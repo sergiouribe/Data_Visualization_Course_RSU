@@ -1,5 +1,8 @@
 # Storytelling with Data: A Data Visualization Course
 
+[Site course RSU](https://estudijas.rsu.lv/course/view.php?id=72998)
+
+
 Welcome to the **Storytelling with Data** course at RSU. In this course, you'll learn how to transform raw data into compelling visual stories using R, tidyverse, and ggplot2.
 
 ## Course Overview
@@ -15,6 +18,11 @@ This hands-on course will teach you:
 - **No prior R experience required** - we start from the basics
 - Bring your own laptop with R, RStudio, and Tidyverse pre-installed
 - Curiosity and willingness to learn!
+
+## Lecturer
+[Dr Sergio Uribe (DDS, MSc, PhD)](https://science.rsu.lv/en/persons/sergio-e-uribe/)
+ - Associate Professor, Deparment of Conservative Dentistry and Oral Health, Riga Stradins University
+ - Visiting Professor, LMU Klinikum, Deparment of Conservative Dentistry, Periodontology and Digital Dentistry, LMU, Munich
 
 ## Course Modules
 
