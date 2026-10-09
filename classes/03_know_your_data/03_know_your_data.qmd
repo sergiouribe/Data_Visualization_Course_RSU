@@ -1,5 +1,5 @@
 ---
-title: "Class 3. Know your data: the type of variable decides the chart"
+title: "Class 3. Recap, and the type of variable decides the chart"
 format: html
 ---
 
@@ -9,6 +9,56 @@ format: html
 #| label: setup
 pacman::p_load(tidyverse, palmerpenguins, here)
 ```
+
+## 0. Recap: bad graphs and the five principles
+
+**Ask. Show. Cut. Focus. Tell.** Today we practice **Show**: honest data, the right chart for the data type, and honest scales.
+
+Three mistakes from class 1, rebuilt with penguins.
+
+```{r}
+#| label: recap-baseline
+# Mistake 1: omitting the baseline. The axis starts at 3,600 g.
+# Chinstrap looks 30% heavier than Adelie. The real gap is 0.9%.
+penguins |>
+  group_by(species) |>
+  summarize(mean_mass = mean(body_mass_g, na.rm = TRUE)) |>
+  ggplot(aes(x = species, y = mean_mass)) +
+  geom_col() +
+  coord_cartesian(ylim = c(3600, 5100))
+```
+
+```{r}
+#| label: recap-baseline-fix
+# Fix: bars start at zero
+penguins |>
+  group_by(species) |>
+  summarize(mean_mass = mean(body_mass_g, na.rm = TRUE)) |>
+  ggplot(aes(x = species, y = mean_mass)) +
+  geom_col()
+```
+
+```{r}
+#| label: recap-wrong-graph
+# Mistake 2: using the wrong graph. A line joins categories that have no order.
+penguins |>
+  group_by(species) |>
+  summarize(mean_mass = mean(body_mass_g, na.rm = TRUE)) |>
+  ggplot(aes(x = species, y = mean_mass, group = 1)) +
+  geom_line() +
+  geom_point()
+```
+
+```{r}
+#| label: recap-axis
+# Mistake 3: manipulating the y axis. Same data, a range of 0 to 20,000 g.
+penguins |>
+  ggplot(aes(x = flipper_length_mm, y = body_mass_g)) +
+  geom_point() +
+  coord_cartesian(ylim = c(0, 20000))
+```
+
+Which principle failed in each graph? Write it down. The rest of today answers: **which chart fits which type of data?**
 
 ## 1. Know the data before you plot
 

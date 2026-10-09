@@ -36,7 +36,7 @@ Every table passes the [five-check data quality checklist](capstone/data_quality
 |---|---|---|---|
 | 1 | Sat 10 Oct, 13:45 | [Why storytelling matters](classes/01_why_storytelling) (no coding) | Examples |
 | 2 | Sat 10 Oct, 15:30 | [Setup, RStudio basics, first graph](classes/02_first_graph) | Penguins |
-| 3 | Sat 17 Oct, 09:00 | [Know your data](classes/03_know_your_data) | Penguins |
+| 3 | Sat 17 Oct, 09:00 | [Recap and know your data](classes/03_know_your_data) | Penguins |
 | 4 | Sat 17 Oct, 10:45 | [`filter()` and `select()`](classes/04_row_column_verbs) | NHANES |
 | 5 | Sat 17 Oct, 12:30 | [Tidy data and `case_when()`](classes/05_tidy_data) | Gapminder wide |
 | 6 | Sat 17 Oct, 14:15 | [Split, apply, combine, `arrange()`](classes/06_split_apply_combine) | Gapminder, NHANES |
