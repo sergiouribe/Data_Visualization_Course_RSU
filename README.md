@@ -73,7 +73,11 @@ Gapminder covers 142 countries from 1952 to 2007 in steps of 5 years. It does no
 
 ## Sources
 
-Wickham, Çetinkaya-Rundel, Grolemund. *R for Data Science*. Healy. *Data Visualization*. Knaflic. *Storytelling with Data*. Wong. *The Wall Street Journal Guide to Information Graphics*.
+* Wickham, H., Çetinkaya-Rundel, M., & Grolemund, G. *R for Data Science* (2nd ed.). O'Reilly Media.
+* Healy, K. *Data Visualization: A Practical Introduction*. Princeton University Press.
+* Knaflic, C. N. *Storytelling with Data: A Data Visualization Guide for Business Professionals*. Wiley.
+* Wong, D. M. *The Wall Street Journal Guide to Information Graphics: The Dos and Don'ts of Presenting Data, Facts, and Figures*. W. W. Norton & Company.
+
 
 ## Archive
 
