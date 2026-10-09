@@ -1,22 +1,22 @@
 ---
-title: "Class 1 (teacher). Eight graphs with a mistake"
+title: "Class 1 (teacher). Four graphs with a mistake"
 format: html
 ---
 
-Show each graph for 60 seconds. Ask: *What is wrong? What would a reader believe?* Then reveal the answer and the fix. Students only watch in this class; they do not run the code yet.
+Show each graph for 60 seconds. Ask: *What does a reader believe? What is wrong?* Then reveal the answer and the fix. Students only watch in this class; they do not run the code yet.
+
+The four mistakes: **omitting the baseline, manipulating the y axis, cherry picking data, using the wrong graph.** Charts 2 and 3 use the same Poland data on purpose: the same numbers can tell different stories.
 
 ```{r}
 #| label: setup
 pacman::p_load(tidyverse, gapminder, palmerpenguins)
 ```
 
-## Part A. Design mistakes (graphs 1 to 4)
-
-### 1. The truncated bar
+## 1. Omitting the baseline
 
 ```{r}
 #| label: bad-1
-# Life expectancy in 2007: the y axis starts at 70
+# Life expectancy in 2007: the y axis starts at 74
 gapminder |>
   filter(year == 2007, country %in% c("Poland", "Czech Republic", "Slovenia", "Portugal")) |>
   ggplot(aes(x = country, y = lifeExp)) +
@@ -34,10 +34,76 @@ gapminder |>
   geom_col()
 ```
 
-### 2. The pie with many slices
+## 2. Manipulating the y axis
+
+Same data, two axes.
 
 ```{r}
-#| label: bad-2
+#| label: bad-2a
+# Squashed: the y axis runs from 0 to 200. "Nothing changed."
+gapminder |>
+  filter(country == "Poland") |>
+  ggplot(aes(x = year, y = lifeExp)) +
+  geom_line() +
+  coord_cartesian(ylim = c(0, 200))
+```
+
+```{r}
+#| label: bad-2b
+# Stretched: the y axis runs from 60 to 76. "Explosive growth."
+gapminder |>
+  filter(country == "Poland") |>
+  ggplot(aes(x = year, y = lifeExp)) +
+  geom_line() +
+  coord_cartesian(ylim = c(60, 76))
+```
+
+**Mistake:** the axis range sets the slope. The author, not the data, decides how steep the line looks. **Fix (Show):** choose a range that fits the data and the question. Lines may leave zero, bars may not. Say the range in the title or subtitle.
+
+```{r}
+#| label: fix-2
+gapminder |>
+  filter(country == "Poland") |>
+  ggplot(aes(x = year, y = lifeExp)) +
+  geom_line() +
+  coord_cartesian(ylim = c(40, 80)) +
+  labs(title = "Polish life expectancy rose from 61 to 76 years between 1952 and 2007",
+       y = "Years", x = NULL)
+```
+
+## 3. Cherry picking data
+
+```{r}
+#| label: bad-3
+# Only 1972 to 1992 is shown
+gapminder |>
+  filter(country == "Poland", year >= 1972, year <= 1992) |>
+  ggplot(aes(x = year, y = lifeExp)) +
+  geom_line() +
+  coord_cartesian(ylim = c(65, 75))
+```
+
+**Mistake:** the window shows no gain (70.8 in 1972, 71.0 in 1992). The full series rose 14 years. Choosing the start and end years chooses the message. **Fix (Show, Ask):** state the question first and show the whole period, or explain why the window matters.
+
+```{r}
+#| label: fix-3
+gapminder |>
+  filter(country == "Poland") |>
+  mutate(window = year >= 1972 & year <= 1992) |>
+  ggplot(aes(x = year, y = lifeExp)) +
+  geom_line(color = "gray60") +
+  geom_line(data = \(d) filter(d, window), color = "firebrick", linewidth = 1.2) +
+  coord_cartesian(ylim = c(55, 80)) +
+  labs(title = "Polish life expectancy stalled from 1972 to 1992, then rose again",
+       y = "Years", x = NULL)
+```
+
+Questions for students: Who gains from showing only the red window? Which countries or years would you check to see if a pattern holds?
+
+## 4. Using the wrong graph
+
+```{r}
+#| label: bad-4
 # 12 countries as slices
 gapminder |>
   filter(year == 2007, continent == "Europe") |>
@@ -47,10 +113,10 @@ gapminder |>
   coord_polar(theta = "y")
 ```
 
-**Mistake:** readers compare angles and areas poorly (Healy, perception ranking). **Fix (Show):** sorted bars on a common baseline.
+**Mistake:** readers compare angles and areas poorly (Healy, perception ranking), and 12 colors need a legend lookup. The chart type does not fit the question "which countries are largest?". **Fix (Show):** sorted bars on a common baseline.
 
 ```{r}
-#| label: fix-2
+#| label: fix-4
 gapminder |>
   filter(year == 2007, continent == "Europe") |>
   slice_max(pop, n = 12) |>
@@ -58,7 +124,19 @@ gapminder |>
   geom_col()
 ```
 
-### 3. The dual axis
+Link forward: class 3 teaches how the type of variable decides the chart.
+
+## Discussion
+
+For each graph, students write: (1) what a reader would believe, (2) the principle broken (Ask, Show, Cut, Focus, Tell).
+
+---
+
+# Reserve examples
+
+Not for class 1. Use them in later classes: the dual axis and the spaghetti plot in classes 7 and 11, the data errors in classes 3, 6 and 9.
+
+### R1. The dual axis
 
 ```{r}
 #| label: bad-3
@@ -73,7 +151,7 @@ gapminder |>
 
 **Mistake:** the author picks the scale of the second axis, so the lines can be made to cross, touch, or diverge. Change `+ 30` to `+ 10` and the story changes. **Fix:** two panels with one axis each (class 11), or one variable per graph.
 
-### 4. The spaghetti plot
+### R2. The spaghetti plot
 
 ```{r}
 #| label: bad-4
@@ -97,9 +175,7 @@ gapminder |>
 
 > Latvia is not in Gapminder, so no line is red. Ask students what went wrong. This is a missing-data error that the code did not report. Change `"Latvia"` to `"Poland"` to fix it.
 
-## Part B. Data errors behind the graph (graphs 5 to 8)
-
-### 5. Missing values coded as zero
+### R3. Missing values coded as zero
 
 ```{r}
 #| label: bad-5
@@ -112,7 +188,7 @@ penguins |>
 
 **Mistake:** a spike at 0 g. No penguin weighs 0 g. The two missing rows were counted as data. **Fix:** keep `NA` and report how many are missing (class 3).
 
-### 6. Mixed units
+### R4. Mixed units
 
 ```{r}
 #| label: bad-6
@@ -125,7 +201,7 @@ penguins |>
 
 **Mistake:** every tenth penguin is stored in kilograms (about 4 instead of 4,000). The histogram shows a thin bar at 0. **Fix:** check ranges with `summary()` before plotting.
 
-### 7. Percentages that do not add to 100
+### R5. Percentages that do not add to 100
 
 ```{r}
 #| label: bad-7
@@ -152,7 +228,7 @@ penguins |>
   geom_col()
 ```
 
-### 8. A join that duplicates rows
+### R6. A join that duplicates rows
 
 ```{r}
 #| label: bad-8
@@ -171,6 +247,3 @@ gapminder |>
 
 **Mistake:** Poland appears twice in the lookup table, so its row is duplicated and the bar doubles (stacked bars drawn on top of each other). **Fix:** count rows before and after a join (class 9).
 
-## Discussion
-
-For each graph, students write: (1) what a reader would believe, (2) the principle broken (Ask, Show, Cut, Focus, Tell).
