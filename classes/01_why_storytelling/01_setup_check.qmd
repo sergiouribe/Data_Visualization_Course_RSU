@@ -1,0 +1,59 @@
+---
+title: "Class 1. Setup check"
+format: html
+---
+
+Work through the chunks in order. Run each chunk with Ctrl+Shift+Enter (Cmd+Shift+Enter on Mac).
+
+## 1. The console
+
+```{r}
+#| label: console
+# R is a calculator
+1 + 1
+```
+
+## 2. Load packages
+
+```{r}
+#| label: packages
+# pacman installs a package if it is missing, then loads it
+pacman::p_load(tidyverse, palmerpenguins, here)
+```
+
+## 3. Find your project folder
+
+```{r}
+#| label: here
+# This path must end with the name of the course folder
+here()
+```
+
+If the path points to another folder, close RStudio, double-click `data_visualization_course.Rproj`, and run this chunk again.
+
+## 4. Read a file with a relative path
+
+```{r}
+#| label: read
+here("data", "life_expectancy_wide.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  glimpse()
+```
+
+## 5. Draw one graph
+
+```{r}
+#| label: graph
+penguins |>
+  ggplot(aes(x = flipper_length_mm, y = body_mass_g)) +
+  geom_point()
+```
+
+## Check
+
+- [ ] Chunk 1 printed `[1] 2`.
+- [ ] Chunk 3 printed the project folder.
+- [ ] Chunk 4 printed a table with `country` and year columns.
+- [ ] Chunk 5 drew a scatter plot.
+
+Fix any red text with the teacher before you leave.
