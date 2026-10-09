@@ -14,6 +14,13 @@
 | 40-65 | `annotate()`: text, arrows, highlighted areas. |
 | 65-90 | Students apply Tell to the class 7 graph. Pair read-aloud: the partner states the message in one sentence. |
 
+## Reading
+
+Individual work (about 30 minutes). Read it before the class if possible:
+
+- [R4DS 2e](https://r4ds.hadley.nz/), chapter 11, Communication.
+- [Points of view: Labels and callouts](https://www.nature.com/articles/nmeth.2405), Nature Methods 10, 275.
+
 ## Deliverable
 
 One graph with an active title and one annotation.

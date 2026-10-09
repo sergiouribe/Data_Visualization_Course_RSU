@@ -14,6 +14,14 @@
 | 40-65 | Focus: gray plus one color. Preattentive attributes. |
 | 65-90 | Students make a before and after pair and list the changes. |
 
+## Reading
+
+Individual work (about 30 minutes). Read it before the class if possible:
+
+- Knaflic, *Storytelling with Data*, chapters 3 and 4 (clutter, focus attention).
+- [Points of view: Elements of visual style](https://www.nature.com/articles/nmeth.2444), Nature Methods 10, 371.
+- [Points of view: Axes, ticks and grids](https://www.nature.com/articles/nmeth.2337), Nature Methods 10, 183.
+
 ## Deliverable
 
 Before and after of one graph.

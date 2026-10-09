@@ -14,6 +14,13 @@
 | 35-60 | `scale_size_area()`: why area, not radius. |
 | 60-90 | Color by continent. Students compare their chart with the clip. |
 
+## Reading
+
+Individual work (about 30 minutes). Read it before the class if possible:
+
+- [Points of view: Plotting symbols](https://www.nature.com/articles/nmeth.2490), Nature Methods 10, 451.
+- [R4DS 2e](https://r4ds.hadley.nz/), chapter 9, Layers (scales).
+
 ## Deliverable
 
 Static Rosling chart for 2007.

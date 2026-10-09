@@ -11,12 +11,18 @@
 |---|---|
 | 0-30 | Apply Cut, Focus, Tell. Fill the checklist in the template. |
 | 30-55 | Pair review with the rubric. |
-| 55-80 | Export the PNG at 300 dpi. Write the 60-second script. |
+| 55-80 | Export the PNG at 300 dpi. Render the capstone `.qmd` to a single HTML file (`embed-resources: true`). Write the 60-second script. |
 | 80-90 | Fix the last issues. |
+
+## Reading
+
+Individual work (about 30 minutes). Read it before the class if possible:
+
+- Knaflic, *Storytelling with Data*, chapter 8, Putting it all together.
 
 ## Deliverable
 
-Final PNG at 300 dpi, title, and 60-second script.
+Final PNG at 300 dpi, rendered HTML report, title, and 60-second script.
 
 ## Files
 

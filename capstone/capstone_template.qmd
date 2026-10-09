@@ -1,7 +1,10 @@
 ---
 title: "Capstone: [your title with the finding]"
 author: "[your name]"
-format: html
+format:
+  html:
+    embed-resources: true
+    toc: true
 ---
 
 ```{r}
@@ -26,6 +29,8 @@ here("data", "my_data.csv") |>
   clean_names() |>
   glimpse()
 ```
+
+Data quality: run the five checks of the [data quality checklist](data_quality_checklist.md) and write one line per check.
 
 Tidy check (answer yes or no):
 
