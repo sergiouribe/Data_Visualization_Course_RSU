@@ -194,7 +194,7 @@ penguins |>
 #| label: bad-6
 # Some rows in kg, others in g
 penguins |>
-  mutate(body_mass_g = if_else(row_number() %% 10 == 0, body_mass_g / 1000, body_mass_g)) |>
+  mutate(body_mass_g = case_when(row_number() %% 10 == 0 ~ body_mass_g / 1000, .default = body_mass_g)) |>
   ggplot(aes(x = body_mass_g)) +
   geom_histogram(binwidth = 250)
 ```
