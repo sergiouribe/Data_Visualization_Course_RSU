@@ -15,6 +15,12 @@
 | 60-70 | `arrange()` and `desc()` to rank a summary table. |
 | 70-90 | NHANES mean by group. Students do the exercise. |
 
+## Reading
+
+Individual work (about 30 minutes). Read it before the class if possible:
+
+- [R4DS 2e](https://r4ds.hadley.nz/), chapter 3, Data transformation (section on groups).
+
 ## Deliverable
 
 Life expectancy by continent over time, and an NHANES mean by group.

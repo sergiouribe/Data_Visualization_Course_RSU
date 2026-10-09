@@ -15,6 +15,13 @@
 | 65-80 | `case_when()`: turn life expectancy into three groups and count them with `geom_bar()`. |
 | 80-90 | Students pick five other countries and describe the largest change. |
 
+## Reading
+
+Individual work (about 30 minutes). Read it before the class if possible:
+
+- Broman and Woo, [Data organization in spreadsheets](https://peerj.com/preprints/3183v1/).
+- [R4DS 2e](https://r4ds.hadley.nz/), chapter 5, Data tidying.
+
 ## Deliverable
 
 Reshaped table, a line plot of five countries, and a bar chart of life-expectancy groups.

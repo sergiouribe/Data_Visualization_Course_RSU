@@ -32,6 +32,17 @@
 - **Setup problems:** have these fixes ready. Most failures are a missing package (run `install.packages("pacman")`) or opening the `.R` file without the project (close RStudio, double-click the `.Rproj`).
 - **Bring your own examples:** replace or add one real graph from a news site or a paper that the students may know. The eight examples here are built from open data so that you can show and fix them in the same file.
 
+## Reading
+
+Individual work (about 30 minutes). Read it before the class if possible:
+
+- Knaflic, *Storytelling with Data*, chapter 1, The importance of context.
+- Optional: Healy, [*Data Visualization*](https://socviz.co/), chapter Look at data.
+
+## Tell the students
+
+We write reports in Quarto (`.qmd`). Quarto is the successor to R Markdown, uses the same chunks, and renders to HTML, PDF and Word. Class 14 teaches rendering.
+
 ## Deliverable
 
 1. The completed worksheet (eight rows).

@@ -16,6 +16,12 @@
 | 70-80 | `mutate()` with arithmetic only. |
 | 80-90 | Students write one question of their own. |
 
+## Reading
+
+Individual work (about 30 minutes). Read it before the class if possible:
+
+- [R4DS 2e](https://r4ds.hadley.nz/), chapter 3, Data transformation (sections on rows and columns).
+
 ## Deliverable
 
 Three questions answered with `filter()` and a plot.

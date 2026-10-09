@@ -13,6 +13,13 @@
 | 10-70 | Write the pipeline: `filter()`, `mutate()`, `pivot_longer()`, joins, `group_by()` + `summarize()`. |
 | 70-90 | Teacher walks around. Students show the head of the clean table to one peer. |
 
+## Reading
+
+Individual work (about 30 minutes). Read it before the class if possible:
+
+- [R4DS 2e](https://r4ds.hadley.nz/), chapter 18, Missing values.
+- The [data quality checklist](../../capstone/data_quality_checklist.md).
+
 ## Deliverable
 
 Clean table from a script.
@@ -23,7 +30,7 @@ Clean table from a script.
 
 ## Notes
 
-Homework: first draft of the graph by 19 Nov.
+Homework: first draft of the graph by 19 Nov. Run the [data quality checklist](../../capstone/data_quality_checklist.md) on the clean table.
 
 **Moodle checkpoint, Fri 13 Nov 2026, 23:59.** Submit a script of about five lines that loads your cleaned data and runs `glimpse()` and `nrow()` without errors. The teacher fixes import problems before class 17.
 

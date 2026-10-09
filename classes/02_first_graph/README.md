@@ -15,6 +15,12 @@
 | 65-80 | Save with `ggsave(here(...))`. Pair check: does the graph answer the question? |
 | 80-90 | Recap: three parts of every ggplot. |
 
+## Reading
+
+Individual work (about 30 minutes). Read it before the class if possible:
+
+- [R4DS 2e](https://r4ds.hadley.nz/), chapter 1, Data visualization.
+
 ## Deliverable
 
 First graph with a one-line question, saved in the project.
