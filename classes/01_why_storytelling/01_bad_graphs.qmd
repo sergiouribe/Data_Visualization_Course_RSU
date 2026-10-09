@@ -50,7 +50,19 @@ gapminder |>
 **Mistake:** readers compare angles and areas poorly (Healy, perception ranking). **Fix (Show):** sorted bars on a common baseline.
 
 ```{r}
-#| label: fix-2
+#| label: fix-2.1
+gapminder |>
+  filter(year == 2007, continent == "Europe") |>
+  slice_max(pop, n = 12) |>
+  ggplot(aes(x = pop, y = reorder(country, pop))) +
+  geom_col() + 
+  coord_flip() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+
+```{r}
+#| label: fix-2.2
 gapminder |>
   filter(year == 2007, continent == "Europe") |>
   slice_max(pop, n = 12) |>
@@ -61,7 +73,7 @@ gapminder |>
 ### 3. The dual axis
 
 ```{r}
-#| label: bad-3
+#| label: bad-3.1
 # Same data, one arbitrary scale factor on the second axis
 gapminder |>
   filter(country == "Finland") |>
@@ -73,10 +85,22 @@ gapminder |>
 
 **Mistake:** the author picks the scale of the second axis, so the lines can be made to cross, touch, or diverge. Change `+ 30` to `+ 10` and the story changes. **Fix:** two panels with one axis each (class 11), or one variable per graph.
 
+```{r}
+#| label: bad-3.2
+gapminder |>
+  filter(country == "Finland") |>
+  select(year, lifeExp, pop) |>
+  pivot_longer(-year, names_to = "measure", values_to = "value") |>
+  ggplot(aes(x = year, y = value)) +
+  geom_line() +
+  facet_wrap(~ measure, scales = "free_y", ncol = 1)
+```
+
+
 ### 4. The spaghetti plot
 
 ```{r}
-#| label: bad-4
+#| label: bad-4.1
 gapminder |>
   ggplot(aes(x = year, y = lifeExp, color = country)) +
   geom_line()
@@ -85,29 +109,60 @@ gapminder |>
 **Mistake:** 142 colors and a legend nobody can read. **Fix (Cut, Focus):** gray lines plus one highlighted country (class 7).
 
 ```{r}
-#| label: fix-4
+#| label: fix-4.2
 gapminder |>
-  mutate(highlight = country == "Latvia") |>
-  ggplot(aes(x = year, y = lifeExp, group = country, color = highlight)) +
-  geom_line() +
-  scale_color_manual(values = c("TRUE" = "firebrick", "FALSE" = "gray80")) +
-  theme_minimal() +
-  theme(legend.position = "none")
+  ggplot(aes(x = year, y = lifeExp, group = country)) +
+  geom_line(color = "gray90") +
+  geom_line(
+    data = function(d) filter(d, country == "Chile"),
+    color = "firebrick"
+  ) +
+  theme_minimal()
 ```
 
-> Latvia is not in Gapminder, so no line is red. Ask students what went wrong. This is a missing-data error that the code did not report. Change `"Latvia"` to `"Poland"` to fix it.
+```{r}
+#| label: fix-4.3
+gapminder |>
+  ggplot(aes(x = year, y = lifeExp, group = country)) +
+  geom_line(color = "gray90") +
+  geom_line(
+    data = function(d) filter(d, country == "Chile"),
+    color = "firebrick"
+  ) +
+  geom_text(
+    data = function(d) filter(d, country == "Chile", year == max(year)),
+    aes(label = country),
+    color = "firebrick",
+    hjust = -0.1,
+    size = 3.5
+  ) +
+  coord_cartesian(clip = "off") +
+  theme_minimal()
+```
+
+
 
 ## Part B. Data errors behind the graph (graphs 5 to 8)
 
 ### 5. Missing values coded as zero
 
 ```{r}
-#| label: bad-5
+#| label: bad-5.1
 # Someone replaced NA with 0 before plotting
 penguins |>
   mutate(body_mass_g = replace_na(body_mass_g, 0)) |>
   ggplot(aes(x = body_mass_g)) +
   geom_histogram(binwidth = 250)
+```
+
+```{r}
+#| label: bad-5.2
+# Someone replaced NA with 0 before plotting
+penguins |>
+  # mutate(body_mass_g = replace_na(body_mass_g, 0)) |>
+  ggplot(aes(x = body_mass_g)) +
+  geom_histogram(binwidth = 250)
+
 ```
 
 **Mistake:** a spike at 0 g. No penguin weighs 0 g. The two missing rows were counted as data. **Fix:** keep `NA` and report how many are missing (class 3).
@@ -116,9 +171,13 @@ penguins |>
 
 ```{r}
 #| label: bad-6
-# Some rows in kg, others in g
 penguins |>
-  mutate(body_mass_g = if_else(row_number() %% 10 == 0, body_mass_g / 1000, body_mass_g)) |>
+  mutate(
+    body_mass_g = case_when(
+      row_number() %% 10 == 0 ~ body_mass_g / 1000,
+      .default = body_mass_g
+    )
+  ) |>
   ggplot(aes(x = body_mass_g)) +
   geom_histogram(binwidth = 250)
 ```
@@ -171,6 +230,6 @@ gapminder |>
 
 **Mistake:** Poland appears twice in the lookup table, so its row is duplicated and the bar doubles (stacked bars drawn on top of each other). **Fix:** count rows before and after a join (class 9).
 
-## Discussion
+## Exercises
 
 For each graph, students write: (1) what a reader would believe, (2) the principle broken (Ask, Show, Cut, Focus, Tell).
