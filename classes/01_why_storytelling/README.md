@@ -23,7 +23,7 @@
 | 70-75 | Wrap the discussion: each student reads one row of the worksheet aloud. |
 | 75-90 | Setup: RStudio Project, console, `pacman::p_load()`, `here()`, `01_setup_check.qmd`. |
 
-## Notes for the teacher
+## Notes
 
 - **Time:** class starts 13:45 and ends 15:15. The next class starts at 15:30.
 - **Students run no code until minute 75.** The first hour is looking and talking. This is intended: they learn to see before they learn to build.
