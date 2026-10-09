@@ -124,6 +124,19 @@ gapminder |>
   geom_col()
 ```
 
+Alternative: vertical bars with rotated labels.
+
+```{r}
+#| label: fix-4-vertical
+gapminder |>
+  filter(year == 2007, continent == "Europe") |>
+  slice_max(pop, n = 12) |>
+  ggplot(aes(x = pop, y = reorder(country, pop))) +
+  geom_col() +
+  coord_flip() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
 Link forward: class 3 teaches how the type of variable decides the chart.
 
 ## Discussion
@@ -139,7 +152,7 @@ Not for class 1. Use them in later classes: the dual axis and the spaghetti plot
 ### R1. The dual axis
 
 ```{r}
-#| label: bad-3
+#| label: r1-bad
 # Same data, one arbitrary scale factor on the second axis
 gapminder |>
   filter(country == "Finland") |>
@@ -151,10 +164,22 @@ gapminder |>
 
 **Mistake:** the author picks the scale of the second axis, so the lines can be made to cross, touch, or diverge. Change `+ 30` to `+ 10` and the story changes. **Fix:** two panels with one axis each (class 11), or one variable per graph.
 
+```{r}
+#| label: r1-fix
+# Fix: one panel per measure, each with its own y axis
+gapminder |>
+  filter(country == "Finland") |>
+  select(year, lifeExp, pop) |>
+  pivot_longer(-year, names_to = "measure", values_to = "value") |>
+  ggplot(aes(x = year, y = value)) +
+  geom_line() +
+  facet_wrap(~ measure, scales = "free_y", ncol = 1)
+```
+
 ### R2. The spaghetti plot
 
 ```{r}
-#| label: bad-4
+#| label: r2-bad
 gapminder |>
   ggplot(aes(x = year, y = lifeExp, color = country)) +
   geom_line()
@@ -163,22 +188,43 @@ gapminder |>
 **Mistake:** 142 colors and a legend nobody can read. **Fix (Cut, Focus):** gray lines plus one highlighted country (class 7).
 
 ```{r}
-#| label: fix-4
+#| label: r2-fix
+# Gray lines for context, one highlighted country
 gapminder |>
-  mutate(highlight = country == "Latvia") |>
-  ggplot(aes(x = year, y = lifeExp, group = country, color = highlight)) +
-  geom_line() +
-  scale_color_manual(values = c("TRUE" = "firebrick", "FALSE" = "gray80")) +
-  theme_minimal() +
-  theme(legend.position = "none")
+  ggplot(aes(x = year, y = lifeExp, group = country)) +
+  geom_line(color = "gray90") +
+  geom_line(
+    data = function(d) filter(d, country == "Chile"),
+    color = "firebrick"
+  ) +
+  theme_minimal()
 ```
 
-> Latvia is not in Gapminder, so no line is red. Ask students what went wrong. This is a missing-data error that the code did not report. Change `"Latvia"` to `"Poland"` to fix it.
+```{r}
+#| label: r2-fix-label
+# Add a direct label at the end of the line
+gapminder |>
+  ggplot(aes(x = year, y = lifeExp, group = country)) +
+  geom_line(color = "gray90") +
+  geom_line(
+    data = function(d) filter(d, country == "Chile"),
+    color = "firebrick"
+  ) +
+  geom_text(
+    data = function(d) filter(d, country == "Chile", year == max(year)),
+    aes(label = country),
+    color = "firebrick",
+    hjust = -0.1,
+    size = 3.5
+  ) +
+  coord_cartesian(clip = "off") +
+  theme_minimal()
+```
 
 ### R3. Missing values coded as zero
 
 ```{r}
-#| label: bad-5
+#| label: r3-bad
 # Someone replaced NA with 0 before plotting
 penguins |>
   mutate(body_mass_g = replace_na(body_mass_g, 0)) |>
@@ -188,10 +234,18 @@ penguins |>
 
 **Mistake:** a spike at 0 g. No penguin weighs 0 g. The two missing rows were counted as data. **Fix:** keep `NA` and report how many are missing (class 3).
 
+```{r}
+#| label: r3-fix
+# Fix: keep the NA values (ggplot drops them and warns)
+penguins |>
+  ggplot(aes(x = body_mass_g)) +
+  geom_histogram(binwidth = 250)
+```
+
 ### R4. Mixed units
 
 ```{r}
-#| label: bad-6
+#| label: r4-bad
 # Some rows in kg, others in g
 penguins |>
   mutate(body_mass_g = case_when(row_number() %% 10 == 0 ~ body_mass_g / 1000, .default = body_mass_g)) |>
@@ -204,7 +258,7 @@ penguins |>
 ### R5. Percentages that do not add to 100
 
 ```{r}
-#| label: bad-7
+#| label: r5-bad
 # Percent computed within each island, then stacked by species
 penguins |>
   count(island, species) |>
@@ -218,7 +272,7 @@ penguins |>
 **Mistake:** the percentages add to 100 within each island, but the bars stack across islands for each species. The Adelie bar reaches 171%. **Fix:** compute the percentage within the group you stack (class 6, `group_by()`).
 
 ```{r}
-#| label: fix-7
+#| label: r5-fix
 penguins |>
   count(island, species) |>
   group_by(species) |>
@@ -231,7 +285,7 @@ penguins |>
 ### R6. A join that duplicates rows
 
 ```{r}
-#| label: bad-8
+#| label: r6-bad
 # A lookup table with a repeated key doubles the population of Poland
 gapminder |>
   filter(year == 2007, country %in% c("Poland", "Slovakia", "Czech Republic")) |>
