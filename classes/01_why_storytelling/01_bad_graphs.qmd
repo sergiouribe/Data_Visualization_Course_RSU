@@ -1,0 +1,176 @@
+---
+title: "Class 1 (teacher). Eight graphs with a mistake"
+format: html
+---
+
+Show each graph for 60 seconds. Ask: *What is wrong? What would a reader believe?* Then reveal the answer and the fix. Students only watch in this class; they do not run the code yet.
+
+```{r}
+#| label: setup
+pacman::p_load(tidyverse, gapminder, palmerpenguins)
+```
+
+## Part A. Design mistakes (graphs 1 to 4)
+
+### 1. The truncated bar
+
+```{r}
+#| label: bad-1
+# Life expectancy in 2007: the y axis starts at 70
+gapminder |>
+  filter(year == 2007, country %in% c("Poland", "Czech Republic", "Slovenia", "Portugal")) |>
+  ggplot(aes(x = country, y = lifeExp)) +
+  geom_col() +
+  coord_cartesian(ylim = c(74, 80))
+```
+
+**Mistake:** bar length encodes value, so a bar must start at zero. Here Portugal's bar is 2.5 times as long as Poland's, while the real gap is 3.3% (78.1 versus 75.6 years). **Fix (Show):**
+
+```{r}
+#| label: fix-1
+gapminder |>
+  filter(year == 2007, country %in% c("Poland", "Czech Republic", "Slovenia", "Portugal")) |>
+  ggplot(aes(x = country, y = lifeExp)) +
+  geom_col()
+```
+
+### 2. The pie with many slices
+
+```{r}
+#| label: bad-2
+# 12 countries as slices
+gapminder |>
+  filter(year == 2007, continent == "Europe") |>
+  slice_max(pop, n = 12) |>
+  ggplot(aes(x = "", y = pop, fill = country)) +
+  geom_col() +
+  coord_polar(theta = "y")
+```
+
+**Mistake:** readers compare angles and areas poorly (Healy, perception ranking). **Fix (Show):** sorted bars on a common baseline.
+
+```{r}
+#| label: fix-2
+gapminder |>
+  filter(year == 2007, continent == "Europe") |>
+  slice_max(pop, n = 12) |>
+  ggplot(aes(x = pop, y = reorder(country, pop))) +
+  geom_col()
+```
+
+### 3. The dual axis
+
+```{r}
+#| label: bad-3
+# Same data, one arbitrary scale factor on the second axis
+gapminder |>
+  filter(country == "Finland") |>
+  ggplot(aes(x = year)) +
+  geom_line(aes(y = lifeExp), color = "steelblue") +
+  geom_line(aes(y = pop / 100000 + 30), color = "firebrick") +
+  scale_y_continuous(sec.axis = sec_axis(~ (. - 30) * 100000, name = "Population"))
+```
+
+**Mistake:** the author picks the scale of the second axis, so the lines can be made to cross, touch, or diverge. Change `+ 30` to `+ 10` and the story changes. **Fix:** two panels with one axis each (class 11), or one variable per graph.
+
+### 4. The spaghetti plot
+
+```{r}
+#| label: bad-4
+gapminder |>
+  ggplot(aes(x = year, y = lifeExp, color = country)) +
+  geom_line()
+```
+
+**Mistake:** 142 colors and a legend nobody can read. **Fix (Cut, Focus):** gray lines plus one highlighted country (class 7).
+
+```{r}
+#| label: fix-4
+gapminder |>
+  mutate(highlight = country == "Latvia") |>
+  ggplot(aes(x = year, y = lifeExp, group = country, color = highlight)) +
+  geom_line() +
+  scale_color_manual(values = c("TRUE" = "firebrick", "FALSE" = "gray80")) +
+  theme_minimal() +
+  theme(legend.position = "none")
+```
+
+> Latvia is not in Gapminder, so no line is red. Ask students what went wrong. This is a missing-data error that the code did not report. Change `"Latvia"` to `"Poland"` to fix it.
+
+## Part B. Data errors behind the graph (graphs 5 to 8)
+
+### 5. Missing values coded as zero
+
+```{r}
+#| label: bad-5
+# Someone replaced NA with 0 before plotting
+penguins |>
+  mutate(body_mass_g = replace_na(body_mass_g, 0)) |>
+  ggplot(aes(x = body_mass_g)) +
+  geom_histogram(binwidth = 250)
+```
+
+**Mistake:** a spike at 0 g. No penguin weighs 0 g. The two missing rows were counted as data. **Fix:** keep `NA` and report how many are missing (class 3).
+
+### 6. Mixed units
+
+```{r}
+#| label: bad-6
+# Some rows in kg, others in g
+penguins |>
+  mutate(body_mass_g = if_else(row_number() %% 10 == 0, body_mass_g / 1000, body_mass_g)) |>
+  ggplot(aes(x = body_mass_g)) +
+  geom_histogram(binwidth = 250)
+```
+
+**Mistake:** every tenth penguin is stored in kilograms (about 4 instead of 4,000). The histogram shows a thin bar at 0. **Fix:** check ranges with `summary()` before plotting.
+
+### 7. Percentages that do not add to 100
+
+```{r}
+#| label: bad-7
+# Percent computed within each island, then stacked by species
+penguins |>
+  count(island, species) |>
+  group_by(island) |>
+  mutate(pct = 100 * n / sum(n)) |>
+  ungroup() |>
+  ggplot(aes(x = species, y = pct, fill = island)) +
+  geom_col()
+```
+
+**Mistake:** the percentages add to 100 within each island, but the bars stack across islands for each species. The Adelie bar reaches 171%. **Fix:** compute the percentage within the group you stack (class 6, `group_by()`).
+
+```{r}
+#| label: fix-7
+penguins |>
+  count(island, species) |>
+  group_by(species) |>
+  mutate(pct = 100 * n / sum(n)) |>
+  ungroup() |>
+  ggplot(aes(x = species, y = pct, fill = island)) +
+  geom_col()
+```
+
+### 8. A join that duplicates rows
+
+```{r}
+#| label: bad-8
+# A lookup table with a repeated key doubles the population of Poland
+gapminder |>
+  filter(year == 2007, country %in% c("Poland", "Slovakia", "Czech Republic")) |>
+  select(country, pop) |>
+  left_join(
+    tibble(country = c("Poland", "Poland", "Slovakia", "Czech Republic"),
+           capital = c("Warsaw", "Warszawa", "Bratislava", "Prague")),
+    by = "country"
+  ) |>
+  ggplot(aes(x = country, y = pop)) +
+  geom_col()
+```
+
+**Mistake:** Poland appears twice in the lookup table, so its row is duplicated and the bar doubles (stacked bars drawn on top of each other). **Fix:** count rows before and after a join (class 9).
+
+## Discussion
+
+For each graph, students write: (1) what a reader would believe, (2) the principle broken (Ask, Show, Cut, Focus, Tell).
