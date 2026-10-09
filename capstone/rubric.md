@@ -1,0 +1,13 @@
+# Capstone rubric (100 points)
+
+Each student presents one graph for 3 minutes, then receives 2 minutes of feedback.
+
+| Principle | What the audience checks | Points |
+|---|---|---|
+| Ask | The question is clear and the data can answer it. The message fits in one sentence. | 20 |
+| Show | The chart type fits the data type. Scales are honest (bars from zero, labeled log axes). Data are tidy and the script runs. | 25 |
+| Cut | No non-data ink. No legend, border, or grid line without a job. | 15 |
+| Focus | One element stands out (gray plus one color). The eye goes to the message. | 15 |
+| Tell | The title states the finding. One annotation points to the evidence. The talk has a beginning, middle, and end in 60 seconds. | 25 |
+
+Score each principle on four levels: 0 missing, 1 partial, 2 good, 3 complete. Multiply the share of the maximum by the points.

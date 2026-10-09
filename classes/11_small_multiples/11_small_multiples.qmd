@@ -1,0 +1,49 @@
+---
+title: "Class 11. Small multiples: compare 1952 and 2007"
+format: html
+---
+
+**Question for today:** How did the world change between 1952 and 2007?
+
+```{r}
+#| label: setup
+pacman::p_load(tidyverse, here)
+```
+
+## 1. facet_wrap(): one panel per year
+
+```{r}
+#| label: facet-wrap
+here("data", "rosling_tidy.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(year %in% c(1952, 2007)) |>
+  ggplot(aes(x = income, y = life_exp, size = population, color = continent)) +
+  geom_point(alpha = 0.7) +
+  scale_x_log10() +
+  scale_size_area(max_size = 12) +
+  facet_wrap(vars(year))
+```
+
+## 2. facet_grid(): rows by one variable, columns by another
+
+```{r}
+#| label: facet-grid
+here("data", "rosling_tidy.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(year %in% c(1952, 2007)) |>
+  ggplot(aes(x = income, y = life_exp, size = population)) +
+  geom_point(alpha = 0.6) +
+  scale_x_log10() +
+  scale_size_area(max_size = 10) +
+  facet_grid(rows = vars(continent), cols = vars(year))
+```
+
+## 3. Keep scales equal across panels
+
+By default all panels share the same axes, which is what you want when you compare. Do not use `scales = "free"` unless you explain why.
+
+## 4. Your turn
+
+Add a third year (1980 is not in the data; use 1977 or 1982). Which panel arrangement shows the change best, and why?
+
+> Deliverable: the faceted Rosling chart for 1952 and 2007.

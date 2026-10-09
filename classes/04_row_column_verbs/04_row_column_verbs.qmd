@@ -1,0 +1,78 @@
+---
+title: "Class 4. Row and column verbs"
+format: html
+---
+
+**Questions for today:** Three questions about adults in the NHANES survey. You answer each with one verb and one plot.
+
+```{r}
+#| label: setup
+pacman::p_load(tidyverse, NHANES, here)
+```
+
+## 1. filter(): choose rows
+
+```{r}
+#| label: filter
+# Q1. Do adults who sleep less have higher BMI?
+NHANES |>
+  filter(Age >= 18, !is.na(SleepHrsNight), !is.na(BMI)) |>
+  ggplot(aes(x = SleepHrsNight, y = BMI)) +
+  geom_jitter(alpha = 0.2)
+```
+
+Logical operators: `==` equal, `!=` not equal, `>` `<` `>=` `<=`, `&` and, `|` or, `%in%` in a set, `!is.na()` not missing.
+
+## 2. select(): choose columns
+
+```{r}
+#| label: select
+NHANES |>
+  select(Age, Gender, BMI, SleepHrsNight, PhysActive) |>
+  glimpse()
+```
+
+## 3. mutate() and case_when(): make new columns
+
+```{r}
+#| label: mutate
+# Q2. How many adults fall in each BMI group?
+NHANES |>
+  filter(Age >= 18, !is.na(BMI)) |>
+  mutate(bmi_group = case_when(
+    BMI < 18.5 ~ "Underweight",
+    BMI < 25   ~ "Normal",
+    BMI < 30   ~ "Overweight",
+    .default   = "Obese"
+  )) |>
+  ggplot(aes(x = bmi_group)) +
+  geom_bar()
+```
+
+## 4. arrange(): sort rows
+
+```{r}
+#| label: arrange
+# Q3. Which 10 adults sleep the fewest hours?
+NHANES |>
+  filter(Age >= 18, !is.na(SleepHrsNight)) |>
+  arrange(SleepHrsNight) |>
+  select(Age, Gender, SleepHrsNight, BMI) |>
+  slice_head(n = 10)
+```
+
+## 5. Your turn
+
+Write one question about NHANES. Answer it with at least one `filter()`, one `mutate()`, and one plot.
+
+```{r}
+#| label: your-turn
+#| eval: false
+NHANES |>
+  filter(___) |>
+  mutate(___) |>
+  ggplot(aes(___)) +
+  geom____()
+```
+
+> Deliverable: three questions answered, each with a verb and a plot.

@@ -1,0 +1,94 @@
+---
+title: "Class 3. Know your data: the type of variable decides the chart"
+format: html
+---
+
+**Question for today:** What does each variable type allow us to draw?
+
+```{r}
+#| label: setup
+pacman::p_load(tidyverse, palmerpenguins, here)
+```
+
+## 1. Know the data before you plot
+
+```{r}
+#| label: glimpse
+# dbl and int are numbers, chr and fct are categories, date is time
+penguins |>
+  glimpse()
+```
+
+```{r}
+#| label: missing
+# Count missing values in each column
+penguins |>
+  summarize(across(everything(), \(x) sum(is.na(x)))) |>
+  pivot_longer(everything(), names_to = "variable", values_to = "n_missing") |>
+  arrange(desc(n_missing))
+```
+
+## 2. One number: histogram
+
+```{r}
+#| label: histogram
+penguins |>
+  ggplot(aes(x = body_mass_g)) +
+  geom_histogram(binwidth = 250)
+```
+
+## 3. Two numbers: scatter plot
+
+```{r}
+#| label: scatter
+penguins |>
+  ggplot(aes(x = flipper_length_mm, y = body_mass_g)) +
+  geom_point()
+```
+
+## 4. One category: bar of counts
+
+`geom_bar()` counts the rows for you. Use `geom_col()` when the table already holds the values.
+
+```{r}
+#| label: bar
+penguins |>
+  ggplot(aes(x = species)) +
+  geom_bar()
+```
+
+## 5. A number by a category: box plot
+
+```{r}
+#| label: boxplot
+penguins |>
+  ggplot(aes(x = species, y = body_mass_g)) +
+  geom_boxplot()
+```
+
+## 6. More variables without 3D
+
+Each new variable goes into one more channel: color, shape, size, or a facet panel.
+
+```{r}
+#| label: more-variables
+penguins |>
+  ggplot(aes(x = flipper_length_mm, y = body_mass_g,
+             color = species, shape = sex)) +
+  geom_point() +
+  facet_wrap(vars(island))
+```
+
+## 7. Your turn
+
+Draw five graphs, one per row of the chart-by-type map, and fill in the map.
+
+| Variables | Chart | Your example |
+|---|---|---|
+| 1 number | histogram | |
+| 2 numbers | scatter | |
+| 1 category | bar of counts | |
+| number by category | box plot | |
+| time | line (next classes) | |
+
+> Deliverable: the chart-by-type map filled with five graphs.

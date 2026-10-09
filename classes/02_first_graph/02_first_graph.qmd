@@ -1,0 +1,71 @@
+---
+title: "Class 2. Grammar of graphics: data, aesthetics, geometry"
+format: html
+---
+
+**Question for today:** Do penguins with longer flippers weigh more?
+
+## Setup
+
+```{r}
+#| label: setup
+# One line loads every package we need. pacman installs missing ones.
+pacman::p_load(tidyverse, palmerpenguins, here)
+```
+
+## 1. Look at the data
+
+```{r}
+#| label: look
+# The pipe |> sends the data on its left into the function on its right
+penguins |>
+  glimpse()
+```
+
+## 2. Data + aes + geom
+
+Every ggplot has three parts: the **data**, the **aesthetics** (which variable goes where), and the **geometry** (which shape draws it).
+
+```{r}
+#| label: first-scatter
+penguins |>
+  ggplot(aes(x = flipper_length_mm, y = body_mass_g)) +
+  geom_point()
+```
+
+## 3. Add a third variable with color
+
+```{r}
+#| label: color
+penguins |>
+  ggplot(aes(x = flipper_length_mm, y = body_mass_g, color = species)) +
+  geom_point()
+```
+
+## 4. Your turn
+
+Change `x` and `y` to bill length and bill depth. Write one sentence about what you see.
+
+```{r}
+#| label: your-turn
+#| eval: false
+penguins |>
+  ggplot(aes(x = ___, y = ___, color = species)) +
+  geom_point()
+```
+
+## 5. Save the graph in the project
+
+```{r}
+#| label: save
+#| eval: false
+# here() builds a path from the project folder, so it works on any computer
+penguins |>
+  ggplot(aes(x = flipper_length_mm, y = body_mass_g, color = species)) +
+  geom_point()
+
+# ggsave() saves the last plot you drew
+ggsave(here("class_02_first_graph.png"), width = 6, height = 4)
+```
+
+> Deliverable: one graph, one sentence that answers the question, saved in your project folder.

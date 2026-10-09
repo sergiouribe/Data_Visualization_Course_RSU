@@ -1,0 +1,77 @@
+---
+title: "Class 9. Joins: build the Rosling table"
+format: html
+---
+
+**Question for today:** Can we build one tidy table from three wide tables?
+
+```{r}
+#| label: setup
+pacman::p_load(tidyverse, here)
+```
+
+## 1. Three wide tables
+
+```{r}
+#| label: look
+# Each table has one row per country and one column per year
+here("data", "income_wide.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  glimpse()
+```
+
+## 2. Keys
+
+A key is the column (or columns) that identify a row. After reshaping, the key is `country` + `year`. A join matches rows by key.
+
+## 3. Reshape each table, then join
+
+`left_join()` keeps every row of the table on the left and adds the matching columns from the table on the right.
+
+```{r}
+#| label: join
+# Reshape the three tables, join them, and save the tidy result
+here("data", "life_expectancy_wide.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  pivot_longer(`1952`:`2007`, names_to = "year", values_to = "life_exp",
+               names_transform = as.integer) |>
+  left_join(
+    here("data", "income_wide.csv") |>
+      read_csv(show_col_types = FALSE) |>
+      pivot_longer(`1952`:`2007`, names_to = "year", values_to = "income",
+                   names_transform = as.integer),
+    by = c("country", "year")
+  ) |>
+  left_join(
+    here("data", "population_wide.csv") |>
+      read_csv(show_col_types = FALSE) |>
+      pivot_longer(`1952`:`2007`, names_to = "year", values_to = "population",
+                   names_transform = as.integer),
+    by = c("country", "year")
+  ) |>
+  write_csv(here("data", "rosling_tidy.csv"))
+```
+
+## 4. Check the row count
+
+Life expectancy has 142 countries and 12 years, so the table must have 1,704 rows. More rows mean a key repeated. Fewer rows mean a join dropped rows.
+
+```{r}
+#| label: check
+here("data", "rosling_tidy.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  summarize(rows = n(), countries = n_distinct(country), missing = sum(is.na(income)))
+```
+
+## 5. First 2007 scatter
+
+```{r}
+#| label: scatter-2007
+here("data", "rosling_tidy.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(year == 2007) |>
+  ggplot(aes(x = income, y = life_exp)) +
+  geom_point()
+```
+
+> Deliverable: `data/rosling_tidy.csv` (country, continent, year, life_exp, income, population) and a first 2007 scatter.

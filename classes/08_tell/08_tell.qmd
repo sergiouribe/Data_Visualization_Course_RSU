@@ -1,0 +1,62 @@
+---
+title: "Class 8. Principle: Tell"
+format: html
+---
+
+**Rule 3, Tell:** the title states the finding. Annotations point to the evidence.
+
+```{r}
+#| label: setup
+pacman::p_load(tidyverse, gapminder, here)
+```
+
+## 1. Topic title versus active title
+
+| Topic title | Active title |
+|---|---|
+| Life expectancy in Poland | Polish life expectancy rose 14 years between 1952 and 2007 |
+
+## 2. labs(): title, subtitle, axes, source
+
+```{r}
+#| label: labs
+gapminder |>
+  filter(country == "Poland") |>
+  ggplot(aes(x = year, y = lifeExp)) +
+  geom_line(color = "firebrick", linewidth = 1) +
+  labs(
+    title = "Polish life expectancy rose 14 years between 1952 and 2007",
+    subtitle = "Years of life at birth",
+    x = NULL,
+    y = NULL,
+    caption = "Source: Gapminder"
+  ) +
+  theme_minimal()
+```
+
+## 3. annotate(): point to the evidence
+
+```{r}
+#| label: annotate
+gapminder |>
+  filter(country == "Poland") |>
+  ggplot(aes(x = year, y = lifeExp)) +
+  geom_line(color = "firebrick", linewidth = 1) +
+  annotate("text", x = 1952, y = 63, label = "61 years in 1952",
+           hjust = 0, color = "gray30") +
+  annotate("text", x = 2007, y = 74, label = "76 years in 2007",
+           hjust = 1, color = "gray30") +
+  labs(
+    title = "Polish life expectancy rose 14 years between 1952 and 2007",
+    subtitle = "Years of life at birth",
+    x = NULL, y = NULL,
+    caption = "Source: Gapminder"
+  ) +
+  theme_minimal()
+```
+
+## 4. Your turn
+
+Take your before and after graph from class 7. Add an active title, a source, and one annotation.
+
+> Deliverable: one graph with an active title and one annotation.
