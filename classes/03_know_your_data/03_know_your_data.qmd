@@ -46,6 +46,28 @@ penguins |>
   geom_point()
 ```
 
+## 3b. Check for outliers
+
+A histogram and a scatter plot show values that sit far from the rest. An outlier needs a check before you remove it.
+
+```{r}
+#| label: outliers-histogram
+# Which penguins are in the right tail of the histogram?
+penguins |>
+  slice_max(body_mass_g, n = 5) |>
+  select(species, island, sex, body_mass_g, flipper_length_mm)
+```
+
+```{r}
+#| label: outliers-scatter
+# Color by species. A point that looks extreme overall may be typical for its group.
+penguins |>
+  ggplot(aes(x = flipper_length_mm, y = body_mass_g, color = species)) +
+  geom_point()
+```
+
+For each extreme value, write one sentence: **data error** (impossible value, wrong unit, typo) or **real value** (rare but possible, typical for its group)?
+
 ## 4. One category: bar of counts
 
 `geom_bar()` counts the rows for you. Use `geom_col()` when the table already holds the values.
@@ -79,7 +101,25 @@ penguins |>
   facet_wrap(vars(island))
 ```
 
-## 7. Your turn
+## 7. Data quality checklist
+
+Run the five checks of the [data quality checklist](../../capstone/data_quality_checklist.md) on `penguins`: types, missing values, units and ranges, duplicates, row counts.
+
+```{r}
+#| label: quality
+# Units and ranges: do the minimum and maximum make sense?
+penguins |>
+  summary()
+```
+
+```{r}
+#| label: duplicates
+# Duplicates: count rows that repeat an earlier row
+penguins |>
+  summarize(duplicated_rows = sum(duplicated(pick(everything()))))
+```
+
+## 8. Your turn
 
 Draw five graphs, one per row of the chart-by-type map, and fill in the map.
 

@@ -11,8 +11,14 @@
 |---|---|
 | 0-15 | Keys. What a join does. `left_join()` in one picture. |
 | 15-45 | Reshape the three tables, then join on `country` and `year`. |
-| 45-65 | Check the row count (1,704) and missing values. |
+| 45-65 | Check the row count (1,704) and missing values with the [data quality checklist](../../capstone/data_quality_checklist.md). |
 | 65-90 | First 2007 scatter of income and life expectancy. |
+
+## Reading
+
+Individual work (about 30 minutes). Read it before the class if possible:
+
+- [R4DS 2e](https://r4ds.hadley.nz/), chapter 19, Joins.
 
 ## Deliverable
 

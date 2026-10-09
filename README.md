@@ -15,6 +15,10 @@ Students learn to turn a question into a clear graph in R. The course ends with 
 | Focus | Use gray plus one color. |
 | Tell | Write a title that states the finding. Add an annotation. |
 
+## Data quality
+
+Every table passes the [five-check data quality checklist](capstone/data_quality_checklist.md) before it is plotted: types, missing values, units and ranges, duplicates, row counts.
+
 ## Data type decides the chart
 
 | Variables | Chart |
@@ -30,8 +34,8 @@ Students learn to turn a question into a clear graph in R. The course ends with 
 
 | # | Date | Topic | Data |
 |---|---|---|---|
-| 1 | Sat 10 Oct, 13:45 | [Why storytelling matters](classes/01_why_storytelling) | Examples |
-| 2 | Sat 10 Oct, 15:30 | [Grammar of graphics](classes/02_first_graph) | Penguins |
+| 1 | Sat 10 Oct, 13:45 | [Why storytelling matters](classes/01_why_storytelling) (no coding) | Examples |
+| 2 | Sat 10 Oct, 15:30 | [Setup, RStudio basics, first graph](classes/02_first_graph) | Penguins |
 | 3 | Sat 17 Oct, 09:00 | [Know your data](classes/03_know_your_data) | Penguins |
 | 4 | Sat 17 Oct, 10:45 | [`filter()` and `select()`](classes/04_row_column_verbs) | NHANES |
 | 5 | Sat 17 Oct, 12:30 | [Tidy data and `case_when()`](classes/05_tidy_data) | Gapminder wide |
@@ -43,7 +47,7 @@ Students learn to turn a question into a clear graph in R. The course ends with 
 | 11 | Sat 24 Oct, 12:30 | [Small multiples](classes/11_small_multiples) | Gapminder |
 | 12 | Sat 24 Oct, 14:15 | [Rosling polish](classes/12_rosling_polish) | Gapminder |
 | 13 | Thu 29 Oct, 18:00 | [Narrative arc](classes/13_narrative_arc) | Rosling chart |
-| 14 | Thu 29 Oct, 19:45 | [Animation demo and capstone questions](classes/14_animation_and_questions) | Own ideas |
+| 14 | Thu 29 Oct, 19:45 | [Quarto reports, animation demo, capstone questions](classes/14_animation_and_questions) | Own ideas |
 | 15 | Fri 30 Oct, 19:45 | [Capstone M1: Ask](classes/15_capstone_ask) | Own data |
 | 16 | Sat 7 Nov, 16:00 | [Capstone M2: Wrangle](classes/16_capstone_wrangle) | Own data |
 | 17 | Thu 19 Nov, 13:45 | [Capstone M3: Draft](classes/17_capstone_draft) | Own data |
@@ -54,6 +58,30 @@ Students learn to turn a question into a clear graph in R. The course ends with 
 Capstone files: [template](capstone/capstone_template.qmd), [rubric](capstone/rubric.md), and [peer scoring sheet](capstone/peer_scoring_sheet.md).
 
 **Moodle checkpoint:** Fri 13 Nov 2026, 23:59. Students submit a short script that loads the clean data and runs `glimpse()` and `nrow()` (see [class 16](classes/16_capstone_wrangle)).
+
+## Assessment
+
+| Part | Share of grade | What counts |
+|---|---|---|
+| Capstone project (the exam) | 60% | One visualization project that joins analysis, visualization and storytelling, presented in 3 minutes. Scored with the [rubric](capstone/rubric.md). |
+| Participation | 40% | The deliverable of each class (see the Deliverable section of each class), the individual readings, and the Moodle checkpoint on 13 Nov. |
+
+Projects are individual. Each student works alone. Students may use any dataset for the capstone.
+
+## Coverage of the official theme plan
+
+| Official theme (course description) | Classes |
+|---|---|
+| Introduction to Data Visualization and Storytelling | 1, 13 |
+| Fundamentals of the Grammar of Graphics with ggplot2 | 2, 3 |
+| Choosing the Right Visualization | 3, 10, 17 |
+| Fundamentals of Data Wrangling: Providing Context to the Data | 4, 5, 6, 9 |
+| Simplifying Visuals and Removing Clutter | 7 |
+| Directing Audience Attention with Design | 7, 8 |
+| Creating Visual Narratives | 8, 13 |
+| Reporting and Sharing Visual Stories | 14, 15, 18 |
+| Advanced Customization in ggplot2 | 10, 11, 12, 18 |
+| Capstone Project: Telling a Data Story | 14 to 20 |
 
 ## How to use this repository
 
@@ -70,6 +98,33 @@ Packages load with `pacman::p_load()`. Core set: `tidyverse`, `here`, `janitor`,
 - `data/rosling_tidy.csv`: the joined result of class 9. Use it if a student falls behind.
 
 Gapminder covers 142 countries from 1952 to 2007 in steps of 5 years. It does not include Latvia, Estonia, or Lithuania.
+
+## Readings
+
+Required reading in the course description: Knaflic, *Storytelling with Data*; Broman and Woo, [Data organization in spreadsheets](https://peerj.com/preprints/3183v1/); Ellis and Leek, [How to share data for collaboration](https://www.tandfonline.com/doi/full/10.1080/00031305.2017.1375987); Wickham et al., [R for Data Science (2e)](https://r4ds.hadley.nz/). Each class README lists its readings (individual work, about 30 minutes).
+
+| Class | Reading |
+|---|---|
+| 1 | Knaflic ch. 1 |
+| 2 | R4DS ch. 1 |
+| 3 | R4DS ch. 10; Nature Methods, Bar charts and box plots; Knaflic ch. 2 |
+| 4 | R4DS ch. 3 |
+| 5 | Broman and Woo; R4DS ch. 5 |
+| 6 | R4DS ch. 3 (groups) |
+| 7 | Knaflic ch. 3 and 4; Nature Methods, Elements of visual style, and Axes, ticks and grids |
+| 8 | R4DS ch. 11; Nature Methods, Labels and callouts |
+| 9 | R4DS ch. 19 |
+| 10 | Nature Methods, Plotting symbols; R4DS ch. 9 |
+| 11 | Nature Methods, Multidimensional data; R4DS ch. 9 |
+| 12 | Nature Methods, Design of data figures; BBC R cookbook; UK Government chart guidance |
+| 13 | Knaflic ch. 7; Nature Methods, Storytelling |
+| 14 | R4DS ch. 28 and 29 |
+| 15 | Ellis and Leek; R4DS ch. 7 |
+| 16 | R4DS ch. 18; data quality checklist |
+| 17 | Knaflic ch. 2; Wilke, Directory of visualizations |
+| 18 | Knaflic ch. 8 |
+
+Other sources: [Wilke, Fundamentals of Data Visualization](https://clauswilke.com/dataviz/), [Healy, Data Visualization](https://socviz.co/), [BBC R cookbook](https://bbc.github.io/rcookbook/).
 
 ## Sources
 

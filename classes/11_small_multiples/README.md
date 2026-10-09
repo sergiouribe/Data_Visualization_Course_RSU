@@ -14,6 +14,13 @@
 | 45-70 | `facet_grid()` by continent and year. |
 | 70-90 | Students choose the best layout and justify it in one sentence. |
 
+## Reading
+
+Individual work (about 30 minutes). Read it before the class if possible:
+
+- [Points of view: Multidimensional data](https://www.nature.com/articles/nmeth.2531), Nature Methods 10, 595.
+- [R4DS 2e](https://r4ds.hadley.nz/), chapter 9, Layers (facets).
+
 ## Deliverable
 
 Faceted Rosling chart.

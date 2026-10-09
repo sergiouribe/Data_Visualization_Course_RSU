@@ -40,7 +40,38 @@ here("data", "rosling_tidy.csv") |>
         legend.position = "top")
 ```
 
-## 2. Five-principle checklist
+## 2. Advanced customization: manual colors and theme
+
+Set colors by name so each continent keeps the same color in every graph of your report. Move the title to the left edge of the plot and control text size and spacing with `theme()`.
+
+```{r}
+#| label: custom-theme
+here("data", "rosling_tidy.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(year == 2007) |>
+  ggplot(aes(x = income, y = life_exp, size = population, color = continent)) +
+  geom_point(alpha = 0.7) +
+  scale_x_log10(labels = scales::label_dollar(accuracy = 1)) +
+  scale_size_area(max_size = 15, guide = "none") +
+  # A named vector fixes one color per continent
+  scale_color_manual(values = c(Africa = "#E69F00", Americas = "#009E73",
+                                Asia = "#D55E00", Europe = "#0072B2",
+                                Oceania = "#CC79A7")) +
+  labs(title = "In 2007, countries above $10,000 per person lived 15 years longer than the rest",
+       x = "Income per person (log scale)", y = "Life expectancy (years)",
+       color = NULL, caption = "Source: Gapminder") +
+  theme_minimal(base_size = 13) +
+  theme(
+    plot.title.position = "plot",                       # align title with the plot edge
+    plot.title = element_text(face = "bold", size = 14),
+    plot.caption = element_text(color = "gray40"),
+    panel.grid.minor = element_blank(),
+    axis.title = element_text(color = "gray30"),
+    legend.position = "top"
+  )
+```
+
+## 3. Five-principle checklist
 
 | Principle | Check |
 |---|---|
@@ -50,7 +81,7 @@ here("data", "rosling_tidy.csv") |>
 | Focus | Does one thing stand out? |
 | Tell | Does the title state a finding, and does an annotation point to it? |
 
-## 3. Export at 300 dpi
+## 4. Export at 300 dpi
 
 ```{r}
 #| label: export
