@@ -2,7 +2,7 @@
 
 The capstone is the exam and counts for 60% of the course grade. Participation counts for 40%.
 
-Projects are individual. Students may work in pairs if they choose.
+Projects are individual. Each student works alone.
 
 Each student presents one graph in exactly 3 minutes. Peers score on paper during the talk (`peer_scoring_sheet.md`). The teacher gives written feedback through Moodle after class.
 

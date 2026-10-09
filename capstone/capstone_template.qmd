@@ -1,6 +1,6 @@
 ---
 title: "Capstone: [your title with the finding]"
-author: "[your name] (and partner, if you work in pairs)"
+author: "[your name]"
 format:
   html:
     embed-resources: true

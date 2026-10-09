@@ -66,7 +66,7 @@ Capstone files: [template](capstone/capstone_template.qmd), [rubric](capstone/ru
 | Capstone project (the exam) | 60% | One visualization project that joins analysis, visualization and storytelling, presented in 3 minutes. Scored with the [rubric](capstone/rubric.md). |
 | Participation | 40% | The deliverable of each class (see the Deliverable section of each class), the individual readings, and the Moodle checkpoint on 13 Nov. |
 
-Projects are individual. Students may work in pairs if they choose. Students may use any dataset for the capstone.
+Projects are individual. Each student works alone. Students may use any dataset for the capstone.
 
 ## Coverage of the official theme plan
 
