@@ -1,0 +1,84 @@
+---
+title: "Class 4. Row and column verbs: filter() and select()"
+format: html
+---
+
+**Questions for today:** Three questions about adults in the NHANES survey. The plot code is written. You write only the condition inside `filter()`.
+
+```{r}
+#| label: setup
+pacman::p_load(tidyverse, NHANES, here)
+```
+
+## Comparisons you will use
+
+| Symbol | Meaning |
+|---|---|
+| `==` | equal to |
+| `!=` | not equal to |
+| `>`, `<`, `>=`, `<=` | greater, smaller |
+| `%in%` | is one of a set |
+| `!is.na()` | is not missing |
+| `&` | and (you can also separate conditions with a comma) |
+
+## 1. filter(): choose rows (demo)
+
+```{r}
+#| label: filter-demo
+# Q1. Do adults who sleep less have a higher BMI?
+NHANES |>
+  filter(Age >= 18, !is.na(SleepHrsNight), !is.na(BMI)) |>
+  ggplot(aes(x = SleepHrsNight, y = BMI)) +
+  geom_jitter(alpha = 0.2)
+```
+
+## 2. Your turn: complete the condition
+
+```{r}
+#| label: filter-2
+#| eval: false
+# Q2. What is the BMI distribution of women aged 18 to 40?
+# Fill the blanks: Gender is "female", Age is between 18 and 40, BMI is not missing
+NHANES |>
+  filter(___) |>
+  ggplot(aes(x = BMI)) +
+  geom_histogram(binwidth = 2)
+```
+
+```{r}
+#| label: filter-3
+#| eval: false
+# Q3. Does sleep differ between physically active and inactive adults?
+# Fill the blank: adults (18 or older) with known PhysActive and SleepHrsNight
+NHANES |>
+  filter(___) |>
+  ggplot(aes(x = PhysActive, y = SleepHrsNight)) +
+  geom_boxplot()
+```
+
+## 3. select(): choose columns
+
+```{r}
+#| label: select
+NHANES |>
+  select(Age, Gender, BMI, SleepHrsNight, PhysActive) |>
+  glimpse()
+```
+
+## 4. mutate(): one new column with arithmetic
+
+```{r}
+#| label: mutate
+# Convert age in years to age in decades
+NHANES |>
+  filter(Age >= 18, !is.na(BMI)) |>
+  mutate(age_decade = Age / 10) |>
+  ggplot(aes(x = age_decade, y = BMI)) +
+  geom_jitter(alpha = 0.1)
+```
+
+## 5. Your turn
+
+Write one question about NHANES. Use `filter()` with at least two conditions and one plot.
+
+> Deliverable: three questions answered with `filter()` and a plot.

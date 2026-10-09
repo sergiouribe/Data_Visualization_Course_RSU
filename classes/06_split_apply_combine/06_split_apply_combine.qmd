@@ -1,0 +1,91 @@
+---
+title: "Class 6. Split, apply, combine"
+format: html
+---
+
+**Questions for today:** How did life expectancy change by continent? What is the mean BMI by group in NHANES?
+
+```{r}
+#| label: setup
+pacman::p_load(tidyverse, gapminder, NHANES, here)
+```
+
+## The idea
+
+1. **Split** the table into groups: `group_by()`.
+2. **Apply** a function to each group: `summarize()`.
+3. **Combine** the results into a new table (dplyr does this for you).
+
+## 1. count(): the shortest summary
+
+```{r}
+#| label: count
+gapminder |>
+  filter(year == 2007) |>
+  count(continent)
+```
+
+## 2. group_by() + summarize()
+
+```{r}
+#| label: sac
+# Population-weighted mean life expectancy by continent and year
+gapminder |>
+  group_by(continent, year) |>
+  summarize(life_exp = weighted.mean(lifeExp, pop), .groups = "drop")
+```
+
+## 3. Summary table into a line plot
+
+```{r}
+#| label: sac-line
+gapminder |>
+  group_by(continent, year) |>
+  summarize(life_exp = weighted.mean(lifeExp, pop), .groups = "drop") |>
+  ggplot(aes(x = year, y = life_exp, color = continent)) +
+  geom_line()
+```
+
+## 4. Summary table into a bar chart
+
+Here the table already holds the values, so we use `geom_col()`.
+
+```{r}
+#| label: sac-col
+gapminder |>
+  filter(year == 2007) |>
+  group_by(continent) |>
+  summarize(life_exp = weighted.mean(lifeExp, pop)) |>
+  ggplot(aes(x = continent, y = life_exp)) +
+  geom_col()
+```
+
+## 5. arrange(): sort a summary table
+
+```{r}
+#| label: arrange
+# Rank continents by life expectancy in 2007, highest first
+gapminder |>
+  filter(year == 2007) |>
+  group_by(continent) |>
+  summarize(life_exp = weighted.mean(lifeExp, pop)) |>
+  arrange(desc(life_exp))
+```
+
+## 6. NHANES: mean BMI by group
+
+```{r}
+#| label: nhanes
+NHANES |>
+  filter(Age >= 18, !is.na(BMI), !is.na(PhysActive)) |>
+  group_by(Gender, PhysActive) |>
+  summarize(mean_bmi = mean(BMI), n = n(), .groups = "drop") |>
+  ggplot(aes(x = PhysActive, y = mean_bmi, fill = Gender)) +
+  geom_col(position = "dodge")
+```
+
+## 7. Your turn
+
+Compute the median income per person (`gdpPercap`) by continent for 1952 and 2007. Plot it.
+
+> Deliverable: life expectancy by continent over time, and one NHANES mean by group.

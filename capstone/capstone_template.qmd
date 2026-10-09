@@ -1,0 +1,90 @@
+---
+title: "Capstone: [your title with the finding]"
+author: "[your name]"
+format: html
+---
+
+```{r}
+#| label: setup
+pacman::p_load(tidyverse, here, janitor)
+```
+
+## M1. Ask (class 15)
+
+**Question:** [one question that names a number, a group, and a period]
+
+**Expected message:** [one sentence]
+
+**Source:** [dataset name and link]
+
+```{r}
+#| label: import
+#| eval: false
+# Replace the path with your file in the data/ folder
+here("data", "my_data.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  clean_names() |>
+  glimpse()
+```
+
+Tidy check (answer yes or no):
+
+- Each variable is a column.
+- Each observation is a row.
+- Each value is a cell.
+
+## M2. Wrangle (class 16)
+
+```{r}
+#| label: wrangle
+#| eval: false
+# One pipeline: filter, mutate, pivot, join, group_by + summarize
+here("data", "my_data.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  clean_names() |>
+  filter() |>
+  mutate() |>
+  group_by() |>
+  summarize()
+```
+
+## M3. Draft (class 17)
+
+Chart type, chosen from the data types (see class 3):
+
+| Variables | Chart |
+|---|---|
+| 1 number | histogram |
+| 2 numbers | scatter |
+| 1 category | bar of counts |
+| number by category | box plot |
+| time | line |
+
+```{r}
+#| label: draft
+#| eval: false
+# Continue the wrangle pipeline and pipe it into ggplot
+here("data", "my_data.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  ggplot(aes()) +
+  geom_point()
+```
+
+## M4. Refine (class 18)
+
+Checklist:
+
+- [ ] Ask: the title answers the question.
+- [ ] Show: right chart, bars start at zero, scales are honest.
+- [ ] Cut: no border, no redundant legend, no extra grid lines.
+- [ ] Focus: gray plus one color.
+- [ ] Tell: active title, source, one annotation.
+
+```{r}
+#| label: final
+#| eval: false
+# Paste the final plot code here, then save the last plot
+ggsave(here("capstone_final.png"), width = 8, height = 5.5, dpi = 300)
+```
+
+**60-second script:** [beginning, middle, end]

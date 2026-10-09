@@ -1,0 +1,26 @@
+---
+title: "Class 14. Optional demo: animate Rosling with gganimate"
+format: html
+---
+
+Teacher demo. If the install fails on your computer, watch the teacher's screen.
+
+```{r}
+#| label: setup
+pacman::p_load(tidyverse, gganimate, gifski, here)
+```
+
+```{r}
+#| label: animate
+#| eval: false
+# One frame per year. transition_time() interpolates between years.
+here("data", "rosling_tidy.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  ggplot(aes(x = income, y = life_exp, size = population, color = continent)) +
+  geom_point(alpha = 0.7) +
+  scale_x_log10() +
+  scale_size_area(max_size = 15) +
+  labs(title = "Year: {frame_time}", x = "Income per person", y = "Life expectancy") +
+  theme_minimal() +
+  transition_time(year)   # printing the plot renders the animation
+```

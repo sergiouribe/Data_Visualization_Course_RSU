@@ -1,0 +1,62 @@
+---
+title: "Class 12. Rosling polish and export"
+format: html
+---
+
+**Goal:** a final 2007 chart that passes the five-principle checklist.
+
+```{r}
+#| label: setup
+pacman::p_load(tidyverse, ggrepel, here)
+```
+
+## 1. Alpha for overlap, direct labels for the story
+
+```{r}
+#| label: final
+here("data", "rosling_tidy.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(year == 2007) |>
+  ggplot(aes(x = income, y = life_exp, size = population, color = continent)) +
+  geom_point(alpha = 0.7) +
+  geom_text_repel(
+    # Label only the five most populous countries
+    data = \(d) slice_max(d, population, n = 5),
+    aes(label = country),
+    size = 3.5, color = "gray20", box.padding = 1.5, show.legend = FALSE
+  ) +
+  scale_x_log10(labels = scales::label_dollar(accuracy = 1)) +
+  scale_size_area(max_size = 15, guide = "none") +
+  labs(
+    title = "In 2007, countries above $10,000 per person lived 15 years longer than the rest",
+    subtitle = "Life expectancy at birth, by income per person (log scale). Circle area shows population.",
+    x = "Income per person (international dollars)",
+    y = "Life expectancy (years)",
+    color = NULL,
+    caption = "Source: Gapminder"
+  ) +
+  theme_minimal() +
+  theme(panel.grid.minor = element_blank(),
+        legend.position = "top")
+```
+
+## 2. Five-principle checklist
+
+| Principle | Check |
+|---|---|
+| Ask | Does the title answer the question? |
+| Show | Is the data tidy, the geom right, the scale honest (log labeled, area for size)? |
+| Cut | Did you remove grid lines, borders, and legends that carry nothing? |
+| Focus | Does one thing stand out? |
+| Tell | Does the title state a finding, and does an annotation point to it? |
+
+## 3. Export at 300 dpi
+
+```{r}
+#| label: export
+#| eval: false
+# ggsave() saves the last plot you drew
+ggsave(here("rosling_2007.png"), width = 8, height = 5.5, dpi = 300)
+```
+
+> Deliverable: the final Rosling PNG at 300 dpi.

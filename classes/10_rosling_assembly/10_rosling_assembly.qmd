@@ -1,0 +1,68 @@
+---
+title: "Class 10. Rosling assembly, 2007"
+format: html
+---
+
+**Question for today:** What is the link between income and life expectancy in 2007?
+
+```{r}
+#| label: setup
+pacman::p_load(tidyverse, here)
+```
+
+Rosling shows four variables at once: x is income, y is life expectancy, size is population, color is continent.
+
+## 1. Start: two numbers
+
+```{r}
+#| label: step-1
+here("data", "rosling_tidy.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(year == 2007) |>
+  ggplot(aes(x = income, y = life_exp)) +
+  geom_point()
+```
+
+## 2. Log scale on x
+
+Income spans 278 to 49,357 dollars. A linear axis squeezes most countries to the left. A log axis gives each doubling the same width.
+
+```{r}
+#| label: step-2
+here("data", "rosling_tidy.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(year == 2007) |>
+  ggplot(aes(x = income, y = life_exp)) +
+  geom_point() +
+  scale_x_log10()
+```
+
+## 3. Size by population
+
+`scale_size_area()` makes the area of each circle proportional to population, which is honest. The default radius scale exaggerates differences.
+
+```{r}
+#| label: step-3
+here("data", "rosling_tidy.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(year == 2007) |>
+  ggplot(aes(x = income, y = life_exp, size = population)) +
+  geom_point() +
+  scale_x_log10() +
+  scale_size_area(max_size = 15)
+```
+
+## 4. Color by continent
+
+```{r}
+#| label: step-4
+here("data", "rosling_tidy.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(year == 2007) |>
+  ggplot(aes(x = income, y = life_exp, size = population, color = continent)) +
+  geom_point() +
+  scale_x_log10() +
+  scale_size_area(max_size = 15)
+```
+
+> Deliverable: the static Rosling chart for 2007 with four variables.
