@@ -9,13 +9,13 @@
 
 | Minutes | Activity |
 |---|---|
-| 0-5 | Order and rules. |
-| 5-85 | Presentations: 3 min talk, 2 min feedback. The audience scores the five principles. |
-| 85-90 | Collect rubric sheets. |
+| 0-5 | Order, rules, and assignment of peer groups. |
+| 5-85 | Talks of exactly 3 minutes, 1 minute for changeover. No oral critique. Each listener fills the peer scoring sheet for the students in their assigned group. |
+| 85-90 | Collect the scoring sheets. |
 
 ## Deliverable
 
-Presentation and rubric score.
+Presentation and peer scores.
 
 ## Files
 
@@ -23,4 +23,4 @@ Presentation and rubric score.
 
 ## Notes
 
-Rubric: `capstone/rubric.md`.
+Rubric: `capstone/rubric.md`. Sheet to print: `capstone/peer_scoring_sheet.md`. The teacher sends written feedback through Moodle.

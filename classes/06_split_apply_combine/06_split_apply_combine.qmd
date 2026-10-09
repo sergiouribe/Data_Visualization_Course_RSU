@@ -60,7 +60,19 @@ gapminder |>
   geom_col()
 ```
 
-## 5. NHANES: mean BMI by group
+## 5. arrange(): sort a summary table
+
+```{r}
+#| label: arrange
+# Rank continents by life expectancy in 2007, highest first
+gapminder |>
+  filter(year == 2007) |>
+  group_by(continent) |>
+  summarize(life_exp = weighted.mean(lifeExp, pop)) |>
+  arrange(desc(life_exp))
+```
+
+## 6. NHANES: mean BMI by group
 
 ```{r}
 #| label: nhanes
@@ -72,7 +84,7 @@ NHANES |>
   geom_col(position = "dodge")
 ```
 
-## 6. Your turn
+## 7. Your turn
 
 Compute the median income per person (`gdpPercap`) by continent for 1952 and 2007. Plot it.
 

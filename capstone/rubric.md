@@ -1,6 +1,6 @@
 # Capstone rubric (100 points)
 
-Each student presents one graph for 3 minutes, then receives 2 minutes of feedback.
+Each student presents one graph in exactly 3 minutes. Peers score on paper during the talk (`peer_scoring_sheet.md`). The teacher gives written feedback through Moodle after class.
 
 | Principle | What the audience checks | Points |
 |---|---|---|

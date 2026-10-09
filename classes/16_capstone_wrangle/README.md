@@ -24,3 +24,15 @@ Clean table from a script.
 ## Notes
 
 Homework: first draft of the graph by 19 Nov.
+
+**Moodle checkpoint, Fri 13 Nov 2026, 23:59.** Submit a script of about five lines that loads your cleaned data and runs `glimpse()` and `nrow()` without errors. The teacher fixes import problems before class 17.
+
+```r
+pacman::p_load(tidyverse, here)
+here("data", "my_data.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  glimpse() |>
+  nrow()
+```
+
+`glimpse()` returns its input, so `nrow()` receives the table and prints the row count.

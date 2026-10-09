@@ -33,9 +33,9 @@ Students learn to turn a question into a clear graph in R. The course ends with 
 | 1 | Sat 10 Oct, 13:45 | [Why storytelling matters](classes/01_why_storytelling) | Examples |
 | 2 | Sat 10 Oct, 15:30 | [Grammar of graphics](classes/02_first_graph) | Penguins |
 | 3 | Sat 17 Oct, 09:00 | [Know your data](classes/03_know_your_data) | Penguins |
-| 4 | Sat 17 Oct, 10:45 | [Row and column verbs](classes/04_row_column_verbs) | NHANES |
-| 5 | Sat 17 Oct, 12:30 | [Tidy data](classes/05_tidy_data) | Gapminder wide |
-| 6 | Sat 17 Oct, 14:15 | [Split, apply, combine](classes/06_split_apply_combine) | Gapminder, NHANES |
+| 4 | Sat 17 Oct, 10:45 | [`filter()` and `select()`](classes/04_row_column_verbs) | NHANES |
+| 5 | Sat 17 Oct, 12:30 | [Tidy data and `case_when()`](classes/05_tidy_data) | Gapminder wide |
+| 6 | Sat 17 Oct, 14:15 | [Split, apply, combine, `arrange()`](classes/06_split_apply_combine) | Gapminder, NHANES |
 | 7 | Fri 23 Oct, 18:00 | [Cut and Focus](classes/07_cut_and_focus) | Own graphs |
 | 8 | Fri 23 Oct, 19:45 | [Tell](classes/08_tell) | Own graphs |
 | 9 | Sat 24 Oct, 09:00 | [Joins](classes/09_joins) | Gapminder wide |
@@ -51,7 +51,9 @@ Students learn to turn a question into a clear graph in R. The course ends with 
 | 19 | Fri 20 Nov, 18:00 | [Presentations 1](classes/19_presentations_1) | Own data |
 | 20 | Fri 20 Nov, 19:45 | [Presentations 2](classes/20_presentations_2) | Own data |
 
-Capstone files: [template](capstone/capstone_template.qmd) and [rubric](capstone/rubric.md).
+Capstone files: [template](capstone/capstone_template.qmd), [rubric](capstone/rubric.md), and [peer scoring sheet](capstone/peer_scoring_sheet.md).
+
+**Moodle checkpoint:** Fri 13 Nov 2026, 23:59. Students submit a short script that loads the clean data and runs `glimpse()` and `nrow()` (see [class 16](classes/16_capstone_wrangle)).
 
 ## How to use this repository
 

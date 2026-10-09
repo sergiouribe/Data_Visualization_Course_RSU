@@ -9,13 +9,13 @@
 
 | Minutes | Activity |
 |---|---|
-| 0-60 | Presentations: 3 min talk, 2 min feedback. |
+| 0-60 | Talks of exactly 3 minutes, 1 minute for changeover. Peers fill the scoring sheet. |
 | 60-80 | Group critique: which graph changed your mind, and why? |
 | 80-90 | Course evaluation. |
 
 ## Deliverable
 
-Presentation and rubric score.
+Presentation and peer scores.
 
 ## Files
 
@@ -23,4 +23,4 @@ Presentation and rubric score.
 
 ## Notes
 
-Rubric: `capstone/rubric.md`.
+Rubric: `capstone/rubric.md`. Sheet to print: `capstone/peer_scoring_sheet.md`.

@@ -9,14 +9,16 @@
 
 | Minutes | Activity |
 |---|---|
-| 0-10 | Verbs as sentences: filter rows, select columns, mutate new columns, arrange order. |
-| 10-40 | `filter()` and logical operators with a plot after each step. |
-| 40-65 | `select()`, `mutate()`, `case_when()`. |
-| 65-90 | Students write three questions and answer them. |
+| 0-10 | Verbs as sentences: filter rows, select columns. |
+| 10-25 | Comparisons: `==`, `!=`, `>`, `<`, `%in%`, `!is.na()`. Demo with Q1. |
+| 25-55 | Students complete the `filter()` condition in Q2 and Q3. The plot code is given. |
+| 55-70 | `select()` and `glimpse()`. |
+| 70-80 | `mutate()` with arithmetic only. |
+| 80-90 | Students write one question of their own. |
 
 ## Deliverable
 
-Three questions answered with a verb and a plot.
+Three questions answered with `filter()` and a plot.
 
 ## Files
 
@@ -24,4 +26,4 @@ Three questions answered with a verb and a plot.
 
 ## Notes
 
-This class is dense. If students fall behind, move `arrange()` and `case_when()` to the start of class 6.
+`arrange()` moved to class 6 and `case_when()` to class 5, so this class teaches only `filter()`, `select()` and simple `mutate()`. Students fill blanks inside finished ggplot pipelines instead of writing code from a blank script.
