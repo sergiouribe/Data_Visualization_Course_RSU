@@ -42,7 +42,24 @@ penguins |>
   geom_point()
 ```
 
-## 4. Your turn
+## 4. Labels
+
+`labs()` sets the title, axis names and legend title. Write what the graph shows, in plain words.
+
+```{r}
+#| label: labels
+penguins |>
+  ggplot(aes(x = flipper_length_mm, y = body_mass_g, color = species)) +
+  geom_point() +
+  labs(
+    title = "Penguins with longer flippers weigh more",
+    x = "Flipper length (mm)",
+    y = "Body mass (g)",
+    color = "Species"
+  )
+```
+
+## 5. Your turn
 
 Change `x` and `y` to bill length and bill depth. Write one sentence about what you see.
 
@@ -54,7 +71,7 @@ penguins |>
   geom_point()
 ```
 
-## 5. Save the graph in the project
+## 6. Save the graph in the project
 
 ```{r}
 #| label: save
@@ -68,4 +85,9 @@ penguins |>
 ggsave(here("class_02_first_graph.png"), width = 6, height = 4)
 ```
 
-> Deliverable: one graph, one sentence that answers the question, saved in your project folder.
+## 7. Export a copy
+
+1. Click **Render** (or Ctrl+Shift+K). RStudio makes an HTML file next to this document.
+2. Open the HTML file in your browser, press Ctrl+P (Cmd+P on Mac), and choose **Save as PDF**.
+
+> Deliverable: one graph, one sentence that answers the question, saved in your project folder, and a PDF copy of this document.

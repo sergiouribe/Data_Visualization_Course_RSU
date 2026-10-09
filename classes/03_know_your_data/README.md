@@ -3,19 +3,21 @@
 **When:** Sat 17 Oct 2026, 09:00-10:30 (in person, 90 min)  
 **Data:** Penguins
 
-**Goal:** Students pick a chart from the type of each variable.
+**Goal:** Students recognize common chart mistakes and pick a chart from the type of each variable.
 
 ## Plan
 
 | Minutes | Activity |
 |---|---|
-| 0-10 | Why data knowledge comes first. `glimpse()`, `is.na()`, number, category, date. |
-| 10-30 | One number: histogram. Two numbers: scatter. |
-| 30-45 | Outliers in the histogram and the scatter plot: data error or real value? |
-| 45-55 | One category: bar of counts. Number by category: box plot. Time: line. |
-| 55-65 | Add variables with color, shape, size and facet. Explain why 3D adds nothing. |
-| 65-75 | Data quality checklist: five checks on `penguins`. |
-| 75-90 | Students fill the chart-by-type map with five graphs. |
+| 0-20 | **Recap.** Bad graphs from class 1 rebuilt with penguins (baseline, wrong graph, y axis). The five principles on one slide. Today's focus: **Show**. |
+| 20-30 | Know the data: `glimpse()`, `is.na()`, number, category, date. |
+| 30-50 | One number: histogram. Two numbers: scatter. Outliers: data error or real value? |
+| 50-60 | One category: bar of counts. Number by category: box plot. Time: line. |
+| 60-70 | Add variables with color, shape, size and facet. Explain why 3D adds nothing. |
+| 70-75 | Data quality checklist: five checks on `penguins`. |
+| 75-90 | Apply **Show** with `labs()` to your graphs. Fill the chart-by-type map with five graphs. |
+
+Cut, Focus and Tell are taught in classes 7 and 8.
 
 ## Reading
 
