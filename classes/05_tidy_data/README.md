@@ -29,6 +29,7 @@ Reshaped table, a line plot of five countries, and a bar chart of life-expectanc
 ## Files
 
 - [05_tidy_data.qmd](05_tidy_data.qmd)
+- [05_exercise_add_continent.qmd](05_exercise_add_continent.qmd): extra exercise. Add the continent to each country with `countrycode` (uses `data/gapminder_life_expectancy_wide.csv`).
 
 ## Notes
 

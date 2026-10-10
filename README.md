@@ -95,6 +95,7 @@ Packages load with `pacman::p_load()`. Core set: `tidyverse`, `here`, `janitor`,
 
 - `palmerpenguins`, `NHANES`, `gapminder`: R packages.
 - `data/life_expectancy_wide.csv`, `data/income_wide.csv`, `data/population_wide.csv`: Gapminder in wide format, made by `data-raw/make_wide.R`. Students reshape them in classes 5 and 9.
+- `data/gapminder_life_expectancy_wide.csv`: life expectancy from the Gapminder Foundation (194 countries, one column per year, 1800 to 2100; years after 2023 are projections). Columns `geo` (ISO3 code) and `name`; no continent. Used in the continent exercise of class 5.
 - `data/rosling_tidy.csv`: the joined result of class 9. Use it if a student falls behind.
 
 Gapminder covers 142 countries from 1952 to 2007 in steps of 5 years. It does not include Latvia, Estonia, or Lithuania.
