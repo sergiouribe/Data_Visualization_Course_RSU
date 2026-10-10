@@ -1,0 +1,131 @@
+---
+title: "Exercise. Add the continent to each country"
+format: html
+---
+
+**Question:** Which continent does each country belong to, and does the life expectancy of the continents differ in 2023?
+
+The Gapminder table in `data/gapminder_life_expectancy_wide.csv` has one row per country and one column per year (1800 to 2100). It has no continent. The package `countrycode` adds it.
+
+```{r}
+#| label: setup
+# Install once with: install.packages("pacman")
+pacman::p_load(tidyverse, here, janitor, countrycode)
+```
+
+## 1. Look at the table
+
+```{r}
+#| label: look
+# geo = ISO3 code in lower case, name = country name, then one column per year
+here("data", "gapminder_life_expectancy_wide.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  select(geo, name, `1800`, `2023`, `2100`) |>
+  glimpse()
+```
+
+Years after 2023 are projections. Use 1800 to 2023 as data.
+
+## 2. Add the continent from the country name
+
+`countrycode()` takes the vector, the format you have (`origin`), and the format you want (`destination`).
+
+```{r}
+#| label: continent-from-name
+here("data", "gapminder_life_expectancy_wide.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  select(geo, name, `2023`) |>
+  mutate(continent = countrycode(name, origin = "country.name", destination = "continent")) |>
+  glimpse()
+```
+
+## 3. Check for countries without a continent
+
+A name that `countrycode` does not recognise returns `NA` and a warning. Check it every time.
+
+```{r}
+#| label: check-name-matches
+here("data", "gapminder_life_expectancy_wide.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  select(geo, name) |>
+  mutate(continent = countrycode(name, origin = "country.name", destination = "continent")) |>
+  filter(is.na(continent))
+```
+
+Write down how many countries have no continent: [YOUR ANSWER HERE]
+
+## 4. Use the ISO3 code instead
+
+The column `geo` holds ISO3 codes (`usa`, `lva`, `chl`). Codes are less ambiguous than names such as "UK", "Lao" or "Congo, Dem. Rep.". Compare both routes.
+
+```{r}
+#| label: continent-from-iso
+here("data", "gapminder_life_expectancy_wide.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  select(geo, name) |>
+  mutate(
+    continent_name = countrycode(name, origin = "country.name", destination = "continent"),
+    continent_iso  = countrycode(str_to_upper(geo), origin = "iso3c", destination = "continent")
+  ) |>
+  # Rows where the two routes disagree, or one is missing
+  filter(is.na(continent_name) | is.na(continent_iso) | continent_name != continent_iso)
+```
+
+Which route do you trust more, and why? [YOUR ANSWER HERE]
+
+## 5. Fix what is left
+
+If a country is still missing, add it by hand with `case_when()`.
+
+```{r}
+#| label: fix-missing
+#| eval: false
+# Replace ___ with the code of a country from step 4, and with its continent
+here("data", "gapminder_life_expectancy_wide.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  select(geo, name) |>
+  mutate(
+    continent = countrycode(str_to_upper(geo), origin = "iso3c", destination = "continent"),
+    continent = case_when(
+      is.na(continent) & geo == "___" ~ "___",
+      .default = continent
+    )
+  ) |>
+  filter(is.na(continent))
+```
+
+## 6. Count countries per continent
+
+```{r}
+#| label: count-continent
+here("data", "gapminder_life_expectancy_wide.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  mutate(continent = countrycode(str_to_upper(geo), origin = "iso3c", destination = "continent")) |>
+  count(continent, sort = TRUE) |>
+  ggplot(aes(x = n, y = fct_reorder(continent, n))) +
+  geom_col() +
+  labs(x = "Countries", y = NULL, title = "Countries per continent in the Gapminder table")
+```
+
+## 7. Reshape and compare continents
+
+```{r}
+#| label: continents-2023
+here("data", "gapminder_life_expectancy_wide.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  mutate(continent = countrycode(str_to_upper(geo), origin = "iso3c", destination = "continent")) |>
+  pivot_longer(
+    cols = `1800`:`2100`,
+    names_to = "year",
+    values_to = "life_exp",
+    names_transform = as.integer
+  ) |>
+  filter(year == 2023, !is.na(life_exp), !is.na(continent)) |>
+  ggplot(aes(x = life_exp, y = fct_reorder(continent, life_exp, .fun = median))) +
+  geom_boxplot() +
+  labs(x = "Life expectancy in 2023 (years)", y = NULL)
+```
+
+## Your turn
+
+Join `data/rosling_tidy.csv` (continent from the gapminder package) to your continents by country name and list the countries where the two continents differ: [YOUR ANSWER HERE]
