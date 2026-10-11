@@ -87,7 +87,7 @@ ggsave(here("class_02_first_graph.png"), width = 6, height = 4)
 
 ## 7. Export a copy
 
-1. Click **Render** (or Ctrl+Shift+K). RStudio makes an HTML file next to this document.
-2. Open the HTML file in your browser, press Ctrl+P (Cmd+P on Mac), and choose **Save as PDF**.
+1.  Click **Render** (or Ctrl+Shift+K). RStudio makes an HTML file next to this document.
+2.  Open the HTML file in your browser, press Ctrl+P (Cmd+P on Mac), and choose **Save as PDF**.
 
 > Deliverable: one graph, one sentence that answers the question, saved in your project folder, and a PDF copy of this document.

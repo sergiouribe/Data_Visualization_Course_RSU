@@ -1,0 +1,82 @@
+---
+title: "2026_Storytelling"
+author: "Sergio Uribe"
+format: html
+editor: visual
+---
+
+# First Session
+
+This is normal text, here you can write.
+
+Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+
+## Running Code
+
+When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+
+```{r}
+1 + 1
+```
+
+You can add options to executable code like this
+
+```{r}
+#| echo: false
+2 * 2
+```
+
+The `echo: false` option disables the printing of code (only output is displayed).
+
+CTRL + ALT + I
+
+Command + option + I
+
+```{r}
+# this is a comment, and is not executed
+# another line
+
+x <- 5
+y <- 9
+x + y
+
+
+```
+
+## If you haven't followed the instruction in the e-studies
+
+```{r}
+# install.packages("tidyverse")
+# install.packages("palmerpenguins")
+```
+
+```{r}
+library(tidyverse, palmerpenguins)
+```
+
+## The Penguins!
+
+```{r}
+penguins
+```
+
+### First chapter
+
+#### Load the data
+
+```{r}
+View(penguins)
+```
+
+## My first graph!
+
+```{r}
+penguins |> 
+  ggplot(aes(x = flipper_len, 
+             y = body_mass, 
+             color = species, 
+             shape = island)) +
+  geom_point()
+```
+
+# Second class
