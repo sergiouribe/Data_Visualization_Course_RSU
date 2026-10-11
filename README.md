@@ -38,6 +38,7 @@ This hands-on course will teach you:
 | 07 | [Reporting and Sharing Visual Stories](modules/07_reporting/) |
 | 08 | [Advanced Customization in ggplot2](modules/08_advanced_ggplot2/) |
 | 09 | [Capstone Project: Telling a Data Story](modules/09_capstone/) |
+| 10 | [Latvian Data Exercises (ICT survey, Household Budget Survey)](modules/10_latvian_data/) |
 
 ## Datasets
 
