@@ -1,0 +1,334 @@
+---
+title: "Exercise. The four dplyr verbs with the Latvian Labour Force Survey (solutions)"
+format: html
+---
+
+Each part answers one question about work in Latvia in 2025. Codes are in `data/lfs_codebook.md`.
+
+| Verb | What it does | Part |
+|---|---|---|
+| `filter()` | Extract specific observations (rows) | A |
+| `select()` | Remove distracting columns | B |
+| `mutate()` | Compute new variables | C |
+| `summarise()` | Summarize cases | D |
+
+```{r}
+#| label: setup
+pacman::p_load(tidyverse, here, janitor)
+```
+
+## Look first
+
+```{r}
+#| label: look
+# One row per person. Blank cells mean "not applicable", "." is also read as missing
+here("data", "lfs_2025_example.csv") |>
+  read_csv(na = c("", ".", "NA"), show_col_types = FALSE) |>
+  glimpse()
+```
+
+# Part A. filter(): extract rows
+
+## A1. How many people are employed?
+
+```{r}
+#| label: a1
+# EKA == 1 means employed. count() with no column counts rows.
+here("data", "lfs_2025_example.csv") |>
+  read_csv(na = c("", ".", "NA"), show_col_types = FALSE) |>
+  filter(EKA == 1) |>
+  count()
+```
+
+## A2. How many employed women aged 25 to 54 live in the Riga region?
+
+```{r}
+#| label: a2
+# Vecums 3, 4, 5 = ages 25 to 54. B11 == 2 = women. Jreg5 == 1 = Riga.
+here("data", "lfs_2025_example.csv") |>
+  read_csv(na = c("", ".", "NA"), show_col_types = FALSE) |>
+  filter(EKA == 1, B11 == 2, Vecums %in% 3:5, Jreg5 == 1) |>
+  count()
+```
+
+## A3. Who works part time because no full-time job was available?
+
+```{r}
+#| label: a3
+# D55 == 2 part time. D56 == 3 could not find full-time work.
+here("data", "lfs_2025_example.csv") |>
+  read_csv(na = c("", ".", "NA"), show_col_types = FALSE) |>
+  filter(D55 == 2, D56 == 3) |>
+  select(NR, Vecums, B11, Jreg5, Stundas)
+```
+
+## A4. How many unemployed people have higher education?
+
+```{r}
+#| label: a4
+# EKA == 2 unemployed. L124 == 1 higher education.
+here("data", "lfs_2025_example.csv") |>
+  read_csv(na = c("", ".", "NA"), show_col_types = FALSE) |>
+  filter(EKA == 2, L124 == 1) |>
+  count()
+```
+
+## A5. Quality check: how many employed people have no answer on hours?
+
+```{r}
+#| label: a5
+# Stundas == 9 is "no answer". is.na() catches blank cells.
+here("data", "lfs_2025_example.csv") |>
+  read_csv(na = c("", ".", "NA"), show_col_types = FALSE) |>
+  filter(EKA == 1) |>
+  filter(Stundas == 9 | is.na(Stundas)) |>
+  count()
+```
+
+# Part B. select(): remove distracting columns
+
+## B1. Keep who the person is
+
+```{r}
+#| label: b1
+# Four columns: ID, age group, sex, region
+here("data", "lfs_2025_example.csv") |>
+  read_csv(na = c("", ".", "NA"), show_col_types = FALSE) |>
+  select(NR, Vecums, B11, Jreg5)
+```
+
+## B2. Which columns describe the household?
+
+```{r}
+#| label: b2
+# starts_with() picks every column whose name begins with MS_
+here("data", "lfs_2025_example.csv") |>
+  read_csv(na = c("", ".", "NA"), show_col_types = FALSE) |>
+  select(NR, starts_with("MS_"))
+```
+
+## B3. Drop the weights and give columns readable names
+
+```{r}
+#| label: b3
+# -starts_with() removes columns. rename(new = old) changes names.
+here("data", "lfs_2025_example.csv") |>
+  read_csv(na = c("", ".", "NA"), show_col_types = FALSE) |>
+  select(NR, Vecums, B11, Jreg5, EKA, Svars_G) |>
+  rename(id = NR, age_group = Vecums, sex = B11, region = Jreg5, activity = EKA, weight = Svars_G)
+```
+
+## B4. Which columns have no values at all?
+
+```{r}
+#| label: b4
+# where() selects columns by a test. Here: every value is missing.
+here("data", "lfs_2025_example.csv") |>
+  read_csv(na = c("", ".", "NA"), show_col_types = FALSE) |>
+  select(where(\(x) all(is.na(x)))) |>
+  names()
+```
+
+# Part C. mutate(): compute new variables
+
+## C1. Is the annual weight one quarter of the quarterly weight?
+
+```{r}
+#| label: c1
+# Arithmetic: divide one column by another
+here("data", "lfs_2025_example.csv") |>
+  read_csv(na = c("", ".", "NA"), show_col_types = FALSE) |>
+  mutate(ratio = Svars_Cet / Svars_G) |>
+  count(ratio)
+```
+
+## C2. Turn codes into labels
+
+```{r}
+#| label: c2
+# case_when(): condition ~ value, one line per code
+here("data", "lfs_2025_example.csv") |>
+  read_csv(na = c("", ".", "NA"), show_col_types = FALSE) |>
+  mutate(
+    sex = case_when(
+      B11 == 1 ~ "Men",
+      B11 == 2 ~ "Women"
+    ),
+    region = case_when(
+      Jreg5 == 1 ~ "Riga",
+      Jreg5 == 2 ~ "Vidzeme",
+      Jreg5 == 3 ~ "Kurzeme",
+      Jreg5 == 4 ~ "Zemgale",
+      Jreg5 == 5 ~ "Latgale"
+    ),
+    activity = case_when(
+      EKA == 1 ~ "Employed",
+      EKA == 2 ~ "Unemployed",
+      EKA == 3 ~ "Inactive"
+    )
+  ) |>
+  select(NR, sex, region, activity)
+```
+
+## C3. Group ages into three bands
+
+```{r}
+#| label: c3
+# Vecums codes: 2 = 15-24, 3 to 5 = 25-54, 6 and 7 = 55-74
+here("data", "lfs_2025_example.csv") |>
+  read_csv(na = c("", ".", "NA"), show_col_types = FALSE) |>
+  mutate(
+    age_band = case_when(
+      Vecums == 2 ~ "15-24",
+      Vecums %in% 3:5 ~ "25-54",
+      Vecums %in% 6:7 ~ "55-74",
+      .default = "Other"
+    )
+  ) |>
+  count(age_band)
+```
+
+## C4. Flag part-time work
+
+```{r}
+#| label: c4
+# A comparison returns TRUE or FALSE. Use it as a new column.
+here("data", "lfs_2025_example.csv") |>
+  read_csv(na = c("", ".", "NA"), show_col_types = FALSE) |>
+  filter(EKA == 1) |>
+  mutate(part_time = D55 == 2) |>
+  count(part_time)
+```
+
+# Part D. summarise(): summarize cases
+
+The survey covers a sample. Each person has a weight (`Svars_G`), the number of people in Latvia that person stands for. Sum the weights to estimate people in Latvia. Use `Svars_G` for one year of data.
+
+## D1. How many people aged 15 to 74 are employed, unemployed or inactive?
+
+```{r}
+#| label: d1
+# count(wt = ...) adds up the weights instead of counting rows
+here("data", "lfs_2025_example.csv") |>
+  read_csv(na = c("", ".", "NA"), show_col_types = FALSE) |>
+  filter(!is.na(EKA)) |>
+  mutate(
+    activity = case_when(
+      EKA == 1 ~ "Employed",
+      EKA == 2 ~ "Unemployed",
+      EKA == 3 ~ "Inactive"
+    )
+  ) |>
+  count(activity, wt = Svars_G, sort = TRUE)
+```
+
+## D2. Which region has the highest share of employed people?
+
+```{r}
+#| label: d2
+# Share = weighted employed / weighted total, by region
+here("data", "lfs_2025_example.csv") |>
+  read_csv(na = c("", ".", "NA"), show_col_types = FALSE) |>
+  filter(!is.na(EKA)) |>
+  mutate(
+    employed = EKA == 1,
+    region = case_when(
+      Jreg5 == 1 ~ "Riga",
+      Jreg5 == 2 ~ "Vidzeme",
+      Jreg5 == 3 ~ "Kurzeme",
+      Jreg5 == 4 ~ "Zemgale",
+      Jreg5 == 5 ~ "Latgale"
+    )
+  ) |>
+  group_by(region) |>
+  summarise(employed_share = sum(Svars_G * employed) / sum(Svars_G)) |>
+  arrange(desc(employed_share))
+```
+
+## D3. Do men or women work part time more often?
+
+```{r}
+#| label: d3
+# Among employed people only
+here("data", "lfs_2025_example.csv") |>
+  read_csv(na = c("", ".", "NA"), show_col_types = FALSE) |>
+  filter(EKA == 1, D55 %in% 1:2) |>
+  mutate(
+    part_time = D55 == 2,
+    sex = case_when(B11 == 1 ~ "Men", B11 == 2 ~ "Women")
+  ) |>
+  group_by(sex) |>
+  summarise(part_time_share = sum(Svars_G * part_time) / sum(Svars_G))
+```
+
+## D4. In which sectors do women hold most jobs?
+
+```{r}
+#| label: d4
+# Women's share of employed people, by sector of the main job
+here("data", "lfs_2025_example.csv") |>
+  read_csv(na = c("", ".", "NA"), show_col_types = FALSE) |>
+  filter(EKA == 1, D47 != 99) |>
+  mutate(
+    women = B11 == 2,
+    sector = case_when(
+      D47 == 1 ~ "Agriculture",
+      D47 == 2 ~ "Industry and energy",
+      D47 == 3 ~ "Construction",
+      D47 == 4 ~ "Trade, accommodation, food",
+      D47 == 5 ~ "Transport and ICT",
+      D47 == 6 ~ "Finance and professional",
+      D47 == 7 ~ "Public administration",
+      D47 == 8 ~ "Education",
+      D47 == 9 ~ "Health and social care",
+      D47 == 10 ~ "Other"
+    )
+  ) |>
+  group_by(sector) |>
+  summarise(women_share = sum(Svars_G * women) / sum(Svars_G)) |>
+  arrange(desc(women_share))
+```
+
+## D5. Draw the answer to D4
+
+```{r}
+#| label: d5
+#| fig-height: 4
+# Show: sorted bars. Focus: one color. Tell: the title states the finding.
+here("data", "lfs_2025_example.csv") |>
+  read_csv(na = c("", ".", "NA"), show_col_types = FALSE) |>
+  filter(EKA == 1, D47 != 99) |>
+  mutate(
+    women = B11 == 2,
+    sector = case_when(
+      D47 == 1 ~ "Agriculture",
+      D47 == 2 ~ "Industry and energy",
+      D47 == 3 ~ "Construction",
+      D47 == 4 ~ "Trade, accommodation, food",
+      D47 == 5 ~ "Transport and ICT",
+      D47 == 6 ~ "Finance and professional",
+      D47 == 7 ~ "Public administration",
+      D47 == 8 ~ "Education",
+      D47 == 9 ~ "Health and social care",
+      D47 == 10 ~ "Other"
+    )
+  ) |>
+  group_by(sector) |>
+  summarise(women_share = sum(Svars_G * women) / sum(Svars_G)) |>
+  ggplot(aes(x = women_share, y = fct_reorder(sector, women_share))) +
+  geom_col(fill = "gray40") +
+  scale_x_continuous(labels = scales::label_percent(accuracy = 1)) +
+  labs(
+    title = "Women hold [DATA NEEDED HERE] of jobs in education",
+    x = "Share of employed people who are women",
+    y = NULL,
+    caption = "Source: Central Statistical Bureau of Latvia, Labour Force Survey 2025"
+  ) +
+  theme_minimal()
+```
+
+# Your own question
+
+Write one question about the survey. Name the verbs you need. Answer it in a chunk.
+
+Question: [YOUR QUESTION HERE]
