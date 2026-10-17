@@ -5,10 +5,10 @@ Run these five checks on every table before you plot it. Write one line per chec
 | # | Check | How in R |
 |---|---|---|
 | 1 | **Types.** Numbers are numbers, categories are text or factors, dates are dates. | `glimpse()` |
-| 2 | **Missing values.** How many, in which columns, and why? Do not replace `NA` with 0. | `summarize(across(everything(), \(x) sum(is.na(x))))` |
+| 2 | **Missing values.** How many, in which columns, and why? Do not replace `NA` with 0. | `summary()` |
 | 3 | **Units and ranges.** The minimum and maximum make sense. All rows use the same unit. | `summary()`, histogram, scatter plot |
-| 4 | **Duplicates.** No row appears twice by mistake. | `count(key, sort = TRUE)`, `duplicated()` |
-| 5 | **Row counts.** The number of rows before and after each filter or join matches what you expect. | `nrow()`, `n_distinct()` |
+| 4 | **Duplicates.** No row appears twice by mistake. | `distinct()` and `count()`, compare the two |
+| 5 | **Row counts.** The number of rows before and after each filter or join matches what you expect. | `count()` |
 
 ## Decision for each problem found
 
