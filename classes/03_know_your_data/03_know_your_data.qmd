@@ -18,23 +18,21 @@ Three mistakes from class 1, rebuilt with penguins.
 
 ```{r}
 #| label: recap-baseline
-# Mistake 1: omitting the baseline. The axis starts at 3,600 g.
-# Chinstrap looks 30% heavier than Adelie. The real gap is 0.9%.
+# Mistake 1: omitting the baseline. The axis starts at 60.
+# Adelie looks 11 times taller than Chinstrap. The real ratio is 2.2 (152 and 68 penguins).
 penguins |>
-  group_by(species) |>
-  summarize(mean_mass = mean(body_mass_g, na.rm = TRUE)) |>
-  ggplot(aes(x = species, y = mean_mass)) +
+  count(species) |>
+  ggplot(aes(x = species, y = n)) +
   geom_col() +
-  coord_cartesian(ylim = c(3600, 5100))
+  coord_cartesian(ylim = c(60, 160))
 ```
 
 ```{r}
 #| label: recap-baseline-fix
 # Fix: bars start at zero
 penguins |>
-  group_by(species) |>
-  summarize(mean_mass = mean(body_mass_g, na.rm = TRUE)) |>
-  ggplot(aes(x = species, y = mean_mass)) +
+  count(species) |>
+  ggplot(aes(x = species, y = n)) +
   geom_col()
 ```
 
@@ -42,9 +40,8 @@ penguins |>
 #| label: recap-wrong-graph
 # Mistake 2: using the wrong graph. A line joins categories that have no order.
 penguins |>
-  group_by(species) |>
-  summarize(mean_mass = mean(body_mass_g, na.rm = TRUE)) |>
-  ggplot(aes(x = species, y = mean_mass, group = 1)) +
+  count(species) |>
+  ggplot(aes(x = species, y = n, group = 1)) +
   geom_line() +
   geom_point()
 ```
@@ -71,11 +68,9 @@ penguins |>
 
 ```{r}
 #| label: missing
-# Count missing values in each column
+# NA's = missing values in each column. Min and Max show the range.
 penguins |>
-  summarize(across(everything(), \(x) sum(is.na(x)))) |>
-  pivot_longer(everything(), names_to = "variable", values_to = "n_missing") |>
-  arrange(desc(n_missing))
+  summary()
 ```
 
 ## 2. One number: histogram
@@ -102,10 +97,9 @@ A histogram and a scatter plot show values that sit far from the rest. An outlie
 
 ```{r}
 #| label: outliers-histogram
-# Which penguins are in the right tail of the histogram?
+# The heaviest penguins come first
 penguins |>
-  slice_max(body_mass_g, n = 5) |>
-  select(species, island, sex, body_mass_g, flipper_length_mm)
+  arrange(desc(body_mass_g))
 ```
 
 ```{r}
@@ -145,28 +139,30 @@ Each new variable goes into one more channel: color, shape, size, or a facet pan
 ```{r}
 #| label: more-variables
 penguins |>
-  ggplot(aes(x = flipper_length_mm, y = body_mass_g,
-             color = species, shape = sex)) +
+  ggplot(aes(x = flipper_length_mm, y = body_mass_g, color = species, shape = sex)) +
   geom_point() +
-  facet_wrap(vars(island))
+  facet_wrap(~ island)
 ```
 
 ## 7. Data quality checklist
 
 Run the five checks of the [data quality checklist](../../capstone/data_quality_checklist.md) on `penguins`: types, missing values, units and ranges, duplicates, row counts.
 
+Types, missing values and ranges: use `glimpse()` and `summary()` from section 1.
+
 ```{r}
-#| label: quality
-# Units and ranges: do the minimum and maximum make sense?
+#| label: rows
+# Row count
 penguins |>
-  summary()
+  count()
 ```
 
 ```{r}
 #| label: duplicates
-# Duplicates: count rows that repeat an earlier row
+# Duplicates: the count of different rows. If it equals the row count, no row repeats.
 penguins |>
-  summarize(duplicated_rows = sum(duplicated(pick(everything()))))
+  distinct() |>
+  count()
 ```
 
 ## 8. Your turn
