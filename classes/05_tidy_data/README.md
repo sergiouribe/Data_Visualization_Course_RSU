@@ -29,8 +29,11 @@ Reshaped table, a line plot of five countries, and a bar chart of life-expectanc
 ## Files
 
 - [05_tidy_data.qmd](05_tidy_data.qmd)
+- [05_exercise_wide_to_long.qmd](05_exercise_wide_to_long.qmd): short exercise. Reshape life expectancy of Estonia, Latvia and Lithuania from wide to long and plot it. Data from `https://bit.ly/wide_to_long`. Teacher version: [05_exercise_wide_to_long_solutions.qmd](05_exercise_wide_to_long_solutions.qmd).
 - [05_exercise_add_continent.qmd](05_exercise_add_continent.qmd): extra exercise. Add the continent to each country with `countrycode` (uses `data/gapminder_life_expectancy_wide.csv`).
 
 ## Notes
 
 `data/life_expectancy_wide.csv` comes from `data-raw/make_wide.R`.
+
+The link `https://bit.ly/wide_to_long` points to `data/gapminder_life_expectancy_wide.csv`. After the pull request is merged, change the link target to the `main` branch.
