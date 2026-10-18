@@ -1,0 +1,119 @@
+---
+title: "Class 8. Pivoting (solutions)"
+format: html
+---
+
+**Question for today:** How did life expectancy change in Estonia, Latvia and Lithuania since 1950?
+
+```{r}
+#| label: setup
+pacman::p_load(tidyverse, palmerpenguins, here)
+```
+
+## 1. Tidy data in one picture
+
+Tidy data follow three rules: each variable is a column, each observation is a row, each value is a cell. The wide table below breaks the first rule: the variable *year* is spread over many columns.
+
+```{r}
+#| label: wide
+here("data", "gapminder_life_expectancy_wide.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(name %in% c("Estonia", "Latvia", "Lithuania")) |>
+  select(name, `1950`, `1990`, `2023`)
+```
+
+**Ask:** How many variables does this table show? Where is the year?
+
+## 2. pivot_longer(): wide to long
+
+Three arguments: `cols` (the columns to stack), `names_to` (the name of the new column that holds the old column names) and `values_to` (the name of the column that holds the values).
+
+```{r}
+#| label: long
+here("data", "gapminder_life_expectancy_wide.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(name %in% c("Estonia", "Latvia", "Lithuania")) |>
+  select(name, `1950`:`2023`) |>
+  pivot_longer(
+    cols = `1950`:`2023`,
+    names_to = "year",
+    values_to = "life_exp",
+    names_transform = as.integer
+  )
+```
+
+`names_transform = as.integer` turns the year from text into a number, so the x axis is numeric.
+
+## 3. Line plot
+
+```{r}
+#| label: line
+here("data", "gapminder_life_expectancy_wide.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(name %in% c("Estonia", "Latvia", "Lithuania")) |>
+  select(name, `1950`:`2023`) |>
+  pivot_longer(
+    cols = `1950`:`2023`,
+    names_to = "year",
+    values_to = "life_exp",
+    names_transform = as.integer
+  ) |>
+  ggplot(aes(x = year, y = life_exp, color = name)) +
+  geom_line()
+```
+
+**Your turn 1:** Plot Finland, Sweden and Norway for 1950 to 2023. Which country had the lowest life expectancy in 1950?
+
+```{r}
+#| label: turn-1
+here("data", "gapminder_life_expectancy_wide.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(name %in% c("Finland", "Sweden", "Norway")) |>
+  select(name, `1950`:`2023`) |>
+  pivot_longer(
+    cols = `1950`:`2023`,
+    names_to = "year",
+    values_to = "life_exp",
+    names_transform = as.integer
+  ) |>
+  ggplot(aes(x = year, y = life_exp, color = name)) +
+  geom_line()
+```
+
+## 4. pivot_wider(): long to wide
+
+The opposite move. `names_from` gives the column whose values become column names. `values_from` gives the column that fills the cells. Wide tables suit a reader who compares two columns.
+
+```{r}
+#| label: wider
+# Mean body mass per species and sex (from class 7), one column per sex
+penguins |>
+  filter(!is.na(sex)) |>
+  group_by(species, sex) |>
+  summarize(mean_mass = mean(body_mass_g), .groups = "drop") |>
+  pivot_wider(names_from = sex, values_from = mean_mass) |>
+  mutate(difference = male - female)
+```
+
+**Your turn 2:** Make the same wide table for the mean flipper length.
+
+```{r}
+#| label: turn-2
+penguins |>
+  filter(!is.na(sex)) |>
+  group_by(species, sex) |>
+  summarize(mean_flipper = mean(flipper_length_mm), .groups = "drop") |>
+  pivot_wider(names_from = sex, values_from = mean_flipper) |>
+  mutate(difference = male - female)
+```
+
+## 5. When to use each
+
+| Task | Table shape |
+|---|---|
+| Plot with ggplot2, group, filter, join | long |
+| Show a table to a reader who compares columns | wide |
+
+> Deliverable: the line plot and one wide summary table.
+
+> Homework: [08_homework_add_continent.qmd](08_homework_add_continent.qmd).

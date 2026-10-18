@@ -17,7 +17,7 @@
 | 70-75 | Data quality checklist: five checks on `penguins`. |
 | 75-90 | Apply **Show** with `labs()` to your graphs. Fill the chart-by-type map with five graphs. |
 
-Cut, Focus and Tell are taught in classes 7 and 8.
+Cut, Focus and Tell are taught in classes 11 and 12.
 
 ## Reading
 

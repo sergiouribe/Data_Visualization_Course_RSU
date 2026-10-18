@@ -1,5 +1,5 @@
 ---
-title: "Class 11. Small multiples: compare 1952 and 2007"
+title: "Class 13, part 1. Small multiples: compare 1952 and 2007"
 format: html
 ---
 
@@ -19,9 +19,12 @@ here("data", "rosling_tidy.csv") |>
   filter(year %in% c(1952, 2007)) |>
   ggplot(aes(x = income, y = life_exp, size = population, color = continent)) +
   geom_point(alpha = 0.7) +
-  scale_x_log10() +
+  scale_x_log10(labels = scales::label_dollar(accuracy = 1)) +
   scale_size_area(max_size = 12) +
-  facet_wrap(vars(year))
+  scale_color_viridis_d() +
+  facet_wrap(vars(year)) +
+  theme_minimal(base_size = 14) +
+  theme(legend.position = "bottom")
 ```
 
 ## 2. facet_grid(): rows by one variable, columns by another
@@ -35,7 +38,8 @@ here("data", "rosling_tidy.csv") |>
   geom_point(alpha = 0.6) +
   scale_x_log10() +
   scale_size_area(max_size = 10) +
-  facet_grid(rows = vars(continent), cols = vars(year))
+  facet_grid(rows = vars(continent), cols = vars(year)) +
+  theme_minimal(base_size = 12)
 ```
 
 ## 3. Keep scales equal across panels

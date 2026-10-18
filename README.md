@@ -19,6 +19,10 @@ Students learn to turn a question into a clear graph in R. The course ends with 
 
 Every table passes the [five-check data quality checklist](capstone/data_quality_checklist.md) before it is plotted: types, missing values, units and ranges, duplicates, row counts.
 
+## Palettes
+
+Viridis is the default palette of the course (`scale_color_viridis_d()` for categories, `scale_color_viridis_c()` for numbers). It stays readable with color blindness and in black and white. Gray plus one color highlights one group (class 11).
+
 ## Data type decides the chart
 
 | Variables | Chart |
@@ -40,13 +44,13 @@ Every table passes the [five-check data quality checklist](capstone/data_quality
 | 4 | Sat 17 Oct, 10:45 | [`filter()` and `select()`](classes/04_row_column_verbs) | NHANES |
 | 5 | Sat 17 Oct, 12:30 | [Tidy data and `case_when()`](classes/05_tidy_data) | Gapminder wide |
 | 6 | Sat 17 Oct, 14:15 | [Split, apply, combine, `arrange()`](classes/06_split_apply_combine) | Gapminder, NHANES |
-| 7 | Fri 23 Oct, 18:00 | [Cut and Focus](classes/07_cut_and_focus) | Own graphs |
-| 8 | Fri 23 Oct, 19:45 | [Tell](classes/08_tell) | Own graphs |
+| 7 | Fri 23 Oct, 18:00 | [Split, apply, combine on penguins](classes/07_split_apply_combine) | Penguins, Latvian survey |
+| 8 | Fri 23 Oct, 19:45 | [Pivoting](classes/08_pivoting) | Gapminder wide, penguins |
 | 9 | Sat 24 Oct, 09:00 | [Joins](classes/09_joins) | Gapminder wide |
-| 10 | Sat 24 Oct, 10:45 | [Rosling assembly](classes/10_rosling_assembly) | Gapminder |
-| 11 | Sat 24 Oct, 12:30 | [Small multiples](classes/11_small_multiples) | Gapminder |
-| 12 | Sat 24 Oct, 14:15 | [Rosling polish](classes/12_rosling_polish) | Gapminder |
-| 13 | Thu 29 Oct, 18:00 | [Narrative arc](classes/13_narrative_arc) | Rosling chart |
+| 10 | Sat 24 Oct, 10:45 | [Rosling chart, 2007 (log axis, size, color, viridis)](classes/10_rosling_assembly) | Gapminder |
+| 11 | Sat 24 Oct, 12:30 | [Cut, Focus and themes](classes/11_cut_focus_themes) | Gapminder |
+| 12 | Sat 24 Oct, 14:15 | [Tell: message, annotation, export](classes/12_tell) | Gapminder |
+| 13 | Thu 29 Oct, 18:00 | [Small multiples and narrative arc](classes/13_narrative_arc) | Gapminder, Rosling's talk |
 | 14 | Thu 29 Oct, 19:45 | [Quarto reports, animation demo, capstone questions](classes/14_animation_and_questions) | Own ideas |
 | 15 | Fri 30 Oct, 19:45 | [Capstone M1: Ask](classes/15_capstone_ask) | Own data |
 | 16 | Sat 7 Nov, 16:00 | [Capstone M2: Wrangle](classes/16_capstone_wrangle) | Own data |
@@ -72,15 +76,15 @@ Projects are individual. Each student works alone. Students may use any dataset 
 
 | Official theme (course description) | Classes |
 |---|---|
-| Introduction to Data Visualization and Storytelling | 1, 13 |
+| Introduction to Data Visualization and Storytelling | 1, 12, 13 |
 | Fundamentals of the Grammar of Graphics with ggplot2 | 2, 3 |
 | Choosing the Right Visualization | 3, 10, 17 |
-| Fundamentals of Data Wrangling: Providing Context to the Data | 4, 5, 6, 9 |
-| Simplifying Visuals and Removing Clutter | 7 |
-| Directing Audience Attention with Design | 7, 8 |
-| Creating Visual Narratives | 8, 13 |
+| Fundamentals of Data Wrangling: Providing Context to the Data | 4, 5, 6, 7, 8, 9 |
+| Simplifying Visuals and Removing Clutter | 11 |
+| Directing Audience Attention with Design | 10, 11, 12 |
+| Creating Visual Narratives | 12, 13 |
 | Reporting and Sharing Visual Stories | 14, 15, 18 |
-| Advanced Customization in ggplot2 | 10, 11, 12, 18 |
+| Advanced Customization in ggplot2 | 10, 11, 12, 13, 18 |
 | Capstone Project: Telling a Data Story | 14 to 20 |
 
 ## How to use this repository
@@ -89,14 +93,14 @@ Projects are individual. Each student works alone. Students may use any dataset 
 2. Open the `.qmd` file of the class.
 3. Run each chunk with Ctrl+Shift+Enter (Cmd+Shift+Enter on Mac).
 
-Packages load with `pacman::p_load()`. Core set: `tidyverse`, `here`, `janitor`, `gtsummary`. Class packages: `palmerpenguins`, `NHANES`, `gapminder`, `ggrepel`, `gganimate`, `gifski`.
+Packages load with `pacman::p_load()`. Core set: `tidyverse`, `here`, `janitor`, `gtsummary`. Class packages: `palmerpenguins`, `countrycode`, `NHANES`, `gapminder`, `ggrepel`, `gganimate`, `gifski`.
 
 ## Data
 
 - `palmerpenguins`, `NHANES`, `gapminder`: R packages.
-- `data/life_expectancy_wide.csv`, `data/income_wide.csv`, `data/population_wide.csv`: Gapminder in wide format, made by `data-raw/make_wide.R`. Students reshape them in classes 5 and 9.
-- `data/gapminder_life_expectancy_wide.csv`: life expectancy from the Gapminder Foundation (194 countries, one column per year, 1800 to 2100; years after 2023 are projections). Columns `geo` (ISO3 code) and `name`; no continent. Used in the continent exercise of class 5.
-- `data/lfs_2025_example.csv`, `data/lfs_codebook.md`: 7-row sample of the Latvian Labour Force Survey 2025 (Central Statistical Bureau of Latvia, [data.gov.lv](https://data.gov.lv/dati/lv/dataset/darbspeka-apsekojums)) and an English codebook of the variables used. Replace the sample with the full file under the same name. Used in the dplyr exercise of classes 4 to 6.
+- `data/life_expectancy_wide.csv`, `data/income_wide.csv`, `data/population_wide.csv`: Gapminder in wide format, made by `data-raw/make_wide.R`. Students reshape them in classes 8 and 9.
+- `data/gapminder_life_expectancy_wide.csv`: life expectancy from the Gapminder Foundation (194 countries, one column per year, 1800 to 2100; years after 2023 are projections). Columns `geo` (ISO3 code) and `name`; no continent. Used in the pivot exercises of classes 5 and 8 and in the continent homework of class 8.
+- `data/lfs_2025_example.csv`, `data/lfs_codebook.md`: 7-row sample of the Latvian Labour Force Survey 2025 (Central Statistical Bureau of Latvia, [data.gov.lv](https://data.gov.lv/dati/lv/dataset/darbspeka-apsekojums)) and an English codebook of the variables used. Replace the sample with the full file under the same name. Used in the dplyr exercise of classes 4 to 6 and the closing question of class 7.
 - `data/rosling_tidy.csv`: the joined result of class 9. Use it if a student falls behind.
 
 Gapminder covers 142 countries from 1952 to 2007 in steps of 5 years. It does not include Latvia, Estonia, or Lithuania.
@@ -113,13 +117,13 @@ Required reading in the course description: Knaflic, *Storytelling with Data*; B
 | 4 | R4DS ch. 3 |
 | 5 | Broman and Woo; R4DS ch. 5 |
 | 6 | R4DS ch. 3 (groups) |
-| 7 | Knaflic ch. 3 and 4; Nature Methods, Elements of visual style, and Axes, ticks and grids |
-| 8 | R4DS ch. 11; Nature Methods, Labels and callouts |
+| 7 | R4DS ch. 3 (groups) |
+| 8 | R4DS ch. 5 |
 | 9 | R4DS ch. 19 |
 | 10 | Nature Methods, Plotting symbols; R4DS ch. 9 |
-| 11 | Nature Methods, Multidimensional data; R4DS ch. 9 |
-| 12 | Nature Methods, Design of data figures; BBC R cookbook; UK Government chart guidance |
-| 13 | Knaflic ch. 7; Nature Methods, Storytelling |
+| 11 | Knaflic ch. 3 and 4; Nature Methods, Elements of visual style, and Axes, ticks and grids |
+| 12 | R4DS ch. 11; Nature Methods, Labels and callouts, and Design of data figures; BBC R cookbook |
+| 13 | Knaflic ch. 7; Nature Methods, Storytelling, and Multidimensional data; R4DS ch. 9 |
 | 14 | R4DS ch. 28 and 29 |
 | 15 | Ellis and Leek; R4DS ch. 7 |
 | 16 | R4DS ch. 18; data quality checklist |

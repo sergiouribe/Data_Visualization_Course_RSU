@@ -3,6 +3,8 @@ title: "Class 9. Joins: build the Rosling table"
 format: html
 ---
 
+Replace each `___` with code, remove `#| eval: false` and run the chunk.
+
 **Question for today:** Can we build one tidy table from three wide tables?
 
 ```{r}
@@ -12,9 +14,10 @@ pacman::p_load(tidyverse, here)
 
 ## 1. Three wide tables
 
+Each table has one row per country and one column per year. Life expectancy also holds the continent.
+
 ```{r}
 #| label: look
-# Each table has one row per country and one column per year
 here("data", "income_wide.csv") |>
   read_csv(show_col_types = FALSE) |>
   glimpse()
@@ -24,13 +27,48 @@ here("data", "income_wide.csv") |>
 
 A key is the column (or columns) that identify a row. After reshaping, the key is `country` + `year`. A join matches rows by key.
 
-## 3. Reshape each table, then join
-
 `left_join()` keeps every row of the table on the left and adds the matching columns from the table on the right.
 
+## 3. Reshape life expectancy
+
+The first table is the left table. Reshape it as in class 8.
+
 ```{r}
-#| label: join
-# Reshape the three tables, join them, and save the tidy result
+#| label: reshape-life
+#| eval: false
+here("data", "life_expectancy_wide.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  pivot_longer(`1952`:`2007`, names_to = "year", values_to = "___",
+               names_transform = as.integer)
+```
+
+## 4. Reshape income and join it
+
+Reshape the income table inside `left_join()`. The key is `country` and `year`.
+
+```{r}
+#| label: join-income
+#| eval: false
+here("data", "life_expectancy_wide.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  pivot_longer(`1952`:`2007`, names_to = "year", values_to = "life_exp",
+               names_transform = as.integer) |>
+  left_join(
+    here("data", "income_wide.csv") |>
+      read_csv(show_col_types = FALSE) |>
+      pivot_longer(`1952`:`2007`, names_to = "year", values_to = "___",
+                   names_transform = as.integer),
+    by = c("___", "year")
+  )
+```
+
+## 5. Add population and save
+
+Repeat the join for `population_wide.csv`, then save the result.
+
+```{r}
+#| label: join-all
+#| eval: false
 here("data", "life_expectancy_wide.csv") |>
   read_csv(show_col_types = FALSE) |>
   pivot_longer(`1952`:`2007`, names_to = "year", values_to = "life_exp",
@@ -43,33 +81,37 @@ here("data", "life_expectancy_wide.csv") |>
     by = c("country", "year")
   ) |>
   left_join(
-    here("data", "population_wide.csv") |>
+    here("data", "___.csv") |>
       read_csv(show_col_types = FALSE) |>
-      pivot_longer(`1952`:`2007`, names_to = "year", values_to = "population",
+      pivot_longer(`1952`:`2007`, names_to = "year", values_to = "___",
                    names_transform = as.integer),
     by = c("country", "year")
   ) |>
   write_csv(here("data", "rosling_tidy.csv"))
 ```
 
-## 4. Check the row count
+## 6. Check the row count and missing values
 
-Life expectancy has 142 countries and 12 years, so the table must have 1,704 rows. More rows mean a key repeated. Fewer rows mean a join dropped rows.
+Life expectancy has 142 countries and 12 years, so the table must have 1,704 rows. More rows mean a repeated key. Fewer rows mean a join dropped rows. See the [data quality checklist](../../capstone/data_quality_checklist.md).
 
 ```{r}
 #| label: check
+#| eval: false
 here("data", "rosling_tidy.csv") |>
   read_csv(show_col_types = FALSE) |>
-  summarize(rows = n(), countries = n_distinct(country), missing = sum(is.na(income)))
+  summarize(rows = ___, countries = n_distinct(country), missing = sum(is.na(income)))
 ```
 
-## 5. First 2007 scatter
+Answer: [YOUR ANSWER HERE] rows, [YOUR ANSWER HERE] countries.
+
+## 7. First 2007 scatter
 
 ```{r}
 #| label: scatter-2007
+#| eval: false
 here("data", "rosling_tidy.csv") |>
   read_csv(show_col_types = FALSE) |>
-  filter(year == 2007) |>
+  filter(year == ___) |>
   ggplot(aes(x = income, y = life_exp)) +
   geom_point()
 ```

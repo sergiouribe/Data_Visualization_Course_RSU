@@ -147,7 +147,7 @@ For each graph, students write: (1) what a reader would believe, (2) the princip
 
 # Reserve examples
 
-Not for class 1. Use them in later classes: the dual axis and the spaghetti plot in classes 7 and 11, the data errors in classes 3, 6 and 9.
+Not for class 1. Use them in later classes: the dual axis in class 13 and the spaghetti plot in class 11, the data errors in classes 3, 7 and 9.
 
 ### R1. The dual axis
 
@@ -162,7 +162,7 @@ gapminder |>
   scale_y_continuous(sec.axis = sec_axis(~ (. - 30) * 100000, name = "Population"))
 ```
 
-**Mistake:** the author picks the scale of the second axis, so the lines can be made to cross, touch, or diverge. Change `+ 30` to `+ 10` and the story changes. **Fix:** two panels with one axis each (class 11), or one variable per graph.
+**Mistake:** the author picks the scale of the second axis, so the lines can be made to cross, touch, or diverge. Change `+ 30` to `+ 10` and the story changes. **Fix:** two panels with one axis each (class 13), or one variable per graph.
 
 ```{r}
 #| label: r1-fix
@@ -185,7 +185,7 @@ gapminder |>
   geom_line()
 ```
 
-**Mistake:** 142 colors and a legend nobody can read. **Fix (Cut, Focus):** gray lines plus one highlighted country (class 7).
+**Mistake:** 142 colors and a legend nobody can read. **Fix (Cut, Focus):** gray lines plus one highlighted country (class 11).
 
 ```{r}
 #| label: r2-fix
