@@ -10,7 +10,7 @@
 | Minutes | Activity |
 |---|---|
 | 0-15 | Keys. What a join does. `left_join()` in one picture. |
-| 15-45 | Reshape the three tables, then join on `country` and `year`. |
+| 15-45 | Reshape the three tables (class 8), then join on `country` and `year`. Starter code with blanks. |
 | 45-65 | Check the row count (1,704) and missing values with the [data quality checklist](../../capstone/data_quality_checklist.md). |
 | 65-90 | First 2007 scatter of income and life expectancy. |
 
@@ -26,8 +26,9 @@ Individual work (about 30 minutes). Read it before the class if possible:
 
 ## Files
 
-- [09_joins.qmd](09_joins.qmd)
+- [09_joins.qmd](09_joins.qmd): student version with blanks.
+- [09_joins_solutions.qmd](09_joins_solutions.qmd): teacher version.
 
 ## Notes
 
-A ready copy of `data/rosling_tidy.csv` is in the repo for students who fall behind.
+The continent exercise moved to the homework of class 8, so today holds only the joins. A ready copy of `data/rosling_tidy.csv` is in the repo for students who fall behind.

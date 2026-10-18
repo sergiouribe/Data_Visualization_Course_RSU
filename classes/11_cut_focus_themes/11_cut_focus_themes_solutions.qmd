@@ -1,0 +1,156 @@
+---
+title: "Class 11. Cut, Focus and themes (solutions)"
+format: html
+---
+
+**Rule 3, Cut:** remove every mark that does not carry data.
+**Rule 4, Focus:** use viridis for a variable with several groups. Use gray plus one color to highlight one group.
+
+```{r}
+#| label: setup
+pacman::p_load(tidyverse, ggrepel, here)
+```
+
+## 1. Before: the chart from class 10
+
+Close your eyes test: look for 5 seconds, close your eyes, say what you remember.
+
+```{r}
+#| label: before
+here("data", "rosling_tidy.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(year == 2007) |>
+  ggplot(aes(x = income, y = life_exp, size = population, color = continent)) +
+  geom_point(alpha = 0.7) +
+  scale_x_log10(labels = scales::label_dollar(accuracy = 1)) +
+  scale_size_area(max_size = 12, guide = "none") +
+  scale_color_viridis_d()
+```
+
+## 2. Themes exercise (about 15 minutes)
+
+A theme controls the marks that carry no data: background, grid lines, borders, text size. Draw the same chart with four themes.
+
+```{r}
+#| label: theme-gray
+here("data", "rosling_tidy.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(year == 2007) |>
+  ggplot(aes(x = income, y = life_exp, size = population, color = continent)) +
+  geom_point(alpha = 0.7) +
+  scale_x_log10(labels = scales::label_dollar(accuracy = 1)) +
+  scale_size_area(max_size = 12, guide = "none") +
+  scale_color_viridis_d() +
+  theme_gray()
+```
+
+```{r}
+#| label: theme-minimal
+here("data", "rosling_tidy.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(year == 2007) |>
+  ggplot(aes(x = income, y = life_exp, size = population, color = continent)) +
+  geom_point(alpha = 0.7) +
+  scale_x_log10(labels = scales::label_dollar(accuracy = 1)) +
+  scale_size_area(max_size = 12, guide = "none") +
+  scale_color_viridis_d() +
+  theme_minimal()
+```
+
+```{r}
+#| label: theme-classic
+here("data", "rosling_tidy.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(year == 2007) |>
+  ggplot(aes(x = income, y = life_exp, size = population, color = continent)) +
+  geom_point(alpha = 0.7) +
+  scale_x_log10(labels = scales::label_dollar(accuracy = 1)) +
+  scale_size_area(max_size = 12, guide = "none") +
+  scale_color_viridis_d() +
+  theme_classic()
+```
+
+```{r}
+#| label: theme-bw
+here("data", "rosling_tidy.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(year == 2007) |>
+  ggplot(aes(x = income, y = life_exp, size = population, color = continent)) +
+  geom_point(alpha = 0.7) +
+  scale_x_log10(labels = scales::label_dollar(accuracy = 1)) +
+  scale_size_area(max_size = 12, guide = "none") +
+  scale_color_viridis_d() +
+  theme_bw()
+```
+
+**Question:** Which theme removes the most marks that carry no data?
+
+Answer: `theme_minimal()` removes the gray background, the panel border and the axis lines. `theme_classic()` removes the grid lines and keeps two axis lines.
+
+Next, change the text size and remove the minor grid lines. Move the legend to the bottom.
+
+```{r}
+#| label: theme-tweak
+here("data", "rosling_tidy.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(year == 2007) |>
+  ggplot(aes(x = income, y = life_exp, size = population, color = continent)) +
+  geom_point(alpha = 0.7) +
+  scale_x_log10(labels = scales::label_dollar(accuracy = 1)) +
+  scale_size_area(max_size = 12, guide = "none") +
+  scale_color_viridis_d() +
+  theme_minimal(base_size = 14) +
+  theme(legend.position = "bottom", panel.grid.minor = element_blank())
+```
+
+**Pairs:** Choose a theme for a slide that 30 people see from a distance. Name the principle behind your choice (Cut).
+
+## 3. Focus: gray plus one color
+
+Viridis colors five continents. If the message is about one continent, gray plus one color serves better.
+
+```{r}
+#| label: focus
+here("data", "rosling_tidy.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(year == 2007) |>
+  mutate(highlight = continent == "Africa") |>
+  ggplot(aes(x = income, y = life_exp, size = population, color = highlight)) +
+  geom_point(alpha = 0.7) +
+  geom_text_repel(
+    # Label the three most populous African countries
+    data = \(d) d |> filter(highlight) |> slice_max(population, n = 3),
+    aes(label = country), size = 4, color = "gray20", show.legend = FALSE
+  ) +
+  scale_x_log10(labels = scales::label_dollar(accuracy = 1)) +
+  scale_size_area(max_size = 12, guide = "none") +
+  scale_color_manual(values = c("TRUE" = "firebrick", "FALSE" = "gray70")) +
+  theme_minimal(base_size = 14) +
+  theme(legend.position = "none", panel.grid.minor = element_blank())
+```
+
+## 4. Viridis against gray plus one color (5 minutes)
+
+| Use | When |
+|---|---|
+| Viridis | The chart shows a variable with several groups or a numeric scale. |
+| Gray plus one color | The message is about one group. |
+
+**Your turn:** Make both versions of the Rosling 2007 chart: one with viridis for all continents, one with gray plus one color for Europe. Which one answers the question "How far behind is Africa?" Which one answers "How do the five continents compare?"
+
+```{r}
+#| label: turn-focus
+here("data", "rosling_tidy.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(year == 2007) |>
+  mutate(highlight = continent == "Europe") |>
+  ggplot(aes(x = income, y = life_exp, size = population, color = highlight)) +
+  geom_point(alpha = 0.7) +
+  scale_x_log10(labels = scales::label_dollar(accuracy = 1)) +
+  scale_size_area(max_size = 12, guide = "none") +
+  scale_color_manual(values = c("TRUE" = "firebrick", "FALSE" = "gray70")) +
+  theme_minimal(base_size = 14) +
+  theme(legend.position = "none", panel.grid.minor = element_blank())
+```
+
+> Deliverable: one before and after pair with a list of what you cut and what you highlighted.

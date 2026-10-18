@@ -3,6 +3,8 @@ title: "Class 10. Rosling assembly, 2007"
 format: html
 ---
 
+Replace each `___` with code, remove `#| eval: false` and run the chunk.
+
 **Question for today:** What is the link between income and life expectancy in 2007?
 
 ```{r}
@@ -10,7 +12,7 @@ format: html
 pacman::p_load(tidyverse, here)
 ```
 
-Rosling shows four variables at once: x is income, y is life expectancy, size is population, color is continent.
+Rosling shows four variables at once: x is income, y is life expectancy, size is population, color is continent. We build the chart one layer at a time.
 
 ## 1. Start: two numbers
 
@@ -29,12 +31,13 @@ Income spans 278 to 49,357 dollars. A linear axis squeezes most countries to the
 
 ```{r}
 #| label: step-2
+#| eval: false
 here("data", "rosling_tidy.csv") |>
   read_csv(show_col_types = FALSE) |>
   filter(year == 2007) |>
   ggplot(aes(x = income, y = life_exp)) +
   geom_point() +
-  scale_x_log10()
+  ___()
 ```
 
 ## 3. Size by population
@@ -43,10 +46,11 @@ here("data", "rosling_tidy.csv") |>
 
 ```{r}
 #| label: step-3
+#| eval: false
 here("data", "rosling_tidy.csv") |>
   read_csv(show_col_types = FALSE) |>
   filter(year == 2007) |>
-  ggplot(aes(x = income, y = life_exp, size = population)) +
+  ggplot(aes(x = income, y = life_exp, size = ___)) +
   geom_point() +
   scale_x_log10() +
   scale_size_area(max_size = 15)
@@ -54,15 +58,90 @@ here("data", "rosling_tidy.csv") |>
 
 ## 4. Color by continent
 
+`alpha = 0.7` makes circles see-through, so overlaps stay visible.
+
 ```{r}
 #| label: step-4
+#| eval: false
 here("data", "rosling_tidy.csv") |>
   read_csv(show_col_types = FALSE) |>
   filter(year == 2007) |>
-  ggplot(aes(x = income, y = life_exp, size = population, color = continent)) +
-  geom_point() +
+  ggplot(aes(x = income, y = life_exp, size = population, color = ___)) +
+  geom_point(alpha = 0.7) +
   scale_x_log10() +
   scale_size_area(max_size = 15)
 ```
 
-> Deliverable: the static Rosling chart for 2007 with four variables.
+## 5. Axis number format
+
+`scales::label_dollar(accuracy = 1)` adds the dollar sign and the thousands separator. Put it inside the existing `scale_x_log10()`. A second `scale_x_log10()` would replace the first one.
+
+```{r}
+#| label: step-5
+#| eval: false
+here("data", "rosling_tidy.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(year == 2007) |>
+  ggplot(aes(x = income, y = life_exp, size = population, color = continent)) +
+  geom_point(alpha = 0.7) +
+  scale_x_log10(labels = scales::___()) +
+  scale_size_area(max_size = 15)
+```
+
+## 6. Colors that everyone can read: viridis (about 15 minutes)
+
+The default ggplot2 colors are hard to tell apart for people with color blindness, and some turn to the same gray in a black and white printout. The viridis palettes fix both. They ship with ggplot2.
+
+- `scale_color_viridis_d()`: for categories (`d` = discrete).
+- `scale_color_viridis_c()`: for numbers (`c` = continuous).
+
+```{r}
+#| label: viridis-d
+#| eval: false
+# Categories: continent
+here("data", "rosling_tidy.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(year == 2007) |>
+  ggplot(aes(x = income, y = life_exp, size = population, color = continent)) +
+  geom_point(alpha = 0.7) +
+  scale_x_log10(labels = scales::label_dollar(accuracy = 1)) +
+  scale_size_area(max_size = 15) +
+  scale_color_viridis____()
+```
+
+```{r}
+#| label: viridis-c
+#| eval: false
+# Numbers: color by life expectancy itself
+here("data", "rosling_tidy.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(year == 2007) |>
+  ggplot(aes(x = income, y = life_exp, size = population, color = ___)) +
+  geom_point(alpha = 0.7) +
+  scale_x_log10(labels = scales::label_dollar(accuracy = 1)) +
+  scale_size_area(max_size = 15) +
+  scale_color_viridis_c()
+```
+
+**Question:** Which of the three versions (default, `_d`, `_c`) can you read in a black and white printout? Why does color by `life_exp` repeat the y axis, and when is that useful?
+
+Answer: [YOUR ANSWER HERE]
+
+**Your turn:** Try `scale_color_viridis_d(option = "magma", end = 0.9)`. What does `end = 0.9` do?
+
+```{r}
+#| label: turn-viridis
+#| eval: false
+here("data", "rosling_tidy.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(year == 2007) |>
+  ggplot(aes(x = income, y = life_exp, size = population, color = continent)) +
+  geom_point(alpha = 0.7) +
+  scale_x_log10(labels = scales::label_dollar(accuracy = 1)) +
+  scale_size_area(max_size = 15) +
+  scale_color_viridis_d(option = "___", end = 0.9)
+```
+
+Answer: [YOUR ANSWER HERE]
+
+> Deliverable: the static Rosling chart for 2007 with four variables, dollar labels and a viridis palette.

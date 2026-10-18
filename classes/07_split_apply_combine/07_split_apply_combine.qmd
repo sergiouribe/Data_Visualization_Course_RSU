@@ -1,0 +1,142 @@
+---
+title: "Class 7. Split, apply, combine"
+format: html
+---
+
+Replace each `___` with code, remove `#| eval: false` and run the chunk. Write answers under the chunks.
+
+**Question for today:** Which penguin species is the heaviest, and how do the groups differ?
+
+```{r}
+#| label: setup
+pacman::p_load(tidyverse, palmerpenguins, here)
+```
+
+## 1. The idea
+
+1. **Split** the rows into groups: `group_by()`.
+2. **Apply** a summary to each group: `summarize()`.
+3. **Combine** the results in one new table (dplyr does this).
+
+Mean body mass of each species:
+
+```{r}
+#| label: idea
+penguins |>
+  group_by(species) |>
+  summarize(mean_mass = mean(body_mass_g, na.rm = TRUE))
+```
+
+`na.rm = TRUE` ignores missing values. Without it, one `NA` turns the mean into `NA`.
+
+## 2. Several summaries in one table
+
+Each summary has a name on the left of `=` and a function on the right. `n()` counts the rows of the group.
+
+```{r}
+#| label: several
+penguins |>
+  group_by(species) |>
+  summarize(
+    n = n(),
+    mean_mass = mean(body_mass_g, na.rm = TRUE),
+    median_mass = median(body_mass_g, na.rm = TRUE)
+  )
+```
+
+Two groups: put two columns in `group_by()`.
+
+```{r}
+#| label: two-groups
+penguins |>
+  filter(!is.na(sex)) |>
+  group_by(species, sex) |>
+  summarize(
+    n = n(),
+    mean_mass = mean(body_mass_g, na.rm = TRUE),
+    .groups = "drop"
+  )
+```
+
+**Your turn 1:** Make a table with the number of penguins, the mean flipper length and the median flipper length per island.
+
+```{r}
+#| label: turn-1
+#| eval: false
+penguins |>
+  group_by(___) |>
+  summarize(
+    n = n(),
+    mean_flipper = mean(___, na.rm = TRUE),
+    median_flipper = ___(flipper_length_mm, na.rm = TRUE)
+  )
+```
+
+## 3. count() and arrange()
+
+`count()` is `group_by()` plus `n()` in one step. `arrange(desc())` puts the largest value first.
+
+```{r}
+#| label: count
+penguins |>
+  count(species, island) |>
+  arrange(desc(n))
+```
+
+**Your turn 2:** Which species and sex has the highest mean body mass? Use `filter(!is.na(sex))`, `group_by()`, `summarize()` and `arrange(desc())`.
+
+```{r}
+#| label: turn-2
+#| eval: false
+penguins |>
+  filter(!is.na(sex)) |>
+  group_by(___, ___) |>
+  summarize(mean_mass = mean(body_mass_g, na.rm = TRUE), .groups = "drop") |>
+  arrange(___(mean_mass))
+```
+
+Answer: [YOUR ANSWER HERE]
+
+## 4. A sorted bar chart of group means
+
+The summary table goes straight into `ggplot()`. The table already holds the values, so we use `geom_col()`. `fct_reorder()` sorts the bars by the mean.
+
+```{r}
+#| label: bar
+penguins |>
+  group_by(species) |>
+  summarize(mean_mass = mean(body_mass_g, na.rm = TRUE)) |>
+  ggplot(aes(x = mean_mass, y = fct_reorder(species, mean_mass))) +
+  geom_col() +
+  labs(x = "Mean body mass (g)", y = NULL)
+```
+
+**Your turn 3:** Draw the same chart for the mean bill length (`bill_length_mm`).
+
+```{r}
+#| label: turn-3
+#| eval: false
+penguins |>
+  group_by(species) |>
+  summarize(mean_bill = ___(___, na.rm = TRUE)) |>
+  ggplot(aes(x = mean_bill, y = fct_reorder(species, mean_bill))) +
+  geom____() +
+  labs(x = "Mean bill length (mm)", y = NULL)
+```
+
+## 5. Latvian Labour Force Survey: employed people by sex
+
+Codes: `EKA` = 1 employed, 2 unemployed, 3 inactive. `B11` = 1 male, 2 female (see `data/lfs_codebook.md`).
+
+```{r}
+#| label: lfs
+here("data", "lfs_2025_example.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(EKA == 1) |>
+  mutate(sex = case_when(B11 == 1 ~ "Male", B11 == 2 ~ "Female")) |>
+  count(sex)
+```
+
+Check: the sample file holds a few rows. Replace it with the full file under the same name to get real counts.
+
+> Deliverable: one grouped table and one bar chart.

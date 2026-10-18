@@ -20,7 +20,7 @@ here("data", "rosling_tidy.csv") |>
   geom_point(alpha = 0.7) +
   scale_x_log10() +
   scale_size_area(max_size = 15) +
-  labs(title = "Year: {frame_time}", x = "Income per person", y = "Life expectancy") +
+  labs(title = "Year: {round(frame_time)}", x = "Income per person", y = "Life expectancy") +
   theme_minimal() +
   transition_time(year)   # printing the plot renders the animation
 ```
