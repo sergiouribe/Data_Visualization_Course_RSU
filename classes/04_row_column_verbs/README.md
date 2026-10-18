@@ -29,6 +29,7 @@ Three questions answered with `filter()` and a plot.
 ## Files
 
 - [04_row_column_verbs.qmd](04_row_column_verbs.qmd)
+- [homework_dplyr_penguins.qmd](homework_dplyr_penguins.qmd): homework on penguins. One verb at a time: `head()`, `tail()`, `select()`, comparison symbols, `filter()`, `arrange()`, `mutate()`, `group_by()` and `summarize()`, with `tbl_summary()` tables. Teacher version: [homework_dplyr_penguins_solutions.qmd](homework_dplyr_penguins_solutions.qmd).
 - [04_exercise_lfs.qmd](04_exercise_lfs.qmd): student exercise on the Latvian Labour Force Survey. Part A (`filter()`) and B (`select()`) for class 4, part C (`mutate()`, `case_when()`) for class 5, part D (`summarise()`, `arrange()`) for class 6.
 - [04_exercise_lfs_solutions.qmd](04_exercise_lfs_solutions.qmd): teacher version with code. Do not share before the class.
 
