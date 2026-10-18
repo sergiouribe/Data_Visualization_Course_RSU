@@ -36,4 +36,4 @@ Reshaped table, a line plot of five countries, and a bar chart of life-expectanc
 
 `data/life_expectancy_wide.csv` comes from `data-raw/make_wide.R`.
 
-The link `https://bit.ly/wide_to_long` points to `data/gapminder_life_expectancy_wide.csv`. After the pull request is merged, change the link target to the `main` branch.
+The link `https://bit.ly/wide_to_long` points to `https://raw.githubusercontent.com/sergiouribe/Data_Visualization_Course_RSU/main/data/gapminder_life_expectancy_wide.csv` (the `main` branch).
