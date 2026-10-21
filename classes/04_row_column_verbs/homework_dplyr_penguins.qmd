@@ -7,6 +7,15 @@ Each section has four parts: a short explanation of one verb, a question, the qu
 
 Replace each `___` with code, remove the line `#| eval: false`, and run the chunk. Write the answer under the chunk.
 
+## How to submit
+
+1. Fill in every `___`, remove `#| eval: false` from the chunk and run it.
+2. Write your answer under each chunk.
+3. Click **Render** to make the HTML file.
+4. Upload the HTML file to Moodle before **Fri 23 Oct 2026, 18:00** (start of class 7). Class 7 opens with a 10-minute review of this homework.
+
+The homework takes about 45 to 60 minutes.
+
 ```{r}
 #| label: setup
 pacman::p_load(tidyverse, palmerpenguins, gtsummary)
@@ -32,9 +41,17 @@ penguins |>
 **Your turn:** Show the first 10 rows. Then show the last row. Which species and year does it show?
 
 ```{r}
-#| label: turn-head-tail
+#| label: turn-head
 #| eval: false
-# Use head(10) and tail(1)
+# Use head() with a number
+penguins |>
+  ___
+```
+
+```{r}
+#| label: turn-tail
+#| eval: false
+# Use tail() with a number
 penguins |>
   ___
 ```
@@ -102,13 +119,14 @@ Use `==` to compare. A single `=` assigns a value and gives an error inside `fil
 c(2700, 3500, 6000) > 4000
 ```
 
-**Your turn:** Write a comparison that returns `TRUE` for the number 4000, and one that returns `FALSE`.
+**Your turn:** Replace each `___` with a symbol from the table so that the first line returns `TRUE` and the second line returns `FALSE`.
 
 ```{r}
 #| label: turn-comparisons
 #| eval: false
-penguins |>
-  ___
+# Replace each ___ with a comparison symbol
+4000 ___ 4000
+4000 ___ 4000
 ```
 
 Answer: [YOUR ANSWER HERE]

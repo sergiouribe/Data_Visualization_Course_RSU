@@ -7,6 +7,15 @@ Each section has four parts: a short explanation of one verb, a question, the qu
 
 Replace each `___` with code, remove the line `#| eval: false`, and run the chunk. Write the answer under the chunk.
 
+## How to submit
+
+1. Fill in every `___`, remove `#| eval: false` from the chunk and run it.
+2. Write your answer under each chunk.
+3. Click **Render** to make the HTML file.
+4. Upload the HTML file to Moodle before **Fri 23 Oct 2026, 18:00** (start of class 7). Class 7 opens with a 10-minute review of this homework.
+
+The homework takes about 45 to 60 minutes.
+
 ```{r}
 #| label: setup
 pacman::p_load(tidyverse, palmerpenguins, gtsummary)
@@ -32,17 +41,18 @@ penguins |>
 **Your turn:** Show the first 10 rows. Then show the last row. Which species and year does it show?
 
 ```{r}
-#| label: turn-head-tail
-#| eval: false
-# Use head(10) and tail(1)
+#| label: turn-head
 penguins |>
   head(10)
+```
 
+```{r}
+#| label: turn-tail
 penguins |>
   tail(1)
 ```
 
-Answer: [YOUR ANSWER HERE]
+Answer: Chinstrap, 2009.
 
 # 2. select(): choose columns
 
@@ -77,7 +87,7 @@ penguins |>
   tbl_summary(by = species)
 ```
 
-Answer: [YOUR ANSWER HERE]
+Answer: Gentoo has the longest flippers (median 216 mm, against 190 mm for Adelie and 196 mm for Chinstrap) and the shallowest bills (median depth 15.0 mm, against 18.4 mm for the other two).
 
 # 3. Comparison symbols
 
@@ -115,7 +125,7 @@ c(2700, 3500, 6000) > 4000
 4000 < 4000
 ```
 
-Answer: [YOUR ANSWER HERE]
+Answer: `4000 >= 4000` returns `TRUE`. `4000 < 4000` returns `FALSE`.
 
 # 4. filter(): choose rows
 
@@ -168,7 +178,7 @@ penguins |>
   count()
 ```
 
-Answer: [YOUR ANSWER HERE]
+Answer: 124 penguins.
 
 **Your turn 2:** How many Adelie penguins have a bill longer than 45 mm?
 
@@ -180,7 +190,7 @@ penguins |>
   count()
 ```
 
-Answer: [YOUR ANSWER HERE]
+Answer: 3 penguins.
 
 **Your turn 3:** Make a table of body mass and flipper length per species, only for penguins on Biscoe island.
 
@@ -193,7 +203,7 @@ penguins |>
   tbl_summary(by = species)
 ```
 
-Answer: [YOUR ANSWER HERE]
+Answer: Biscoe has 44 Adelie and 124 Gentoo penguins. Gentoo is heavier (median 5,000 g against 3,750 g) and has longer flippers (median 216 mm against 190 mm).
 
 # 5. arrange(): sort rows
 
@@ -218,7 +228,7 @@ penguins |>
   head(3)
 ```
 
-Answer: [YOUR ANSWER HERE]
+Answer: A male Gentoo, 6,300 g.
 
 # 6. select() again
 
@@ -243,7 +253,7 @@ penguins |>
   head(5)
 ```
 
-Answer: [YOUR ANSWER HERE]
+Answer: The first row is an Adelie male of 3,750 g. The fourth row has no sex and no body mass (`NA`).
 
 # 7. mutate(): make a new column
 
@@ -270,7 +280,7 @@ penguins |>
   head()
 ```
 
-Answer: [YOUR ANSWER HERE]
+Answer: The first penguin has a bill of 3.91 cm (39.1 mm).
 
 # 8. group_by() and summarize(): groups
 
@@ -306,7 +316,7 @@ penguins |>
   summarize(mean_flipper = mean(flipper_length_mm, na.rm = TRUE))
 ```
 
-Answer: [YOUR ANSWER HERE]
+Answer: Biscoe 209.7 mm, Dream 193.1 mm, Torgersen 191.2 mm.
 
 # 9. Final question
 
@@ -320,4 +330,4 @@ penguins |>
   summarize(mean_mass = mean(body_mass_g, na.rm = TRUE))
 ```
 
-Answer: [YOUR ANSWER HERE]
+Answer: 4,680 g.
