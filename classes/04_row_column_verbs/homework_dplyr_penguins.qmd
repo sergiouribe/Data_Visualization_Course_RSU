@@ -3,61 +3,103 @@ title: "Homework. Explore data with dplyr verbs (penguins)"
 format: html
 ---
 
-## Before we start
+```{r}
+# Run this once at the top of every new script.
+# It installs pacman if missing; does nothing if you already have it.
+# You can copy and paste this into any script you write.
+# Everything that starts with # is a comment: R ignores it, but it is useful for notes.
+if (!require("pacman", quietly = TRUE)) install.packages("pacman")
+```
 
-The `tidyverse` is a collection of R packages for data science. Each package does one job. You already know `ggplot2`, the package for graphics.
-
-For data wrangling, the tidyverse has a package called `dplyr`. Wrangling means preparing a table for analysis: choosing columns, choosing rows, sorting, making new columns and summarizing groups.
-
-In this homework you explore the main `dplyr` verbs. Each verb is a function that does one usual data task.
-
-Each section has four parts: a short explanation of one verb, a question, the question solved with the verb, and **your turn**.
-
-Replace each `___` with code, remove the line `#| eval: false`, and run the chunk. Write the answer under the chunk.
-
-## How to submit
-
-1. Fill in every `___`, remove `#| eval: false` from the chunk and run it.
-2. Write your answer under each chunk.
-3. Click **Render** to make the HTML file.
-4. Upload the HTML file to Moodle before **Fri 23 Oct 2026, 18:00** (start of class 7). Class 7 opens with a 10-minute review of this homework.
-
-The homework takes about 45 to 60 minutes.
+Now we install and load the packages we need.
 
 ```{r}
 #| label: setup
-pacman::p_load(tidyverse, palmerpenguins, gtsummary)
+pacman::p_load(
+  here,            # file paths that work on any computer
+  tidyverse,       # ggplot2, dplyr, tidyr and friends
+  gtsummary,       # publication-ready summary tables
+  palmerpenguins,  # penguin dataset for practice
+  NHANES,          # US health and nutrition survey data
+  gapminder        # country health and wealth data over time
+)
 ```
+
+## Shortcuts
+
+| Action | Mac | Windows |
+|---|---|---|
+| Insert chunk | `Cmd` + `Option` + `I` | `Ctrl` + `Alt` + `I` |
+| Insert pipe `\|>` | `Cmd` + `Shift` + `M` | `Ctrl` + `Shift` + `M` |
+| Run chunk | `Cmd` + `Shift` + `Enter` | `Ctrl` + `Shift` + `Enter` |
+
+> **Pipe shortcut note:** RStudio inserts `%>%` by default. To get `|>`, go to Tools → Global Options → Code → tick **Use native pipe operator**.
+
+## Basic data tasks
+
+The `tidyverse` is a collection of R packages for data science. Each package does one job.
+
+- `ggplot2` is the package for graphics.
+- `dplyr` is the package for data wrangling — preparing a table for analysis.
+
+Here we explore the main `dplyr` verbs. Each verb is a function that does one usual data task.
+
+## What is `#| eval: false`?
+
+Some chunks in this homework contain a line that says `#| eval: false`.
+
+This tells R: **do not run this chunk yet**. You will see it in every "Your turn" chunk that has a `___` to fill in. It is there so that the file renders without errors before you fill in your answer.
+
+**Your job:**
+
+1. Replace every `___` with your code.
+2. Delete the line `#| eval: false`.
+3. Run the chunk with `Cmd/Ctrl` + `Shift` + `Enter`.
+4. Write your answer below the chunk.
+
+## How to submit
+
+1. Fill in every `___`, remove `#| eval: false` from each chunk and run it.
+2. Write your answer under each chunk.
+3. Click **Render** to make the HTML file.
+4. Upload the HTML file to Moodle before **Fri 23 Oct 2026, 18:00** (start of class 7).
+
+The homework takes about 45 to 60 minutes.
+
+---
 
 # 1. Look at the first and last rows
 
-`head()` shows the first rows of a table. `tail()` shows the last rows. Add a number to choose how many rows.
+`head()` shows the first rows of a table. `tail()` shows the last rows. Add a number to choose how many rows. Use them to check that your data loaded correctly.
 
-**Question:** What do the first rows of `penguins` look like? And the last rows?
+**Question:** What do the first rows of `penguins` look like?
 
 ```{r}
-#| label: head-tail
-# First 6 rows
+# head() shows the first 6 rows by default
 penguins |>
   head()
+```
 
-# Last 3 rows
+Now the last three rows.
+
+```{r}
+# tail() with a number shows that many rows from the end
 penguins |>
   tail(3)
 ```
 
-**Your turn:** Show the first 10 rows. Then show the last row. Which species and year does it show?
+**Your turn:** Show the first 10 rows.
 
 ```{r}
-#| label: turn-head
 #| eval: false
 # Use head() with a number
 penguins |>
   ___
 ```
 
+Now show only the last row.
+
 ```{r}
-#| label: turn-tail
 #| eval: false
 # Use tail() with a number
 penguins |>
@@ -66,33 +108,37 @@ penguins |>
 
 Answer: [YOUR ANSWER HERE]
 
+---
+
 # 2. select(): choose columns
 
-`select()` keeps the columns you name and drops the others.
+`select()` keeps only the columns you name. Use it to reduce a wide table to the columns you need.
 
 **Question:** Which columns give the species, the island and the body mass?
 
 ```{r}
-#| label: select
 penguins |>
   select(species, island, body_mass_g) |>
   head()
 ```
 
-**Question:** How do bill length and body mass differ between species? Select the columns, then make a table with `tbl_summary()`.
+**Question:** How do bill length and body mass differ between species?
+
+`tbl_summary()` makes a summary table. `by = species` gives one column per species. `missing = "no"` hides rows with missing data. `digits = all_continuous() ~ 1` rounds to one decimal place.
 
 ```{r}
-#| label: select-table
-# by = species gives one column per species
 penguins |>
   select(species, bill_length_mm, body_mass_g) |>
-  tbl_summary(by = species)
+  tbl_summary(
+    by = species,
+    missing = "no",
+    digits = all_continuous() ~ 1
+  )
 ```
 
-**Your turn:** Make the same table with two other numeric columns: `flipper_length_mm` and `bill_depth_mm`.
+**Your turn:** Make the same table with `flipper_length_mm` and `bill_depth_mm`.
 
 ```{r}
-#| label: turn-select-table
 #| eval: false
 penguins |>
   ___
@@ -100,9 +146,50 @@ penguins |>
 
 Answer: [YOUR ANSWER HERE]
 
-# 3. Comparison symbols
+---
 
-`filter()` needs a condition. A condition compares values and returns `TRUE` or `FALSE`.
+# 3. filter(): choose rows
+
+`filter()` keeps only the rows where a condition is `TRUE`. Use it to focus on one species, one island, or any subset you need.
+
+**Question:** Which penguins live on Dream island?
+
+```{r}
+penguins |>
+  filter(island == "Dream")
+```
+
+**Question:** How many Gentoo penguins are there?
+
+```{r}
+penguins |>
+  filter(species == "Gentoo") |>
+  count()
+```
+
+**Your turn 1:** Filter for penguins on Biscoe island.
+
+```{r}
+#| eval: false
+penguins |>
+  ___
+```
+
+**Your turn 2:** How many Chinstrap penguins are there?
+
+```{r}
+#| eval: false
+penguins |>
+  ___
+```
+
+Answer: [YOUR ANSWER HERE]
+
+---
+
+# 4. Comparison symbols
+
+To filter, you need a condition. A condition compares values and returns `TRUE` or `FALSE`.
 
 | Symbol | Meaning | Example |
 |---|---|---|
@@ -110,80 +197,118 @@ Answer: [YOUR ANSWER HERE]
 | `!=` | not equal to | `island != "Dream"` |
 | `>` | greater than | `body_mass_g > 4000` |
 | `>=` | greater than or equal to | `body_mass_g >= 4000` |
-| `<` | less than | `flipper_length_mm < 190` |
+| `<` | less than | `body_mass_g < 3500` |
 | `<=` | less than or equal to | `flipper_length_mm <= 190` |
 | `%in%` | is one of a set | `island %in% c("Dream", "Biscoe")` |
 | `!is.na()` | has a value (not missing) | `!is.na(sex)` |
 
-Use `==` to compare. A single `=` assigns a value and gives an error inside `filter()`. Put text inside quotes. Numbers have no quotes.
+Use `==` to compare text or numbers. A single `=` gives an error inside `filter()`. Text goes inside quotes. Numbers do not.
 
-**Question:** What does each line return?
+**Question:** Which penguins weigh more than 5,000 g?
 
 ```{r}
-#| label: comparisons
-5 > 3
-5 == 3
-"Adelie" == "Gentoo"
-c(2700, 3500, 6000) > 4000
+penguins |>
+  filter(body_mass_g > 5000)
 ```
 
-**Your turn:** Replace each `___` with a symbol from the table so that the first line returns `TRUE` and the second line returns `FALSE`.
+**Question:** Which penguins weigh less than 3,000 g?
 
 ```{r}
-#| label: turn-comparisons
+penguins |>
+  filter(body_mass_g < 3000)
+```
+
+**Your turn 1:** Filter penguins that weigh 4,000 g or more.
+
+```{r}
 #| eval: false
-# Replace each ___ with a comparison symbol
-4000 ___ 4000
-4000 ___ 4000
+penguins |>
+  ___
+```
+
+**Your turn 2:** Filter penguins with a flipper longer than 210 mm.
+
+```{r}
+#| eval: false
+penguins |>
+  ___
 ```
 
 Answer: [YOUR ANSWER HERE]
 
-# 4. filter(): choose rows
+---
 
-`filter()` keeps the rows where the condition is `TRUE`. A comma between two conditions means "and".
+# 5. Combining conditions
 
-**Question:** How many Gentoo penguins are in the table?
+A comma between conditions means "and": both must be `TRUE` for the row to be kept.
 
-```{r}
-#| label: filter-1
-penguins |>
-  filter(species == "Gentoo") |>
-  count()
-```
-
-**Question:** Which penguins weigh more than 6,000 g?
-
-```{r}
-#| label: filter-2
-penguins |>
-  filter(body_mass_g > 6000)
-```
+Think of any dataset with groups: customers, sales points, time periods. You often want to filter by more than one thing at once — for example, orders from one region AND above a certain amount. The logic in R is the same.
 
 **Question:** How many female Gentoo penguins weigh more than 5,000 g?
 
 ```{r}
-#| label: filter-3
-# Three conditions, separated by commas
+# Three conditions separated by commas: all three must be TRUE
 penguins |>
   filter(species == "Gentoo", sex == "female", body_mass_g > 5000) |>
   count()
 ```
 
-**Question:** How many penguins have a known sex?
+**Question:** How many penguins on Biscoe weigh more than 4,500 g?
 
 ```{r}
-#| label: filter-4
-# !is.na() keeps rows with a value
 penguins |>
-  filter(!is.na(sex)) |>
+  filter(island == "Biscoe", body_mass_g > 4500) |>
   count()
 ```
 
-**Your turn 1:** How many penguins live on Dream island?
+**Your turn 1:** How many Adelie penguins have a bill longer than 40 mm?
 
 ```{r}
-#| label: turn-filter-1
+#| eval: false
+penguins |>
+  ___
+```
+
+**Your turn 2:** How many penguins on Dream island have a known sex?
+
+```{r}
+#| eval: false
+# Hint: use !is.na() from the table above
+penguins |>
+  ___
+```
+
+Answer: [YOUR ANSWER HERE]
+
+---
+
+# 6. Chaining verbs
+
+Each verb does one job. The pipe `|>` connects them in order. The result of one verb becomes the input of the next.
+
+**Question:** What are the species, sex and body mass of the three heaviest Gentoo penguins?
+
+```{r}
+penguins |>
+  filter(species == "Gentoo") |>       # keep only Gentoo
+  select(species, sex, body_mass_g) |> # keep three columns
+  arrange(desc(body_mass_g)) |>        # sort heaviest first
+  head(3)                              # show only the top 3
+```
+
+**Question:** Show bill length and body mass for Adelie penguins on Torgersen, sorted lightest first.
+
+```{r}
+penguins |>
+  filter(species == "Adelie") |>
+  filter(island == "Torgersen") |>
+  select(species, island, bill_length_mm, body_mass_g) |>
+  arrange(body_mass_g)
+```
+
+**Your turn:** Show the species, island and flipper length of the five penguins with the longest flippers on Biscoe island, sorted from longest to shortest.
+
+```{r}
 #| eval: false
 penguins |>
   ___
@@ -191,84 +316,15 @@ penguins |>
 
 Answer: [YOUR ANSWER HERE]
 
-**Your turn 2:** How many Adelie penguins have a bill longer than 45 mm?
-
-```{r}
-#| label: turn-filter-2
-#| eval: false
-penguins |>
-  ___
-```
-
-Answer: [YOUR ANSWER HERE]
-
-**Your turn 3:** Make a table of body mass and flipper length per species, only for penguins on Biscoe island.
-
-```{r}
-#| label: turn-filter-3
-#| eval: false
-penguins |>
-  ___
-```
-
-Answer: [YOUR ANSWER HERE]
-
-# 5. arrange(): sort rows
-
-`arrange()` sorts the rows from the smallest to the largest value. `desc()` reverses the order. Missing values go last.
-
-**Question:** Which penguin weighs the least?
-
-```{r}
-#| label: arrange
-penguins |>
-  arrange(body_mass_g) |>
-  head(3)
-```
-
-**Your turn:** Which penguin weighs the most? Which species and sex is it?
-
-```{r}
-#| label: turn-arrange
-#| eval: false
-penguins |>
-  ___
-```
-
-Answer: [YOUR ANSWER HERE]
-
-# 6. select() again
-
-We used `select()` in section 2 and in class. It also helps you look at a few columns of a large table.
-
-**Question:** Which columns tell where and when each penguin was measured?
-
-```{r}
-#| label: select-again
-penguins |>
-  select(island, year) |>
-  head()
-```
-
-**Your turn:** Show the first 5 rows of `species`, `sex` and `body_mass_g`.
-
-```{r}
-#| label: turn-select-again
-#| eval: false
-penguins |>
-  ___
-```
-
-Answer: [YOUR ANSWER HERE]
+---
 
 # 7. mutate(): make a new column
 
-`mutate()` adds a column calculated from other columns. The name goes on the left of `=`.
+`mutate()` adds a column calculated from existing columns. Use it to convert units or create a derived variable. The new column name goes on the left of `=`.
 
 **Question:** What is the body mass in kilograms?
 
 ```{r}
-#| label: mutate
 penguins |>
   mutate(body_mass_kg = body_mass_g / 1000) |>
   select(species, body_mass_g, body_mass_kg) |>
@@ -278,7 +334,6 @@ penguins |>
 **Your turn:** Make a column with the bill length in centimeters (1 cm = 10 mm). Show `species`, `bill_length_mm` and your new column.
 
 ```{r}
-#| label: turn-mutate
 #| eval: false
 penguins |>
   ___
@@ -286,34 +341,33 @@ penguins |>
 
 Answer: [YOUR ANSWER HERE]
 
+---
+
 # 8. group_by() and summarize(): groups
 
-`group_by()` splits the rows into groups. `summarize()` turns each group into one row with a summary number. `mean()` gives the mean. `n()` counts rows. `na.rm = TRUE` ignores missing values.
+`group_by()` splits the table into groups. `summarize()` reduces each group to one summary row. Use them together to compare means, totals or counts across groups.
+
+`mean()` gives the mean. `n()` counts rows. `na.rm = TRUE` ignores missing values.
 
 **Question:** What is the mean body mass of each species?
 
 ```{r}
-#| label: group-summarize
 penguins |>
   group_by(species) |>
   summarize(mean_mass = mean(body_mass_g, na.rm = TRUE))
 ```
 
-**Question:** How many penguins are in each species?
+**Question:** How many penguins are on each island?
 
 ```{r}
-#| label: group-count
 penguins |>
-  group_by(species) |>
+  group_by(island) |>
   summarize(n = n())
 ```
-
-`tbl_summary(by = species)` gives the same kind of answer for many columns in one table, as in section 2.
 
 **Your turn:** What is the mean flipper length on each island?
 
 ```{r}
-#| label: turn-group
 #| eval: false
 penguins |>
   ___
@@ -321,14 +375,40 @@ penguins |>
 
 Answer: [YOUR ANSWER HERE]
 
-# 9. Final question
+---
 
-**What is the mean body mass of female Gentoo penguins?** Use `filter()` and `summarize()`.
+# 9. Summary table
+
+`tbl_summary()` makes a publication-ready summary table in one step. Combine it with `filter()` and `select()` to focus on the rows and columns you need.
+
+**Question:** How do bill length and body mass differ between species?
 
 ```{r}
-#| label: turn-final
+penguins |>
+  select(species, bill_length_mm, body_mass_g) |>
+  tbl_summary(
+    by = species,
+    missing = "no",
+    digits = all_continuous() ~ 1
+  )
+```
+
+**Your turn 1:** Make the same table with `flipper_length_mm` and `bill_depth_mm`.
+
+```{r}
+#| label: turn-tbl-1
 #| eval: false
 penguins |>
+  ___
+```
+
+**Your turn 2:** Make the same table but only for penguins on Biscoe island. Does the pattern change?
+
+```{r}
+#| label: turn-tbl-2
+#| eval: false
+penguins |>
+  filter(___) |>
   ___
 ```
 
