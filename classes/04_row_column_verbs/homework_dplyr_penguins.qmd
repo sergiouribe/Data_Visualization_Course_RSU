@@ -3,6 +3,14 @@ title: "Homework. Explore data with dplyr verbs (penguins)"
 format: html
 ---
 
+## Before we start
+
+The `tidyverse` is a collection of R packages for data science. Each package does one job. You already know `ggplot2`, the package for graphics.
+
+For data wrangling, the tidyverse has a package called `dplyr`. Wrangling means preparing a table for analysis: choosing columns, choosing rows, sorting, making new columns and summarizing groups.
+
+In this homework you explore the main `dplyr` verbs. Each verb is a function that does one usual data task.
+
 Each section has four parts: a short explanation of one verb, a question, the question solved with the verb, and **your turn**.
 
 Replace each `___` with code, remove the line `#| eval: false`, and run the chunk. Write the answer under the chunk.
