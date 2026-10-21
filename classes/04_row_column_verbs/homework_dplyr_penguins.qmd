@@ -1,5 +1,7 @@
 ---
 title: "Homework. Explore data with dplyr verbs (penguins)"
+author: Add your name here
+date: 10/26/2026
 format: html
 ---
 
@@ -25,13 +27,13 @@ pacman::p_load(
 )
 ```
 
-## Shortcuts
+## RECAP Shortcuts
 
-| Action | Mac | Windows |
-|---|---|---|
-| Insert chunk | `Cmd` + `Option` + `I` | `Ctrl` + `Alt` + `I` |
-| Insert pipe `\|>` | `Cmd` + `Shift` + `M` | `Ctrl` + `Shift` + `M` |
-| Run chunk | `Cmd` + `Shift` + `Enter` | `Ctrl` + `Shift` + `Enter` |
+| Action            | Mac                       | Windows                    |
+|-------------------|---------------------------|----------------------------|
+| Insert chunk      | `Cmd` + `Option` + `I`    | `Ctrl` + `Alt` + `I`       |
+| Insert pipe `\|>` | `Cmd` + `Shift` + `M`     | `Ctrl` + `Shift` + `M`     |
+| Run chunk         | `Cmd` + `Shift` + `Enter` | `Ctrl` + `Shift` + `Enter` |
 
 > **Pipe shortcut note:** RStudio inserts `%>%` by default. To get `|>`, go to Tools → Global Options → Code → tick **Use native pipe operator**.
 
@@ -52,21 +54,18 @@ This tells R: **do not run this chunk yet**. You will see it in every "Your turn
 
 **Your job:**
 
-1. Replace every `___` with your code.
-2. Delete the line `#| eval: false`.
-3. Run the chunk with `Cmd/Ctrl` + `Shift` + `Enter`.
-4. Write your answer below the chunk.
+1.  Replace every `___` with your code.
+2.  Delete the line `#| eval: false`.
+3.  Run the chunk with `Cmd/Ctrl` + `Shift` + `Enter`.
+4.  Write your answer below the chunk.
 
 ## How to submit
 
-1. Fill in every `___`, remove `#| eval: false` from each chunk and run it.
-2. Write your answer under each chunk.
-3. Click **Render** to make the HTML file.
-4. Upload the HTML file to Moodle before **Fri 23 Oct 2026, 18:00** (start of class 7).
+1.  Fill in every `___`, remove `#| eval: false` from each chunk and run it.
+2.  Write your answer under each chunk.
+3.  Click **Render** to make the HTML file.
 
-The homework takes about 45 to 60 minutes.
-
----
+------------------------------------------------------------------------
 
 # 1. Look at the first and last rows
 
@@ -108,7 +107,7 @@ penguins |>
 
 Answer: [YOUR ANSWER HERE]
 
----
+------------------------------------------------------------------------
 
 # 2. select(): choose columns
 
@@ -146,7 +145,7 @@ penguins |>
 
 Answer: [YOUR ANSWER HERE]
 
----
+------------------------------------------------------------------------
 
 # 3. filter(): choose rows
 
@@ -185,22 +184,22 @@ penguins |>
 
 Answer: [YOUR ANSWER HERE]
 
----
+------------------------------------------------------------------------
 
 # 4. Comparison symbols
 
 To filter, you need a condition. A condition compares values and returns `TRUE` or `FALSE`.
 
-| Symbol | Meaning | Example |
-|---|---|---|
-| `==` | equal to | `species == "Gentoo"` |
-| `!=` | not equal to | `island != "Dream"` |
-| `>` | greater than | `body_mass_g > 4000` |
-| `>=` | greater than or equal to | `body_mass_g >= 4000` |
-| `<` | less than | `body_mass_g < 3500` |
-| `<=` | less than or equal to | `flipper_length_mm <= 190` |
-| `%in%` | is one of a set | `island %in% c("Dream", "Biscoe")` |
-| `!is.na()` | has a value (not missing) | `!is.na(sex)` |
+| Symbol     | Meaning                   | Example                            |
+|------------|---------------------------|------------------------------------|
+| `==`       | equal to                  | `species == "Gentoo"`              |
+| `!=`       | not equal to              | `island != "Dream"`                |
+| `>`        | greater than              | `body_mass_g > 4000`               |
+| `>=`       | greater than or equal to  | `body_mass_g >= 4000`              |
+| `<`        | less than                 | `body_mass_g < 3500`               |
+| `<=`       | less than or equal to     | `flipper_length_mm <= 190`         |
+| `%in%`     | is one of a set           | `island %in% c("Dream", "Biscoe")` |
+| `!is.na()` | has a value (not missing) | `!is.na(sex)`                      |
 
 Use `==` to compare text or numbers. A single `=` gives an error inside `filter()`. Text goes inside quotes. Numbers do not.
 
@@ -236,7 +235,7 @@ penguins |>
 
 Answer: [YOUR ANSWER HERE]
 
----
+------------------------------------------------------------------------
 
 # 5. Combining conditions
 
@@ -280,7 +279,7 @@ penguins |>
 
 Answer: [YOUR ANSWER HERE]
 
----
+------------------------------------------------------------------------
 
 # 6. Chaining verbs
 
@@ -316,7 +315,7 @@ penguins |>
 
 Answer: [YOUR ANSWER HERE]
 
----
+------------------------------------------------------------------------
 
 # 7. mutate(): make a new column
 
@@ -341,7 +340,7 @@ penguins |>
 
 Answer: [YOUR ANSWER HERE]
 
----
+------------------------------------------------------------------------
 
 # 8. group_by() and summarize(): groups
 
@@ -362,7 +361,7 @@ penguins |>
 ```{r}
 penguins |>
   group_by(island) |>
-  summarize(n = n())
+  count()
 ```
 
 **Your turn:** What is the mean flipper length on each island?
@@ -375,11 +374,59 @@ penguins |>
 
 Answer: [YOUR ANSWER HERE]
 
----
+------------------------------------------------------------------------
 
-# 9. Summary table
+# 9. Putting it together
 
-`tbl_summary()` makes a publication-ready summary table in one step. Combine it with `filter()` and `select()` to focus on the rows and columns you need.
+Each verb does one job. The pipe `|>` connects them. You can chain as many as you need.
+
+**Question:** Which species has the highest mean body mass? Sort from heaviest to lightest.
+
+```{r}
+# group_by species gives 3 rows — arrange is meaningful here
+penguins |>
+  group_by(species) |>
+  summarize(mean_mass = mean(body_mass_g, na.rm = TRUE)) |>
+  arrange(desc(mean_mass))
+```
+
+**Question:** Among female penguins, what is the mean flipper length per species? Sort from longest to shortest.
+
+```{r}
+# filter reduces to females, group_by gives 3 rows, arrange sorts them
+penguins |>
+  filter(sex == "female") |>
+  group_by(species) |>
+  summarize(
+    n = n(),
+    mean_flipper = mean(flipper_length_mm, na.rm = TRUE)
+  ) |>
+  arrange(desc(mean_flipper))
+```
+
+**Your turn 1:** What is the mean bill length per species, only for penguins with a known sex, sorted from longest to shortest?
+
+```{r}
+#| eval: false
+penguins |>
+  ___
+```
+
+**Your turn 2:** How many penguins are on each island? Sort from largest to smallest.
+
+```{r}
+#| eval: false
+penguins |>
+  ___
+```
+
+Answer: [YOUR ANSWER HERE]
+
+------------------------------------------------------------------------
+
+# 10. Summary table
+
+`tbl_summary()` makes a publication-ready summary table in one step. Add `filter()` and `select()` before it to focus on the rows and columns you need.
 
 **Question:** How do bill length and body mass differ between species?
 
@@ -393,23 +440,31 @@ penguins |>
   )
 ```
 
-**Your turn 1:** Make the same table with `flipper_length_mm` and `bill_depth_mm`.
+**Question:** Same table, but only for Biscoe island. Does the pattern change?
 
 ```{r}
-#| label: turn-tbl-1
-#| eval: false
 penguins |>
-  ___
+  filter(island == "Biscoe") |>
+  select(species, bill_length_mm, body_mass_g) |>
+  tbl_summary(
+    by = species,
+    missing = "no",
+    digits = all_continuous() ~ 1
+  )
 ```
 
-**Your turn 2:** Make the same table but only for penguins on Biscoe island. Does the pattern change?
+**Your turn:** Make a table of `flipper_length_mm` and `bill_depth_mm` by species, only for female penguins.
 
 ```{r}
-#| label: turn-tbl-2
 #| eval: false
 penguins |>
-  filter(___) |>
   ___
 ```
 
 Answer: [YOUR ANSWER HERE]
+
+------------------------------------------------------------------------
+
+You are done. Click **Render** to turn this file into a webpage!\
+\
+See you in class!
