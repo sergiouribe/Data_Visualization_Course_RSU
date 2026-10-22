@@ -8,7 +8,6 @@ format:
     slide-number: true
     code-block-bg: true
     highlight-style: github
-    smaller: false
     footer: "dplyr · row and column verbs"
     transition: fade
 execute:
@@ -21,17 +20,12 @@ execute:
 #| label: setup
 #| include: false
 if (!require("pacman", quietly = TRUE)) install.packages("pacman")
-pacman::p_load(
-  here,
-  tidyverse,
-  gtsummary,
-  nycflights13
-)
+pacman::p_load(here, tidyverse, gtsummary, nycflights13)
 ```
 
 ## Today's dataset {.smaller}
 
-336,776 flights that departed New York City airports in 2013.
+336,776 flights from New York City airports in 2013.
 
 | Column | What it contains |
 |--------|-----------------|
@@ -41,13 +35,8 @@ pacman::p_load(
 | `dep_delay` | Departure delay in minutes (negative = left early) |
 | `arr_delay` | Arrival delay in minutes |
 | `air_time` | Time in the air, in minutes |
-| `distance` | Distance between airports, in miles |
-| `month` | Month number (1 = January … 12 = December) |
-
-```{r}
-#| echo: true
-flights |> head(3)
-```
+| `distance` | Distance in miles |
+| `month` | 1 = January … 12 = December |
 
 ---
 
@@ -55,45 +44,38 @@ flights |> head(3)
 
 | Verb | Job |
 |------|-----|
-| `head()` / `tail()` | Preview first or last rows |
-| `select()` | Keep only the columns you name |
-| `filter()` | Keep only the rows that match a condition |
-| `arrange()` | Sort rows by a column |
-| `mutate()` | Add a new calculated column |
-| `group_by()` + `summarize()` | Collapse groups to one summary row |
-
-The **pipe** `|>` connects them:
+| `head()` / `tail()` | Preview rows |
+| `select()` | Keep columns |
+| `filter()` | Keep rows |
+| `arrange()` | Sort rows |
+| `mutate()` | Add a calculated column |
+| `group_by()` + `summarize()` | Summarize groups |
 
 ```r
 data |>
   verb_1(...) |>
-  verb_2(...) |>
-  verb_3(...)
+  verb_2(...)
 ```
 
 ---
 
 # 1. head() and tail() {background-color="#1a5276" style="color: white;"}
 
-**Look at your data before anything else**
+**Look at the data before anything else**
 
 ---
 
-## head() and tail()
-
-`head()` shows the first rows. `tail()` shows the last rows.
+## head() shows the first rows
 
 ```{r}
-# First 6 rows (default)
 flights |> head()
 ```
 
 ---
 
-## head() and tail()
+## tail() shows the last rows
 
 ```{r}
-# Last 3 rows
 flights |> tail(3)
 ```
 
@@ -109,7 +91,7 @@ flights |>
   ___
 ```
 
-**Now show only the last row.**
+**Show only the last row.**
 
 ```{r}
 #| eval: false
@@ -125,12 +107,19 @@ flights |>
 
 ---
 
-## select()
-
-The `flights` table has **19 columns**. You rarely need all of them.
+## The problem: 19 columns
 
 ```{r}
-# Keep only four columns
+# Hard to read — 19 columns scroll off the screen
+flights |> head(3)
+```
+
+---
+
+## select() keeps only what you name
+
+```{r}
+# Four columns only
 flights |>
   select(carrier, origin, dest, dep_delay) |>
   head(4)
@@ -140,18 +129,14 @@ flights |>
 
 ## Your turn 2 {background-color="#d5e8d4"}
 
-**Make a table comparing `air_time` and `distance` for AA, UA and DL.**
+**Make a summary table comparing `air_time` and `distance` for AA, UA and DL.**
 
 ```{r}
 #| eval: false
 flights |>
   filter(carrier %in% c("AA", "UA", "DL")) |>
-  ___ |>   # select the right columns
-  tbl_summary(
-    by = carrier,
-    missing = "no",
-    digits = all_continuous() ~ 1
-  )
+  ___ |>          # select the right columns
+  tbl_summary(by = carrier)
 ```
 
 ---
@@ -162,9 +147,7 @@ flights |>
 
 ---
 
-## filter()
-
-`filter()` keeps rows where the condition is `TRUE`.
+## filter() keeps rows where the condition is TRUE
 
 ```{r}
 # Only flights from JFK
@@ -175,12 +158,12 @@ flights |>
 
 ---
 
-## filter()
+## But how many rows is that?
 
 ```{r}
-# Count American Airlines flights
+# Add count() to count matching rows
 flights |>
-  filter(carrier == "AA") |>
+  filter(origin == "JFK") |>
   count()
 ```
 
@@ -200,35 +183,36 @@ flights |>
 | `!is.na()` | has a value | `!is.na(dep_delay)` |
 
 ::: {.callout-tip}
-Use `==` for text or numbers. A single `=` gives an error inside `filter()`. Text goes inside **quotes**. Numbers do not.
+Text goes inside **quotes**. Numbers do not. Use `==` not `=`.
 :::
 
 ---
 
 ## Your turn 3 {background-color="#d5e8d4"}
 
-**Filter flights from LaGuardia (`LGA`).**
+**Filter for LaGuardia (`LGA`) flights. How many are there?**
 
 ```{r}
 #| eval: false
 flights |>
-  ___
+  filter(___) |>
+  count()
 ```
 
-**How many United Airlines (`UA`) flights are there?**
+**Filter flights with a departure delay of 60 minutes or more.**
 
 ```{r}
 #| eval: false
 flights |>
-  ___
+  filter(___)
 ```
 
-**Filter flights with `dep_delay` of 60 minutes or more.**
+**Filter flights that arrived more than 30 minutes early.**
 
 ```{r}
 #| eval: false
 flights |>
-  ___
+  filter(___)
 ```
 
 ---
@@ -239,27 +223,38 @@ flights |>
 
 ---
 
-## Combining conditions
-
-A **comma** between conditions means "and" — both must be `TRUE`.
+## One condition
 
 ```{r}
-# United Airlines, from Newark, delayed more than 1 hour
+# Only United Airlines
 flights |>
-  filter(carrier == "UA", origin == "EWR", dep_delay > 60) |>
+  filter(carrier == "UA") |>
   count()
 ```
 
 ---
 
-## Combining conditions
+## Add a second condition
 
 ```{r}
-# JFK flights in December that had a departure delay
+# United Airlines AND from Newark
 flights |>
-  filter(origin == "JFK", month == 12, dep_delay > 0) |>
+  filter(carrier == "UA", origin == "EWR") |>
   count()
 ```
+
+---
+
+## Add a third condition
+
+```{r}
+# United, Newark, AND delayed more than 1 hour
+flights |>
+  filter(carrier == "UA", origin == "EWR", dep_delay > 60) |>
+  count()
+```
+
+A comma means **and** — all conditions must be `TRUE`.
 
 ---
 
@@ -270,30 +265,53 @@ flights |>
 ```{r}
 #| eval: false
 flights |>
-  ___
+  filter(___) |>
+  count()
 ```
 
 **How many summer flights (June, July, August) had no departure delay?**
 
 ```{r}
 #| eval: false
-# Hint: month %in% c(6, 7, 8) and dep_delay == 0
+# Hint: month %in% c(6, 7, 8)
 flights |>
-  ___
+  filter(___) |>
+  count()
 ```
 
 ---
 
 # 5. arrange() {background-color="#1a5276" style="color: white;"}
 
-**Sort rows by a column**
+**Sort rows**
 
 ---
 
-## arrange()
+## arrange() sorts ascending by default
 
-`arrange()` sorts rows in **ascending** order by default.
-Wrap the column in `desc()` to sort descending.
+```{r}
+# Smallest dep_delay first — left earliest
+flights |>
+  select(carrier, origin, dest, dep_delay) |>
+  arrange(dep_delay) |>
+  head(4)
+```
+
+---
+
+## What if we want most delayed first?
+
+```{r}
+# desc() reverses the order
+flights |>
+  select(carrier, origin, dest, dep_delay) |>
+  arrange(desc(dep_delay)) |>
+  head(4)
+```
+
+---
+
+## Chain verbs: filter → select → arrange → head
 
 ```{r}
 # Five most-delayed Delta flights from JFK
@@ -306,19 +324,6 @@ flights |>
 
 ---
 
-## arrange()
-
-```{r}
-# AA flights to LAX — shortest air time first
-flights |>
-  filter(carrier == "AA", dest == "LAX") |>
-  select(carrier, origin, air_time) |>
-  arrange(air_time) |>
-  head(5)
-```
-
----
-
 ## Your turn 5 {background-color="#d5e8d4"}
 
 **Carrier, destination and arrival delay of the five flights with the worst arrival delays from Newark (EWR), sorted worst to best.**
@@ -326,7 +331,10 @@ flights |>
 ```{r}
 #| eval: false
 flights |>
-  ___
+  filter(___) |>
+  select(___) |>
+  arrange(___) |>
+  head(5)
 ```
 
 ---
@@ -337,13 +345,21 @@ flights |>
 
 ---
 
-## mutate()
-
-`mutate()` adds a column derived from existing columns.
-The new name goes on the **left** of `=`.
+## mutate() adds the new column at the far right
 
 ```{r}
-# Departure delay in hours
+# dep_delay_hours appears at column 20 — hard to see
+flights |>
+  mutate(dep_delay_hours = dep_delay / 60) |>
+  head(3)
+```
+
+---
+
+## Use select() to bring it into focus
+
+```{r}
+# Show only the columns that matter
 flights |>
   mutate(dep_delay_hours = dep_delay / 60) |>
   select(carrier, dep_delay, dep_delay_hours) |>
@@ -354,16 +370,15 @@ flights |>
 
 ## Your turn 6 {background-color="#d5e8d4"}
 
-**Make a column with flight speed in miles per hour.**
-
-Speed = `distance / (air_time / 60)`
+**Make a column with flight speed in miles per hour: `distance / (air_time / 60)`.**
 
 Show `carrier`, `dest`, `distance`, `air_time` and your new speed column.
 
 ```{r}
 #| eval: false
 flights |>
-  ___
+  mutate(___) |>
+  select(___)
 ```
 
 ---
@@ -374,57 +389,40 @@ flights |>
 
 ---
 
-## group_by() + summarize()
-
-`group_by()` splits the table into groups.
-`summarize()` reduces each group to **one summary row**.
+## summarize() alone: one result for the whole table
 
 ```{r}
-# Mean departure delay per carrier
+# Mean departure delay for all flights
+flights |>
+  summarize(mean_dep_delay = mean(dep_delay))
+```
+
+---
+
+## Why NA? Cancelled flights have no delay recorded
+
+```{r}
+# na.rm = TRUE ignores missing values
+flights |>
+  summarize(mean_dep_delay = mean(dep_delay, na.rm = TRUE))
+```
+
+---
+
+## group_by() splits into groups first
+
+```{r}
+# One row per carrier
 flights |>
   group_by(carrier) |>
   summarize(mean_dep_delay = mean(dep_delay, na.rm = TRUE))
 ```
 
-::: {.callout-note}
-`na.rm = TRUE` ignores missing values — cancelled flights have no delay recorded.
-:::
-
 ---
 
-## group_by() + summarize()
+## Which carrier is worst? Add arrange()
 
 ```{r}
-# Number of flights per airport
-flights |>
-  group_by(origin) |>
-  count()
-```
-
----
-
-## Your turn 7 {background-color="#d5e8d4"}
-
-**What is the mean arrival delay for each month?**
-
-```{r}
-#| eval: false
-flights |>
-  ___
-```
-
----
-
-# 8. Putting it together {background-color="#1a5276" style="color: white;"}
-
-**Chain as many verbs as you need**
-
----
-
-## Chain everything
-
-```{r}
-# Which carrier has the highest mean departure delay?
 flights |>
   group_by(carrier) |>
   summarize(
@@ -436,7 +434,26 @@ flights |>
 
 ---
 
-## Chain everything
+## Your turn 7 {background-color="#d5e8d4"}
+
+**What is the mean arrival delay for each month?**
+
+```{r}
+#| eval: false
+flights |>
+  group_by(___) |>
+  summarize(mean_arr_delay = ___)
+```
+
+---
+
+# 8. Putting it together {background-color="#1a5276" style="color: white;"}
+
+**Chain as many verbs as you need**
+
+---
+
+## Filter → group → summarize → arrange
 
 ```{r}
 # Among JFK flights, which carrier is worst?
@@ -454,20 +471,25 @@ flights |>
 
 ## Your turn 8 {background-color="#d5e8d4"}
 
-**Among flights to Miami (MIA), which carrier has the worst mean arrival delay? Sort from worst to best.**
+**Among flights to Miami (MIA), which carrier has the worst mean arrival delay? Sort worst to best.**
 
 ```{r}
 #| eval: false
 flights |>
-  ___
+  filter(___) |>
+  group_by(___) |>
+  summarize(___) |>
+  arrange(___)
 ```
 
-**How many flights went to each destination? Sort from most to least.**
+**How many flights went to each destination? Sort most to least.**
 
 ```{r}
 #| eval: false
 flights |>
-  ___
+  group_by(___) |>
+  count() |>
+  arrange(___)
 ```
 
 ---
@@ -478,12 +500,36 @@ flights |>
 
 ---
 
-## tbl_summary()
-
-`tbl_summary()` makes a summary table in one step.
-`by =` gives one column per group.
+## tbl_summary() — first attempt
 
 ```{r}
+flights |>
+  filter(carrier %in% c("AA", "UA", "DL")) |>
+  select(carrier, dep_delay, arr_delay) |>
+  tbl_summary(by = carrier)
+```
+
+---
+
+## How to get rid of Unknown?
+
+```{r}
+# missing = "no" removes the Unknown rows
+flights |>
+  filter(carrier %in% c("AA", "UA", "DL")) |>
+  select(carrier, dep_delay, arr_delay) |>
+  tbl_summary(
+    by = carrier,
+    missing = "no"
+  )
+```
+
+---
+
+## And how to reduce the digits?
+
+```{r}
+# digits = all_continuous() ~ 1 rounds to 1 decimal
 flights |>
   filter(carrier %in% c("AA", "UA", "DL")) |>
   select(carrier, dep_delay, arr_delay) |>
@@ -498,35 +544,33 @@ flights |>
 
 ## Your turn 9 {background-color="#d5e8d4"}
 
-**Make a table of `air_time` and `distance` by carrier, for the same three carriers (AA, UA, DL), only for January flights (`month == 1`).**
+**Make a table of `air_time` and `distance` by carrier, for the same three carriers, only for January flights (`month == 1`).**
 
 ```{r}
 #| eval: false
 flights |>
-  ___
+  filter(___) |>
+  select(___) |>
+  tbl_summary(
+    by = carrier,
+    missing = "no",
+    digits = all_continuous() ~ 1
+  )
 ```
 
 ---
 
-## Recap
+## Recap {.smaller}
 
-| Verb | Job |
-|------|-----|
-| `head()` / `tail()` | Preview rows |
-| `select()` | Keep columns |
-| `filter()` | Keep rows |
-| `arrange()` | Sort rows |
-| `mutate()` | Add columns |
-| `group_by()` + `summarize()` | Summarize groups |
-
-```r
-data |>
-  filter(...) |>
-  select(...) |>
-  mutate(...) |>
-  group_by(...) |>
-  summarize(...)
-```
+| Verb | Job | Key detail |
+|------|-----|------------|
+| `head()` / `tail()` | Preview rows | add a number |
+| `select()` | Keep columns | name them |
+| `filter()` | Keep rows | condition is `TRUE` |
+| `arrange()` | Sort rows | `desc()` to reverse |
+| `mutate()` | Add a column | then `select()` to focus |
+| `group_by()` + `summarize()` | Summarize groups | `na.rm = TRUE` always |
+| `tbl_summary()` | Summary table | `missing = "no"`, `digits` |
 
 ---
 
