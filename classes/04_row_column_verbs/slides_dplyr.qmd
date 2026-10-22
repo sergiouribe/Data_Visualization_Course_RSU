@@ -1,7 +1,7 @@
 ---
-title: "Row and Column Verbs"
-subtitle: "Exploring data with dplyr"
-author: "Data Visualisation Course"
+title: "Data Manipulation with dplyr"
+subtitle: "SZF_184 Data Visualisation and Storytelling "
+author: "Sergio.Uribe@rsu.lv"
 format:
   revealjs:
     theme: simple
@@ -33,51 +33,51 @@ pacman::p_load(
 
 336,776 flights that departed New York City airports in 2013.
 
-| Column | What it contains |
-|--------|-----------------|
-| `carrier` | Airline code — AA = American, UA = United, DL = Delta |
-| `origin` | Departure airport: `JFK`, `LGA` or `EWR` |
-| `dest` | Destination airport code |
-| `dep_delay` | Departure delay in minutes (negative = left early) |
-| `arr_delay` | Arrival delay in minutes |
-| `air_time` | Time in the air, in minutes |
-| `distance` | Distance between airports, in miles |
-| `month` | Month number (1 = January … 12 = December) |
+| Column      | What it contains                                      |
+|-------------|-------------------------------------------------------|
+| `carrier`   | Airline code — AA = American, UA = United, DL = Delta |
+| `origin`    | Departure airport: `JFK`, `LGA` or `EWR`              |
+| `dest`      | Destination airport code                              |
+| `dep_delay` | Departure delay in minutes (negative = left early)    |
+| `arr_delay` | Arrival delay in minutes                              |
+| `air_time`  | Time in the air, in minutes                           |
+| `distance`  | Distance between airports, in miles                   |
+| `month`     | Month number (1 = January … 12 = December)            |
 
 ```{r}
 #| echo: true
 flights |> head(3)
 ```
 
----
+------------------------------------------------------------------------
 
 ## The dplyr toolkit
 
-| Verb | Job |
-|------|-----|
-| `head()` / `tail()` | Preview first or last rows |
-| `select()` | Keep only the columns you name |
-| `filter()` | Keep only the rows that match a condition |
-| `arrange()` | Sort rows by a column |
-| `mutate()` | Add a new calculated column |
-| `group_by()` + `summarize()` | Collapse groups to one summary row |
+| Verb                         | Job                                       |
+|------------------------------|-------------------------------------------|
+| `head()` / `tail()`          | Preview first or last rows                |
+| `select()`                   | Keep only the columns you name            |
+| `filter()`                   | Keep only the rows that match a condition |
+| `arrange()`                  | Sort rows by a column                     |
+| `mutate()`                   | Add a new calculated column               |
+| `group_by()` + `summarize()` | Collapse groups to one summary row        |
 
 The **pipe** `|>` connects them:
 
-```r
+``` r
 data |>
   verb_1(...) |>
   verb_2(...) |>
   verb_3(...)
 ```
 
----
+------------------------------------------------------------------------
 
 # 1. head() and tail() {background-color="#1a5276" style="color: white;"}
 
 **Look at your data before anything else**
 
----
+------------------------------------------------------------------------
 
 ## head() and tail()
 
@@ -88,7 +88,7 @@ data |>
 flights |> head()
 ```
 
----
+------------------------------------------------------------------------
 
 ## head() and tail()
 
@@ -97,7 +97,7 @@ flights |> head()
 flights |> tail(3)
 ```
 
----
+------------------------------------------------------------------------
 
 ## Your turn 1 {background-color="#d5e8d4"}
 
@@ -117,13 +117,13 @@ flights |>
   ___
 ```
 
----
+------------------------------------------------------------------------
 
 # 2. select() {background-color="#1a5276" style="color: white;"}
 
 **Choose the columns you need**
 
----
+------------------------------------------------------------------------
 
 ## select()
 
@@ -136,7 +136,7 @@ flights |>
   head(4)
 ```
 
----
+------------------------------------------------------------------------
 
 ## Your turn 2 {background-color="#d5e8d4"}
 
@@ -154,13 +154,13 @@ flights |>
   )
 ```
 
----
+------------------------------------------------------------------------
 
 # 3. filter() {background-color="#1a5276" style="color: white;"}
 
 **Keep only the rows you want**
 
----
+------------------------------------------------------------------------
 
 ## filter()
 
@@ -173,7 +173,7 @@ flights |>
   head(4)
 ```
 
----
+------------------------------------------------------------------------
 
 ## filter()
 
@@ -184,26 +184,26 @@ flights |>
   count()
 ```
 
----
+------------------------------------------------------------------------
 
 ## Comparison symbols {.smaller}
 
-| Symbol | Meaning | Example |
-|--------|---------|---------|
-| `==` | equal to | `carrier == "AA"` |
-| `!=` | not equal to | `origin != "JFK"` |
-| `>` | greater than | `dep_delay > 60` |
-| `>=` | greater than or equal | `dep_delay >= 60` |
-| `<` | less than | `dep_delay < 0` |
-| `<=` | less than or equal | `arr_delay <= 0` |
-| `%in%` | is one of a set | `origin %in% c("JFK", "LGA")` |
-| `!is.na()` | has a value | `!is.na(dep_delay)` |
+| Symbol     | Meaning               | Example                       |
+|------------|-----------------------|-------------------------------|
+| `==`       | equal to              | `carrier == "AA"`             |
+| `!=`       | not equal to          | `origin != "JFK"`             |
+| `>`        | greater than          | `dep_delay > 60`              |
+| `>=`       | greater than or equal | `dep_delay >= 60`             |
+| `<`        | less than             | `dep_delay < 0`               |
+| `<=`       | less than or equal    | `arr_delay <= 0`              |
+| `%in%`     | is one of a set       | `origin %in% c("JFK", "LGA")` |
+| `!is.na()` | has a value           | `!is.na(dep_delay)`           |
 
-::: {.callout-tip}
+::: callout-tip
 Use `==` for text or numbers. A single `=` gives an error inside `filter()`. Text goes inside **quotes**. Numbers do not.
 :::
 
----
+------------------------------------------------------------------------
 
 ## Your turn 3 {background-color="#d5e8d4"}
 
@@ -231,13 +231,13 @@ flights |>
   ___
 ```
 
----
+------------------------------------------------------------------------
 
 # 4. Combining conditions {background-color="#1a5276" style="color: white;"}
 
 **Filter by more than one thing at once**
 
----
+------------------------------------------------------------------------
 
 ## Combining conditions
 
@@ -250,7 +250,7 @@ flights |>
   count()
 ```
 
----
+------------------------------------------------------------------------
 
 ## Combining conditions
 
@@ -261,7 +261,7 @@ flights |>
   count()
 ```
 
----
+------------------------------------------------------------------------
 
 ## Your turn 4 {background-color="#d5e8d4"}
 
@@ -282,18 +282,17 @@ flights |>
   ___
 ```
 
----
+------------------------------------------------------------------------
 
 # 5. arrange() {background-color="#1a5276" style="color: white;"}
 
 **Sort rows by a column**
 
----
+------------------------------------------------------------------------
 
 ## arrange()
 
-`arrange()` sorts rows in **ascending** order by default.
-Wrap the column in `desc()` to sort descending.
+`arrange()` sorts rows in **ascending** order by default. Wrap the column in `desc()` to sort descending.
 
 ```{r}
 # Five most-delayed Delta flights from JFK
@@ -304,7 +303,7 @@ flights |>
   head(5)
 ```
 
----
+------------------------------------------------------------------------
 
 ## arrange()
 
@@ -317,7 +316,7 @@ flights |>
   head(5)
 ```
 
----
+------------------------------------------------------------------------
 
 ## Your turn 5 {background-color="#d5e8d4"}
 
@@ -329,18 +328,17 @@ flights |>
   ___
 ```
 
----
+------------------------------------------------------------------------
 
 # 6. mutate() {background-color="#1a5276" style="color: white;"}
 
 **Add a calculated column**
 
----
+------------------------------------------------------------------------
 
 ## mutate()
 
-`mutate()` adds a column derived from existing columns.
-The new name goes on the **left** of `=`.
+`mutate()` adds a column derived from existing columns. The new name goes on the **left** of `=`.
 
 ```{r}
 # Departure delay in hours
@@ -350,7 +348,7 @@ flights |>
   head(4)
 ```
 
----
+------------------------------------------------------------------------
 
 ## Your turn 6 {background-color="#d5e8d4"}
 
@@ -366,18 +364,17 @@ flights |>
   ___
 ```
 
----
+------------------------------------------------------------------------
 
 # 7. group_by() + summarize() {background-color="#1a5276" style="color: white;"}
 
 **Compare groups**
 
----
+------------------------------------------------------------------------
 
 ## group_by() + summarize()
 
-`group_by()` splits the table into groups.
-`summarize()` reduces each group to **one summary row**.
+`group_by()` splits the table into groups. `summarize()` reduces each group to **one summary row**.
 
 ```{r}
 # Mean departure delay per carrier
@@ -386,11 +383,11 @@ flights |>
   summarize(mean_dep_delay = mean(dep_delay, na.rm = TRUE))
 ```
 
-::: {.callout-note}
+::: callout-note
 `na.rm = TRUE` ignores missing values — cancelled flights have no delay recorded.
 :::
 
----
+------------------------------------------------------------------------
 
 ## group_by() + summarize()
 
@@ -401,7 +398,7 @@ flights |>
   count()
 ```
 
----
+------------------------------------------------------------------------
 
 ## Your turn 7 {background-color="#d5e8d4"}
 
@@ -413,13 +410,13 @@ flights |>
   ___
 ```
 
----
+------------------------------------------------------------------------
 
 # 8. Putting it together {background-color="#1a5276" style="color: white;"}
 
 **Chain as many verbs as you need**
 
----
+------------------------------------------------------------------------
 
 ## Chain everything
 
@@ -434,7 +431,7 @@ flights |>
   arrange(desc(mean_dep_delay))
 ```
 
----
+------------------------------------------------------------------------
 
 ## Chain everything
 
@@ -450,7 +447,7 @@ flights |>
   arrange(desc(mean_dep_delay))
 ```
 
----
+------------------------------------------------------------------------
 
 ## Your turn 8 {background-color="#d5e8d4"}
 
@@ -470,18 +467,17 @@ flights |>
   ___
 ```
 
----
+------------------------------------------------------------------------
 
 # 9. Summary tables {background-color="#1a5276" style="color: white;"}
 
 **Publication-ready tables with gtsummary**
 
----
+------------------------------------------------------------------------
 
 ## tbl_summary()
 
-`tbl_summary()` makes a summary table in one step.
-`by =` gives one column per group.
+`tbl_summary()` makes a summary table in one step. `by =` gives one column per group.
 
 ```{r}
 flights |>
@@ -494,7 +490,7 @@ flights |>
   )
 ```
 
----
+------------------------------------------------------------------------
 
 ## Your turn 9 {background-color="#d5e8d4"}
 
@@ -506,20 +502,20 @@ flights |>
   ___
 ```
 
----
+------------------------------------------------------------------------
 
 ## Recap
 
-| Verb | Job |
-|------|-----|
-| `head()` / `tail()` | Preview rows |
-| `select()` | Keep columns |
-| `filter()` | Keep rows |
-| `arrange()` | Sort rows |
-| `mutate()` | Add columns |
+| Verb                         | Job              |
+|------------------------------|------------------|
+| `head()` / `tail()`          | Preview rows     |
+| `select()`                   | Keep columns     |
+| `filter()`                   | Keep rows        |
+| `arrange()`                  | Sort rows        |
+| `mutate()`                   | Add columns      |
 | `group_by()` + `summarize()` | Summarize groups |
 
-```r
+``` r
 data |>
   filter(...) |>
   select(...) |>
@@ -528,9 +524,9 @@ data |>
   summarize(...)
 ```
 
----
+------------------------------------------------------------------------
 
-## {background-color="#1a5276" style="color: white; text-align: center;"}
+##  {background-color="#1a5276" style="color: white; text-align: center;"}
 
 <br><br>
 
