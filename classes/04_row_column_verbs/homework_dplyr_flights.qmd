@@ -1,0 +1,493 @@
+---
+title: "Homework. Explore data with dplyr verbs (flights)"
+author: Add your name here
+date: 10/26/2026
+format: html
+---
+
+```{r}
+# Run this once at the top of every new script.
+# It installs pacman if missing; does nothing if you already have it.
+# You can copy and paste this into any script you write.
+# Everything that starts with # is a comment: R ignores it, but it is useful for notes.
+if (!require("pacman", quietly = TRUE)) install.packages("pacman")
+```
+
+Now we install and load the packages we need.
+
+```{r}
+#| label: setup
+pacman::p_load(
+  here,            # file paths that work on any computer
+  tidyverse,       # ggplot2, dplyr, tidyr and friends
+  gtsummary,       # publication-ready summary tables
+  nycflights13,    # all flights departing New York City in 2013
+  NHANES,          # US health and nutrition survey data
+  gapminder        # country health and wealth data over time
+)
+```
+
+## RECAP Shortcuts
+
+| Action            | Mac                       | Windows                    |
+|-------------------|---------------------------|----------------------------|
+| Insert chunk      | `Cmd` + `Option` + `I`    | `Ctrl` + `Alt` + `I`       |
+| Insert pipe `\|>` | `Cmd` + `Shift` + `M`     | `Ctrl` + `Shift` + `M`     |
+| Run chunk         | `Cmd` + `Shift` + `Enter` | `Ctrl` + `Shift` + `Enter` |
+
+> **Pipe shortcut note:** RStudio inserts `%>%` by default. To get `|>`, go to Tools → Global Options → Code → tick **Use native pipe operator**.
+
+## Basic data tasks
+
+The `tidyverse` is a collection of R packages for data science. Each package does one job.
+
+- `ggplot2` is the package for graphics.
+- `dplyr` is the package for data wrangling — preparing a table for analysis.
+
+Here we explore the main `dplyr` verbs using the `flights` dataset. It contains all 336,776 flights that departed from New York City airports in 2013.
+
+## About the data
+
+| Column | What it contains |
+|--------|-----------------|
+| `carrier` | Two-letter airline code |
+| `origin` | Departure airport: `JFK`, `LGA` or `EWR` |
+| `dest` | Destination airport code |
+| `dep_delay` | Departure delay in minutes (negative = left early) |
+| `arr_delay` | Arrival delay in minutes (negative = arrived early) |
+| `air_time` | Time in the air, in minutes |
+| `distance` | Distance between airports, in miles |
+| `month` | Month number (1 = January ... 12 = December) |
+
+Main carriers: AA = American Airlines, UA = United Airlines, DL = Delta, B6 = JetBlue, EV = ExpressJet.
+
+## What is `#| eval: false`?
+
+Some chunks in this homework contain a line that says `#| eval: false`.
+
+This tells R: **do not run this chunk yet**. You will see it in every "Your turn" chunk that has a `___` to fill in. It is there so that the file renders without errors before you fill in your answer.
+
+**Your job:**
+
+1.  Replace every `___` with your code.
+2.  Delete the line `#| eval: false`.
+3.  Run the chunk with `Cmd/Ctrl` + `Shift` + `Enter`.
+4.  Write your answer below the chunk.
+
+## How to submit
+
+1.  Fill in every `___`, remove `#| eval: false` from each chunk and run it.
+2.  Write your answer under each chunk.
+3.  Click **Render** to make the HTML file.
+
+------------------------------------------------------------------------
+
+# 1. Look at the first and last rows
+
+`head()` shows the first rows of a table. `tail()` shows the last rows. Add a number to choose how many rows. Use them to check that your data loaded correctly.
+
+**Question:** What do the first rows of `flights` look like?
+
+```{r}
+# head() shows the first 6 rows by default
+flights |>
+  head()
+```
+
+Now the last three rows.
+
+```{r}
+# tail() with a number shows that many rows from the end
+flights |>
+  tail(3)
+```
+
+**Your turn:** Show the first 10 rows.
+
+```{r}
+#| eval: false
+# Use head() with a number
+flights |>
+  ___
+```
+
+Now show only the last row.
+
+```{r}
+#| eval: false
+# Use tail() with a number
+flights |>
+  ___
+```
+
+Answer: [YOUR ANSWER HERE]
+
+------------------------------------------------------------------------
+
+# 2. select(): choose columns
+
+`select()` keeps only the columns you name. Use it to reduce a wide table to the columns you need. The `flights` table has 19 columns; you rarely need all of them.
+
+**Question:** Which columns show the carrier, origin, destination and departure delay?
+
+```{r}
+flights |>
+  select(carrier, origin, dest, dep_delay) |>
+  head()
+```
+
+**Question:** How do departure and arrival delays compare across the three largest carriers?
+
+`tbl_summary()` makes a summary table. `by = carrier` gives one column per carrier. `missing = "no"` hides rows with missing data. `digits = all_continuous() ~ 1` rounds to one decimal place.
+
+```{r}
+flights |>
+  filter(carrier %in% c("AA", "UA", "DL")) |>
+  select(carrier, dep_delay, arr_delay) |>
+  tbl_summary(
+    by = carrier,
+    missing = "no",
+    digits = all_continuous() ~ 1
+  )
+```
+
+**Your turn:** Make a table comparing `air_time` and `distance` for the same three carriers.
+
+```{r}
+#| eval: false
+flights |>
+  filter(carrier %in% c("AA", "UA", "DL")) |>
+  ___
+```
+
+Answer: [YOUR ANSWER HERE]
+
+------------------------------------------------------------------------
+
+# 3. filter(): choose rows
+
+`filter()` keeps only the rows where a condition is `TRUE`. Use it to focus on one airline, one airport, or any subset you need.
+
+**Question:** Which flights departed from JFK?
+
+```{r}
+flights |>
+  filter(origin == "JFK")
+```
+
+**Question:** How many American Airlines flights are in the dataset?
+
+```{r}
+flights |>
+  filter(carrier == "AA") |>
+  count()
+```
+
+**Your turn 1:** Filter for flights from LaGuardia airport (`LGA`).
+
+```{r}
+#| eval: false
+flights |>
+  ___
+```
+
+**Your turn 2:** How many United Airlines (`UA`) flights are there?
+
+```{r}
+#| eval: false
+flights |>
+  ___
+```
+
+Answer: [YOUR ANSWER HERE]
+
+------------------------------------------------------------------------
+
+# 4. Comparison symbols
+
+To filter, you need a condition. A condition compares values and returns `TRUE` or `FALSE`.
+
+| Symbol     | Meaning                   | Example                              |
+|------------|---------------------------|--------------------------------------|
+| `==`       | equal to                  | `carrier == "AA"`                    |
+| `!=`       | not equal to              | `origin != "JFK"`                    |
+| `>`        | greater than              | `dep_delay > 60`                     |
+| `>=`       | greater than or equal to  | `dep_delay >= 60`                    |
+| `<`        | less than                 | `dep_delay < 0`                      |
+| `<=`       | less than or equal to     | `arr_delay <= 0`                     |
+| `%in%`     | is one of a set           | `origin %in% c("JFK", "LGA")`        |
+| `!is.na()` | has a value (not missing) | `!is.na(dep_delay)`                  |
+
+Use `==` to compare text or numbers. A single `=` gives an error inside `filter()`. Text goes inside quotes. Numbers do not.
+
+**Question:** Which flights were delayed more than two hours on departure?
+
+```{r}
+flights |>
+  filter(dep_delay > 120)
+```
+
+**Question:** Which flights left early (negative departure delay)?
+
+```{r}
+flights |>
+  filter(dep_delay < 0)
+```
+
+**Your turn 1:** Filter flights with a departure delay of 60 minutes or more.
+
+```{r}
+#| eval: false
+flights |>
+  ___
+```
+
+**Your turn 2:** Filter flights that arrived more than 30 minutes early (`arr_delay < -30`).
+
+```{r}
+#| eval: false
+flights |>
+  ___
+```
+
+Answer: [YOUR ANSWER HERE]
+
+------------------------------------------------------------------------
+
+# 5. Combining conditions
+
+A comma between conditions means "and": both must be `TRUE` for the row to be kept.
+
+Think of any dataset with groups: airlines, airports, seasons. You often want to filter by more than one thing at once — for example, flights from one airport AND delayed more than an hour. The logic in R is the same.
+
+**Question:** How many United Airlines flights from Newark were delayed more than an hour?
+
+```{r}
+# Three conditions: all three must be TRUE
+flights |>
+  filter(carrier == "UA", origin == "EWR", dep_delay > 60) |>
+  count()
+```
+
+**Question:** How many JFK flights in December had a departure delay?
+
+```{r}
+flights |>
+  filter(origin == "JFK", month == 12, dep_delay > 0) |>
+  count()
+```
+
+**Your turn 1:** How many American Airlines flights from JFK were delayed more than 30 minutes?
+
+```{r}
+#| eval: false
+flights |>
+  ___
+```
+
+**Your turn 2:** How many summer flights (June, July, August) had no departure delay?
+
+```{r}
+#| eval: false
+# Hint: use month %in% c(6, 7, 8) and dep_delay == 0
+flights |>
+  ___
+```
+
+Answer: [YOUR ANSWER HERE]
+
+------------------------------------------------------------------------
+
+# 6. Chaining verbs
+
+Each verb does one job. The pipe `|>` connects them in order. The result of one verb becomes the input of the next.
+
+**Question:** What are the carrier, destination and departure delay of the five most delayed Delta flights from JFK?
+
+```{r}
+flights |>
+  filter(carrier == "DL") |>            # keep only Delta
+  filter(origin == "JFK") |>            # from JFK only
+  select(carrier, dest, dep_delay) |>   # keep three columns
+  arrange(desc(dep_delay)) |>           # sort most delayed first
+  head(5)                               # show only the top 5
+```
+
+**Question:** Show carrier, origin and air time for American Airlines flights to Los Angeles (LAX), sorted by shortest flight first.
+
+```{r}
+flights |>
+  filter(carrier == "AA") |>
+  filter(dest == "LAX") |>
+  select(carrier, origin, air_time) |>
+  arrange(air_time)
+```
+
+**Your turn:** Show the carrier, destination and arrival delay of the five flights with the worst arrival delays from Newark (EWR), sorted from worst to best.
+
+```{r}
+#| eval: false
+flights |>
+  ___
+```
+
+Answer: [YOUR ANSWER HERE]
+
+------------------------------------------------------------------------
+
+# 7. mutate(): make a new column
+
+`mutate()` adds a column calculated from existing columns. Use it to convert units or create a derived variable. The new column name goes on the left of `=`.
+
+**Question:** What is the departure delay in hours?
+
+```{r}
+flights |>
+  mutate(dep_delay_hours = dep_delay / 60) |>
+  select(carrier, dep_delay, dep_delay_hours) |>
+  head()
+```
+
+**Your turn:** Make a column with the flight speed in miles per hour (`distance / (air_time / 60)`). Show `carrier`, `dest`, `distance`, `air_time` and your new column.
+
+```{r}
+#| eval: false
+flights |>
+  ___
+```
+
+Answer: [YOUR ANSWER HERE]
+
+------------------------------------------------------------------------
+
+# 8. group_by() and summarize(): groups
+
+`group_by()` splits the table into groups. `summarize()` reduces each group to one summary row. Use them together to compare means, totals or counts across groups.
+
+`mean()` gives the mean. `n()` counts rows. `na.rm = TRUE` ignores missing values (cancelled flights have no delay recorded).
+
+**Question:** What is the mean departure delay for each carrier?
+
+```{r}
+flights |>
+  group_by(carrier) |>
+  summarize(mean_dep_delay = mean(dep_delay, na.rm = TRUE))
+```
+
+**Question:** How many flights departed from each airport?
+
+```{r}
+flights |>
+  group_by(origin) |>
+  count()
+```
+
+**Your turn:** What is the mean arrival delay for each month?
+
+```{r}
+#| eval: false
+flights |>
+  ___
+```
+
+Answer: [YOUR ANSWER HERE]
+
+------------------------------------------------------------------------
+
+# 9. Putting it together
+
+Each verb does one job. The pipe `|>` connects them. You can chain as many as you need.
+
+**Question:** Which carrier has the highest mean departure delay? Sort from worst to best.
+
+```{r}
+# group_by carrier gives one row per carrier — arrange is meaningful
+flights |>
+  group_by(carrier) |>
+  summarize(
+    n = n(),
+    mean_dep_delay = mean(dep_delay, na.rm = TRUE)
+  ) |>
+  arrange(desc(mean_dep_delay))
+```
+
+**Question:** Among flights from JFK, which carrier has the worst mean departure delay? Sort from worst to best.
+
+```{r}
+# filter to JFK, then group by carrier, then sort
+flights |>
+  filter(origin == "JFK") |>
+  group_by(carrier) |>
+  summarize(
+    n = n(),
+    mean_dep_delay = mean(dep_delay, na.rm = TRUE)
+  ) |>
+  arrange(desc(mean_dep_delay))
+```
+
+**Your turn 1:** Among flights to Miami (MIA), which carrier has the worst mean arrival delay? Sort from worst to best.
+
+```{r}
+#| eval: false
+flights |>
+  ___
+```
+
+**Your turn 2:** How many flights went to each destination? Sort from most to least.
+
+```{r}
+#| eval: false
+flights |>
+  ___
+```
+
+Answer: [YOUR ANSWER HERE]
+
+------------------------------------------------------------------------
+
+# 10. Summary table
+
+`tbl_summary()` makes a publication-ready summary table in one step. Add `filter()` and `select()` before it to focus on the rows and columns you need.
+
+**Question:** How do departure and arrival delays compare across the three main carriers?
+
+```{r}
+flights |>
+  filter(carrier %in% c("AA", "UA", "DL")) |>
+  select(carrier, dep_delay, arr_delay) |>
+  tbl_summary(
+    by = carrier,
+    missing = "no",
+    digits = all_continuous() ~ 1
+  )
+```
+
+**Question:** Same table, but only for JFK flights. Does the pattern change?
+
+```{r}
+flights |>
+  filter(carrier %in% c("AA", "UA", "DL")) |>
+  filter(origin == "JFK") |>
+  select(carrier, dep_delay, arr_delay) |>
+  tbl_summary(
+    by = carrier,
+    missing = "no",
+    digits = all_continuous() ~ 1
+  )
+```
+
+**Your turn:** Make a table of `air_time` and `distance` by carrier, for the same three carriers, only for January flights (`month == 1`).
+
+```{r}
+#| eval: false
+flights |>
+  ___
+```
+
+Answer: [YOUR ANSWER HERE]
+
+------------------------------------------------------------------------
+
+You are done. Click **Render** to turn this file into a webpage!\
+\
+See you in class!
