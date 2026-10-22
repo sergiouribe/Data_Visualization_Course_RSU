@@ -1,0 +1,486 @@
+---
+title: "Class 6. Split, apply, combine"
+subtitle: "[SZF_184 Data Visualisation and Storytelling](https://estudijas.rsu.lv/course/view.php?id=83740)"
+author: "Sergio Uribe"
+institute: "Rīga Stradiņš University"
+format:
+  revealjs:
+    theme: simple
+    slide-number: true
+    code-block-bg: true
+    highlight-style: github
+    footer: '<a href="https://estudijas.rsu.lv/course/view.php?id=83740">SZF_184</a> RSU · Uribe'
+    transition: fade
+execute:
+  echo: true
+  warning: false
+  message: false
+---
+
+```{r}
+#| label: setup
+#| include: false
+pacman::p_load(here, tidyverse, janitor, countrycode)
+
+# Hidden: download the raw CSV if it is missing, so the deck renders on any computer
+if (!file.exists(here("data", "gapminder.csv"))) {
+  read_csv(
+    "https://docs.google.com/spreadsheets/d/e/2PACX-1vQMKvrshkL1R55vcnXnXQ14VfJM6HB62bed8U6ukVc-9ncRg79co2GoaS84eb1o4aEg1bqLFiWNJAS3/pub?gid=554197504&single=true&output=csv",
+    show_col_types = FALSE
+  ) |>
+    write_csv(here("data", "gapminder.csv"))
+}
+```
+
+## Today
+
+**Question:** How did life expectancy change in each continent since 1952?
+
+| Step | What we do |
+|------|-----------|
+| 1 | Download the Gapminder CSV |
+| 2 | Add continent and subregion with `countrycode` |
+| 3 | Split, apply, combine |
+| 4 | Plot the summary table |
+
+---
+
+# 1. Get the data {background-color="#1a5276" style="color: white;"}
+
+**One CSV from Google Drive**
+
+---
+
+## Download the CSV once
+
+```r
+# Run once. It saves a copy of the file in your data folder.
+read_csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vQMKvrshkL1R55vcnXnXQ14VfJM6HB62bed8U6ukVc-9ncRg79co2GoaS84eb1o4aEg1bqLFiWNJAS3/pub?gid=554197504&single=true&output=csv") |>
+  write_csv(here("data", "gapminder.csv"))
+```
+
+From now on every chunk reads the file in `data/`. No internet needed.
+
+---
+
+## Look at the table
+
+```{r}
+here("data", "gapminder.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  glimpse()
+```
+
+---
+
+## Names with capitals are hard to type
+
+```{r}
+# clean_names() writes lifeExp as life_exp
+here("data", "gapminder.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  clean_names() |>
+  glimpse()
+```
+
+---
+
+## Same names as in the next classes
+
+```{r}
+# rename(new_name = old_name)
+here("data", "gapminder.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  clean_names() |>
+  rename(population = pop, income = gdp_percap) |>
+  glimpse()
+```
+
+---
+
+# 2. Add the continent {background-color="#1a5276" style="color: white;"}
+
+**The package `countrycode`**
+
+---
+
+## The file has no continent column
+
+`countrycode()` turns a country name into a continent.
+
+```{r}
+# One name in, one continent out
+countrycode("Latvia", origin = "country.name", destination = "continent")
+
+# A vector of names works too
+countrycode(c("Chile", "Japan", "Kenya"), origin = "country.name", destination = "continent")
+```
+
+Three arguments: the names, `origin` (what we have), `destination` (what we want).
+
+---
+
+## mutate() adds the continent to every row
+
+```{r}
+here("data", "gapminder.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  clean_names() |>
+  rename(population = pop, income = gdp_percap) |>
+  mutate(
+    continent = countrycode(country, origin = "country.name", destination = "continent")
+  ) |>
+  select(country, continent, year, life_exp) |>
+  head(4)
+```
+
+---
+
+## A finer split: the UN subregion
+
+```{r}
+# Same function, another destination
+here("data", "gapminder.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  clean_names() |>
+  rename(population = pop, income = gdp_percap) |>
+  mutate(
+    continent = countrycode(country, origin = "country.name", destination = "continent"),
+    subregion = countrycode(country, origin = "country.name", destination = "un.regionsub.name")
+  ) |>
+  distinct(country, continent, subregion) |>
+  head(6)
+```
+
+---
+
+## Did every country find a continent?
+
+```{r}
+# Rows here are countries that countrycode did not recognise
+here("data", "gapminder.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  clean_names() |>
+  mutate(
+    continent = countrycode(country, origin = "country.name", destination = "continent")
+  ) |>
+  filter(is.na(continent)) |>
+  distinct(country)
+```
+
+An empty table means every name matched.
+
+---
+
+## Save the table for the next classes
+
+```{r}
+here("data", "gapminder.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  clean_names() |>
+  rename(population = pop, income = gdp_percap) |>
+  mutate(
+    continent = countrycode(country, origin = "country.name", destination = "continent"),
+    subregion = countrycode(country, origin = "country.name", destination = "un.regionsub.name"),
+    .after = country
+  ) |>
+  write_csv(here("data", "gapminder_regions.csv"))
+```
+
+From here on we read `gapminder_regions.csv`.
+
+---
+
+## Your turn 1 {background-color="#d5e8d4"}
+
+**Add a column `wb_region` with the World Bank region.**
+
+Use `destination = "region"`. List the distinct values.
+
+```{r}
+#| eval: false
+here("data", "gapminder.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  clean_names() |>
+  mutate(
+    wb_region = countrycode(country, origin = "country.name", destination = "___")
+  ) |>
+  distinct(___)
+```
+
+---
+
+# 3. Split, apply, combine {background-color="#1a5276" style="color: white;"}
+
+**Summarize by group**
+
+---
+
+## Three words, three steps
+
+| Step | Word | dplyr |
+|------|------|-------|
+| 1 | **Split** the rows into groups | `group_by()` |
+| 2 | **Apply** a summary to each group | `summarize()` |
+| 3 | **Combine** the results in one table | dplyr does it |
+
+---
+
+## Six countries, three continents
+
+```{r}
+here("data", "gapminder_regions.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(year == 2007, country %in% c("Chile", "Argentina", "Japan", "China", "Kenya", "Nigeria")) |>
+  select(country, continent, life_exp)
+```
+
+---
+
+## Split by continent, apply the mean
+
+```{r}
+here("data", "gapminder_regions.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(year == 2007, country %in% c("Chile", "Argentina", "Japan", "China", "Kenya", "Nigeria")) |>
+  group_by(continent) |>
+  summarize(mean_life = mean(life_exp))
+```
+
+Six rows became three. Each row is one group.
+
+---
+
+## The shortest summary: count()
+
+```{r}
+# How many countries per continent in 2007?
+here("data", "gapminder_regions.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(year == 2007) |>
+  count(continent)
+```
+
+---
+
+## summarize() alone gives one row
+
+```{r}
+# One number for the whole world
+here("data", "gapminder_regions.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(year == 2007) |>
+  summarize(mean_life = mean(life_exp))
+```
+
+---
+
+## Add group_by() to get one row per group
+
+```{r}
+here("data", "gapminder_regions.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(year == 2007) |>
+  group_by(continent) |>
+  summarize(mean_life = mean(life_exp))
+```
+
+---
+
+## How many countries are behind each mean?
+
+```{r}
+# n() counts the rows of each group
+here("data", "gapminder_regions.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(year == 2007) |>
+  group_by(continent) |>
+  summarize(
+    mean_life = mean(life_exp),
+    n = n()
+  )
+```
+
+---
+
+## A mean of countries or a mean of people?
+
+```{r}
+# weighted.mean() counts each country by its population
+here("data", "gapminder_regions.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(year == 2007) |>
+  group_by(continent) |>
+  summarize(
+    mean_life = mean(life_exp),
+    weighted_life = weighted.mean(life_exp, population)
+  )
+```
+
+**Ask:** Which one describes a continent better? Why do they differ?
+
+---
+
+## Your turn 2 {background-color="#d5e8d4"}
+
+**How many countries are in each subregion in 2007? Sort from most to fewest.**
+
+```{r}
+#| eval: false
+here("data", "gapminder_regions.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(year == ___) |>
+  count(___) |>
+  arrange(___)
+```
+
+---
+
+## Two groups: continent and year
+
+```{r}
+here("data", "gapminder_regions.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  group_by(continent, year) |>
+  summarize(life_exp = weighted.mean(life_exp, population)) |>
+  head(4)
+```
+
+Look at the header: `# Groups: continent`. The table is still grouped.
+
+---
+
+## .groups = "drop" removes the grouping
+
+```{r}
+here("data", "gapminder_regions.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  group_by(continent, year) |>
+  summarize(
+    life_exp = weighted.mean(life_exp, population),
+    .groups = "drop"
+  ) |>
+  head(4)
+```
+
+---
+
+## arrange() ranks the summary
+
+```{r}
+# Subregions with the highest life expectancy in 2007
+here("data", "gapminder_regions.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(year == 2007) |>
+  group_by(subregion) |>
+  summarize(life_exp = weighted.mean(life_exp, population)) |>
+  arrange(desc(life_exp)) |>
+  head(5)
+```
+
+---
+
+# 4. Plot the summary {background-color="#1a5276" style="color: white;"}
+
+**The summary table goes straight into ggplot**
+
+---
+
+## A summary table into a line plot
+
+```{r}
+here("data", "gapminder_regions.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  group_by(continent, year) |>
+  summarize(life_exp = weighted.mean(life_exp, population), .groups = "drop") |>
+  ggplot(aes(x = year, y = life_exp, color = continent)) +
+  geom_line(linewidth = 1)
+```
+
+---
+
+## A summary table into a bar chart
+
+```{r}
+# The table already holds the values, so we use geom_col()
+here("data", "gapminder_regions.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(year == 2007) |>
+  group_by(continent) |>
+  summarize(life_exp = weighted.mean(life_exp, population)) |>
+  ggplot(aes(x = continent, y = life_exp)) +
+  geom_col()
+```
+
+---
+
+## The bars follow the alphabet. How to sort them?
+
+```{r}
+# fct_reorder(what to sort, what to sort by)
+here("data", "gapminder_regions.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(year == 2007) |>
+  group_by(continent) |>
+  summarize(life_exp = weighted.mean(life_exp, population)) |>
+  ggplot(aes(x = fct_reorder(continent, life_exp), y = life_exp)) +
+  geom_col()
+```
+
+---
+
+## Your turn 3 {background-color="#d5e8d4"}
+
+**Median income per person by continent, for 1952 and 2007. Plot it.**
+
+```{r}
+#| eval: false
+here("data", "gapminder_regions.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(year %in% c(___, ___)) |>
+  group_by(___, year) |>
+  summarize(median_income = median(___), .groups = "drop") |>
+  ggplot(aes(x = continent, y = median_income, fill = factor(year))) +
+  geom_col(position = "dodge")
+```
+
+---
+
+## Your turn 4 {background-color="#d5e8d4"}
+
+**Life expectancy over time for the subregions of Europe.**
+
+```{r}
+#| eval: false
+here("data", "gapminder_regions.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(continent == "___") |>
+  group_by(subregion, year) |>
+  summarize(life_exp = weighted.mean(life_exp, population), .groups = "drop") |>
+  ggplot(aes(x = year, y = life_exp, color = ___)) +
+  geom_line(linewidth = 1)
+```
+
+---
+
+## Recap {.smaller}
+
+| Task | Code |
+|------|------|
+| Add a column from a lookup | `mutate(continent = countrycode(...))` |
+| Count rows per group | `count(continent)` |
+| Summary per group | `group_by()` + `summarize()` |
+| Weight by population | `weighted.mean(life_exp, population)` |
+| Remove the grouping | `.groups = "drop"` |
+| Sort a table | `arrange(desc(...))` |
+| Sort bars | `fct_reorder(x, y)` |
+
+**Next class:** joins, pivots and the Rosling chart.
+
+---
+
+## {background-color="#1a5276" style="color: white; text-align: center;"}
+
+<br><br>
+
+### See you next class!

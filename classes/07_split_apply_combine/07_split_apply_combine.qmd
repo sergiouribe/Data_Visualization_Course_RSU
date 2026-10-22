@@ -1,142 +1,179 @@
 ---
-title: "Class 7. Split, apply, combine"
+title: "Class 7. Joins, pivots and the Rosling chart"
 format: html
 ---
 
 Replace each `___` with code, remove `#| eval: false` and run the chunk. Write answers under the chunks.
 
-**Question for today:** Which penguin species is the heaviest, and how do the groups differ?
+**Question for today:** Can we build the Rosling chart and make it move?
+
+You need `data/gapminder_regions.csv` from class 6.
 
 ```{r}
 #| label: setup
-pacman::p_load(tidyverse, palmerpenguins, here)
+pacman::p_load(here, tidyverse, nycflights13, gganimate, gifski)
 ```
 
-## 1. The idea
+## 1. Joins: the key has the same name
 
-1. **Split** the rows into groups: `group_by()`.
-2. **Apply** a summary to each group: `summarize()`.
-3. **Combine** the results in one new table (dplyr does this).
-
-Mean body mass of each species:
+Add the airline name to each flight, count the flights per airline and sort.
 
 ```{r}
-#| label: idea
-penguins |>
-  group_by(species) |>
-  summarize(mean_mass = mean(body_mass_g, na.rm = TRUE))
-```
-
-`na.rm = TRUE` ignores missing values. Without it, one `NA` turns the mean into `NA`.
-
-## 2. Several summaries in one table
-
-Each summary has a name on the left of `=` and a function on the right. `n()` counts the rows of the group.
-
-```{r}
-#| label: several
-penguins |>
-  group_by(species) |>
-  summarize(
-    n = n(),
-    mean_mass = mean(body_mass_g, na.rm = TRUE),
-    median_mass = median(body_mass_g, na.rm = TRUE)
-  )
-```
-
-Two groups: put two columns in `group_by()`.
-
-```{r}
-#| label: two-groups
-penguins |>
-  filter(!is.na(sex)) |>
-  group_by(species, sex) |>
-  summarize(
-    n = n(),
-    mean_mass = mean(body_mass_g, na.rm = TRUE),
-    .groups = "drop"
-  )
-```
-
-**Your turn 1:** Make a table with the number of penguins, the mean flipper length and the median flipper length per island.
-
-```{r}
-#| label: turn-1
+#| label: join-airlines
 #| eval: false
-penguins |>
-  group_by(___) |>
-  summarize(
-    n = n(),
-    mean_flipper = mean(___, na.rm = TRUE),
-    median_flipper = ___(flipper_length_mm, na.rm = TRUE)
-  )
+flights |>
+  left_join(___, by = "carrier") |>
+  count(___) |>
+  arrange(___)
 ```
 
-## 3. count() and arrange()
+Answer: [YOUR ANSWER HERE] flew the most flights.
 
-`count()` is `group_by()` plus `n()` in one step. `arrange(desc())` puts the largest value first.
+## 2. Joins: rows without a match
 
-```{r}
-#| label: count
-penguins |>
-  count(species, island) |>
-  arrange(desc(n))
-```
-
-**Your turn 2:** Which species and sex has the highest mean body mass? Use `filter(!is.na(sex))`, `group_by()`, `summarize()` and `arrange(desc())`.
+Which carriers have flights with no row in `planes`? Count them by carrier.
 
 ```{r}
-#| label: turn-2
+#| label: anti-planes
 #| eval: false
-penguins |>
-  filter(!is.na(sex)) |>
-  group_by(___, ___) |>
-  summarize(mean_mass = mean(body_mass_g, na.rm = TRUE), .groups = "drop") |>
-  arrange(___(mean_mass))
+flights |>
+  ___(planes, by = "tailnum") |>
+  count(carrier)
 ```
 
 Answer: [YOUR ANSWER HERE]
 
-## 4. A sorted bar chart of group means
+## 3. Joins: the key has two names
 
-The summary table goes straight into `ggplot()`. The table already holds the values, so we use `geom_col()`. `fct_reorder()` sorts the bars by the mean.
-
-```{r}
-#| label: bar
-penguins |>
-  group_by(species) |>
-  summarize(mean_mass = mean(body_mass_g, na.rm = TRUE)) |>
-  ggplot(aes(x = mean_mass, y = fct_reorder(species, mean_mass))) +
-  geom_col() +
-  labs(x = "Mean body mass (g)", y = NULL)
-```
-
-**Your turn 3:** Draw the same chart for the mean bill length (`bill_length_mm`).
+Add the airport name of the origin. In `flights` the key is `origin`, in `airports` it is `faa`. Count flights per airport name.
 
 ```{r}
-#| label: turn-3
+#| label: join-airports
 #| eval: false
-penguins |>
-  group_by(species) |>
-  summarize(mean_bill = ___(___, na.rm = TRUE)) |>
-  ggplot(aes(x = mean_bill, y = fct_reorder(species, mean_bill))) +
-  geom____() +
-  labs(x = "Mean bill length (mm)", y = NULL)
+flights |>
+  left_join(airports, by = join_by(___ == ___)) |>
+  count(name)
 ```
 
-## 5. Latvian Labour Force Survey: employed people by sex
+## 4. Join a summary back to the table
 
-Codes: `EKA` = 1 employed, 2 unemployed, 3 inactive. `B11` = 1 male, 2 female (see `data/lfs_codebook.md`).
+Which 5 countries are furthest above their continent mean in 2007?
 
 ```{r}
-#| label: lfs
-here("data", "lfs_2025_example.csv") |>
+#| label: gap
+#| eval: false
+here("data", "gapminder_regions.csv") |>
   read_csv(show_col_types = FALSE) |>
-  filter(EKA == 1) |>
-  mutate(sex = case_when(B11 == 1 ~ "Male", B11 == 2 ~ "Female")) |>
-  count(sex)
+  filter(year == 2007) |>
+  left_join(
+    here("data", "gapminder_regions.csv") |>
+      read_csv(show_col_types = FALSE) |>
+      filter(year == 2007) |>
+      group_by(continent) |>
+      summarize(continent_life = mean(life_exp)),
+    by = "___"
+  ) |>
+  mutate(gap = life_exp - continent_life) |>
+  select(country, continent, life_exp, continent_life, gap) |>
+  arrange(___) |>
+  head(5)
 ```
 
-Check: the sample file holds a few rows. Replace it with the full file under the same name to get real counts.
+Answer: [YOUR ANSWER HERE]
 
-> Deliverable: one grouped table and one bar chart.
+## 5. Pivot wider
+
+Median income by continent for 1952, 1982 and 2007 in wide format. Add a column `ratio`: 2007 divided by 1952.
+
+```{r}
+#| label: wider
+#| eval: false
+here("data", "gapminder_regions.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(year %in% c(1952, 1982, 2007)) |>
+  group_by(continent, year) |>
+  summarize(median_income = median(income), .groups = "drop") |>
+  pivot_wider(names_from = ___, values_from = ___) |>
+  mutate(ratio = ___ / ___)
+```
+
+Answer: Income grew [YOUR ANSWER HERE] times in [YOUR ANSWER HERE], the most of all continents.
+
+## 6. Pivot longer and plot
+
+Take the wide table back to long. Draw one line per continent.
+
+```{r}
+#| label: longer
+#| eval: false
+here("data", "gapminder_regions.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(year %in% c(1952, 1982, 2007)) |>
+  group_by(continent, year) |>
+  summarize(median_income = median(income), .groups = "drop") |>
+  pivot_wider(names_from = year, values_from = median_income) |>
+  pivot_longer(
+    cols = -___,
+    names_to = "year",
+    values_to = "median_income",
+    names_transform = as.integer
+  ) |>
+  ggplot(aes(x = year, y = median_income, color = continent)) +
+  geom_line(linewidth = 1)
+```
+
+## 7. The Rosling chart for 1982
+
+Color the circles by subregion.
+
+```{r}
+#| label: rosling-1982
+#| eval: false
+here("data", "gapminder_regions.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(year == ___) |>
+  ggplot(aes(x = income, y = life_exp, size = population, color = ___)) +
+  geom_point(alpha = 0.7) +
+  scale_x_log10() +
+  scale_size_area(max_size = 15) +
+  theme_minimal()
+```
+
+## 8. Panels for two years
+
+Show 1952 and 2007 side by side.
+
+```{r}
+#| label: facets
+#| eval: false
+here("data", "gapminder_regions.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(year %in% c(___, ___)) |>
+  ggplot(aes(x = income, y = life_exp, size = population, color = continent)) +
+  geom_point(alpha = 0.7) +
+  scale_x_log10() +
+  scale_size_area(max_size = 12) +
+  facet_wrap(~ ___) +
+  theme_minimal()
+```
+
+## 9. Animate Europe
+
+Color the circles by subregion.
+
+```{r}
+#| label: animate-europe
+#| eval: false
+here("data", "gapminder_regions.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(continent == "___") |>
+  ggplot(aes(x = income, y = life_exp, size = population, color = ___)) +
+  geom_point(alpha = 0.7) +
+  scale_x_log10() +
+  scale_size_area(max_size = 15) +
+  labs(title = "Year: {round(frame_time)}") +
+  theme_minimal() +
+  transition_time(___)
+```
+
+> Deliverable: the animated chart from section 9 and one sentence about what you see.

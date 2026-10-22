@@ -1,14 +1,15 @@
 ---
-title: "Row and Column Verbs"
-subtitle: "Exploring data with dplyr"
-author: "Data Visualisation Course"
+title: "Class 4. Row and column verbs"
+subtitle: "[SZF_184 Data Visualisation and Storytelling](https://estudijas.rsu.lv/course/view.php?id=83740)"
+author: "Sergio Uribe"
+institute: "Rīga Stradiņš University"
 format:
   revealjs:
     theme: simple
     slide-number: true
     code-block-bg: true
     highlight-style: github
-    footer: "dplyr · row and column verbs"
+    footer: '<a href="https://estudijas.rsu.lv/course/view.php?id=83740">SZF_184</a> RSU · Uribe'
     transition: fade
 execute:
   echo: true
@@ -29,7 +30,7 @@ pacman::p_load(here, tidyverse, gtsummary, nycflights13)
 
 | Column | What it contains |
 |--------|-----------------|
-| `carrier` | Airline code — AA = American, UA = United, DL = Delta |
+| `carrier` | Airline code: AA = American, UA = United, DL = Delta |
 | `origin` | Departure airport: `JFK`, `LGA` or `EWR` |
 | `dest` | Destination airport code |
 | `dep_delay` | Departure delay in minutes (negative = left early) |
@@ -110,7 +111,7 @@ flights |>
 ## The problem: 19 columns
 
 ```{r}
-# Hard to read — 19 columns scroll off the screen
+# Hard to read, 19 columns scroll off the screen
 flights |> head(3)
 ```
 
@@ -254,7 +255,7 @@ flights |>
   count()
 ```
 
-A comma means **and** — all conditions must be `TRUE`.
+A comma means **and**: all conditions must be `TRUE`.
 
 ---
 
@@ -290,7 +291,7 @@ flights |>
 ## arrange() sorts ascending by default
 
 ```{r}
-# Smallest dep_delay first — left earliest
+# Smallest dep_delay first, left earliest
 flights |>
   select(carrier, origin, dest, dep_delay) |>
   arrange(dep_delay) |>
@@ -348,7 +349,7 @@ flights |>
 ## mutate() adds the new column at the far right
 
 ```{r}
-# dep_delay_hours appears at column 20 — hard to see
+# dep_delay_hours appears at column 20, hard to see
 flights |>
   mutate(dep_delay_hours = dep_delay / 60) |>
   head(3)
@@ -500,7 +501,7 @@ flights |>
 
 ---
 
-## tbl_summary() — first attempt
+## tbl_summary(), first attempt
 
 ```{r}
 flights |>
