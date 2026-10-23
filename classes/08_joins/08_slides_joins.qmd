@@ -1,0 +1,260 @@
+---
+title: "Joining tables: left, inner, full and anti"
+subtitle: "[SZF_184 Data Visualisation and Storytelling](https://estudijas.rsu.lv/course/view.php?id=83740)"
+author: "Sergio Uribe"
+institute: "Rīga Stradiņš University"
+format:
+  revealjs:
+    theme: simple
+    slide-number: true
+    code-block-bg: true
+    highlight-style: github
+    footer: '<a href="https://estudijas.rsu.lv/course/view.php?id=83740">SZF_184</a> RSU · Uribe'
+    transition: fade
+execute:
+  echo: true
+  warning: false
+  message: false
+---
+
+```{r}
+#| label: setup
+#| include: false
+pacman::p_load(tidyverse)
+```
+
+## Two tables, one question
+
+Who plays which instrument in which band? The answer sits in two tables.
+
+```{r}
+# The tables come with the dplyr package
+band_members
+```
+
+```{r}
+band_instruments
+```
+
+---
+
+## Look first {background-color="#d5e8d4"}
+
+**Which column do both tables share?**
+
+Answer: [YOUR ANSWER HERE]
+
+**Who appears in both tables?**
+
+Answer: [YOUR ANSWER HERE]
+
+---
+
+## The key
+
+A **key** is a column that both tables share. Here the key is `name`.
+
+A join uses the key to match rows. Mick has a band and no instrument. Keith has an instrument and no band. Each join treats these two people in a different way.
+
+---
+
+# 1. left_join() {background-color="#1a5276" style="color: white;"}
+
+**Keep every row of the left table**
+
+---
+
+## left_join()
+
+```{r}
+# The left table is band_members. All three members stay
+band_members |>
+  left_join(band_instruments, join_by(name))
+```
+
+Mick has `NA` in `plays`. `band_instruments` has no row for Mick, so R leaves the cell empty.
+
+---
+
+## Name the key
+
+```{r}
+#| message: true
+# Without join_by(), dplyr guesses the key and prints a message
+band_members |>
+  left_join(band_instruments)
+```
+
+The result is the same. Write `join_by()` anyway, so the key is visible in your code.
+
+---
+
+## Your turn 1 {background-color="#d5e8d4"}
+
+**Complete the key. Write your prediction before you run the chunk.**
+
+```{r}
+#| eval: false
+band_members |>
+  left_join(band_instruments, join_by(___))
+```
+
+Prediction: [YOUR ANSWER HERE] rows. Result: [YOUR ANSWER HERE] rows.
+
+Who has `NA` in `plays`? [YOUR ANSWER HERE]
+
+---
+
+## Your turn 2 {background-color="#d5e8d4"}
+
+**Swap the tables. Predict first.**
+
+```{r}
+#| eval: false
+band_instruments |>
+  left_join(band_members, join_by(name))
+```
+
+Prediction: [YOUR ANSWER HERE] rows. Result: [YOUR ANSWER HERE] rows.
+
+Who has `NA` in `band`? [YOUR ANSWER HERE]
+
+---
+
+## The left table decides
+
+`left_join()` keeps all rows of the table on the left. In Your turn 1, Mick stays. In Your turn 2, Keith stays.
+
+---
+
+# 2. inner_join() {background-color="#1a5276" style="color: white;"}
+
+**Keep only the rows that match**
+
+---
+
+## inner_join()
+
+```{r}
+# Only people who appear in both tables
+band_members |>
+  inner_join(band_instruments, join_by(name))
+```
+
+The result has 2 rows: John and Paul. Mick and Keith have no match, so both disappear.
+
+---
+
+## Your turn 3 {background-color="#d5e8d4"}
+
+**Keep only the people who have a band and an instrument. Complete the function name.**
+
+```{r}
+#| eval: false
+band_members |>
+  ___(band_instruments, join_by(name))
+```
+
+Prediction: [YOUR ANSWER HERE] rows. Result: [YOUR ANSWER HERE] rows.
+
+Who is missing from the result, and why? [YOUR ANSWER HERE]
+
+---
+
+# 3. full_join() {background-color="#1a5276" style="color: white;"}
+
+**Keep every row of both tables**
+
+---
+
+## full_join()
+
+```{r}
+# All people from both tables
+band_members |>
+  full_join(band_instruments, join_by(name))
+```
+
+The result has 4 rows. `NA` appears on both sides: Mick has no instrument and Keith has no band.
+
+---
+
+## Your turn 4 {background-color="#d5e8d4"}
+
+**Keep all four people. Complete the function name.**
+
+```{r}
+#| eval: false
+band_members |>
+  ___(band_instruments, join_by(name))
+```
+
+Prediction: [YOUR ANSWER HERE] rows. Result: [YOUR ANSWER HERE] rows.
+
+Where do you see `NA`? [YOUR ANSWER HERE]
+
+---
+
+# 4. anti_join() {background-color="#1a5276" style="color: white;"}
+
+**Find the rows with no match**
+
+---
+
+## anti_join()
+
+```{r}
+# Who plays an instrument and is in no band?
+band_instruments |>
+  anti_join(band_members, join_by(name))
+```
+
+`anti_join()` keeps the rows of the left table that have no match in the right table. The result has only the columns of the left table.
+
+---
+
+## Your turn 5 {background-color="#d5e8d4"}
+
+**Who is in `band_members` and has no instrument? Predict first.**
+
+```{r}
+#| eval: false
+band_members |>
+  anti_join(band_instruments, join_by(name))
+```
+
+Prediction: [YOUR ANSWER HERE]. Result: [YOUR ANSWER HERE].
+
+---
+
+## Your turn 6: choose the join {background-color="#d5e8d4"}
+
+**Write the join that answers each question. Then run it to check.**
+
+| Question | Join |
+|----------|------|
+| All members of the band, with or without an instrument | [YOUR ANSWER HERE] |
+| Only people with a band and an instrument | [YOUR ANSWER HERE] |
+| All four people, whatever is missing | [YOUR ANSWER HERE] |
+| Members with no instrument | [YOUR ANSWER HERE] |
+
+---
+
+## Recap {.smaller}
+
+| Join | Keeps | Rows for our tables |
+|------|-------|---------------------|
+| `left_join(x, y)` | All rows of `x` | 3 |
+| `inner_join(x, y)` | Rows in `x` and `y` | 2 |
+| `full_join(x, y)` | All rows of `x` and `y` | 4 |
+| `anti_join(x, y)` | Rows of `x` with no match in `y` | 1 |
+
+Always write the key: `join_by(name)`.
+
+---
+
+## {background-color="#1a5276" style="color: white; text-align: center;"}
+
+<br><br>
+
+### See you in the next class!
