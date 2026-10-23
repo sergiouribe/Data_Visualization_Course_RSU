@@ -389,4 +389,4 @@ Answer: [YOUR ANSWER HERE] is the only airport left.
 
 <br><br>
 
-### See you in the next class!
+### Next: pivot
