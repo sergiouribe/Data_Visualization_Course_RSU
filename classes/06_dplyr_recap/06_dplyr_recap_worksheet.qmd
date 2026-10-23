@@ -12,6 +12,11 @@ The data are all flights that departed from New York in 2013. Put `flights.csv` 
 pacman::p_load(here, tidyverse)
 ```
 
+```{r}
+#| label: load-data
+flights <- read_csv(here("data", "flights.csv"))
+```
+
 ## Your turn 1: select a range
 
 Select the columns from `dep_time` to `arr_delay`.
@@ -19,8 +24,7 @@ Select the columns from `dep_time` to `arr_delay`.
 ```{r}
 #| label: turn-1a
 #| eval: false
-here("data", "flights.csv") |>
-  read_csv(show_col_types = FALSE) |>
+flights |>
   select(___:___)
 ```
 
@@ -31,8 +35,7 @@ Select all columns except `dep_time` to `arr_delay`.
 ```{r}
 #| label: turn-1b
 #| eval: false
-here("data", "flights.csv") |>
-  read_csv(show_col_types = FALSE) |>
+flights |>
   select(!___:___)
 ```
 
@@ -45,8 +48,7 @@ Select the columns that end in `time`.
 ```{r}
 #| label: turn-2a
 #| eval: false
-here("data", "flights.csv") |>
-  read_csv(show_col_types = FALSE) |>
+flights |>
   select(ends_with("___"))
 ```
 
@@ -57,8 +59,7 @@ Select the columns that start with `sched`.
 ```{r}
 #| label: turn-2b
 #| eval: false
-here("data", "flights.csv") |>
-  read_csv(show_col_types = FALSE) |>
+flights |>
   select(starts_with("___"))
 ```
 
@@ -71,8 +72,7 @@ Flights that departed on December 25.
 ```{r}
 #| label: turn-3a
 #| eval: false
-here("data", "flights.csv") |>
-  read_csv(show_col_types = FALSE) |>
+flights |>
   filter(month == ___ & day == ___)
 ```
 
@@ -81,8 +81,7 @@ Flights that departed in June or July, with `|`.
 ```{r}
 #| label: turn-3b
 #| eval: false
-here("data", "flights.csv") |>
-  read_csv(show_col_types = FALSE) |>
+flights |>
   filter(month == ___ | month == ___)
 ```
 
@@ -91,8 +90,7 @@ The same flights as the previous question, with `%in%`.
 ```{r}
 #| label: turn-3c
 #| eval: false
-here("data", "flights.csv") |>
-  read_csv(show_col_types = FALSE) |>
+flights |>
   filter(month %in% c(___, ___))
 ```
 
@@ -105,8 +103,7 @@ Flights that did not depart from JFK.
 ```{r}
 #| label: turn-4a
 #| eval: false
-here("data", "flights.csv") |>
-  read_csv(show_col_types = FALSE) |>
+flights |>
   filter(origin ___ "JFK") |>
   count(origin)
 ```
@@ -118,8 +115,7 @@ Flights that did not depart from JFK or LGA.
 ```{r}
 #| label: turn-4b
 #| eval: false
-here("data", "flights.csv") |>
-  read_csv(show_col_types = FALSE) |>
+flights |>
   filter(!(origin %in% c("___", "___"))) |>
   count(origin)
 ```
