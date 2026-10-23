@@ -1,0 +1,188 @@
+---
+title: "Split, apply, combine (solutions)"
+format: html
+---
+
+Teacher version. Chunks run, so `data/rosling_tidy.csv` must exist.
+
+```{r}
+#| label: setup
+pacman::p_load(here, tidyverse, palmerpenguins)
+```
+
+```{r}
+#| label: load-data
+rosling_tidy <- read_csv(here("data", "rosling_tidy.csv"))
+```
+
+## 0. One number for the whole table
+
+```{r}
+#| label: na-example
+penguins |>
+  summarize(mean_mass = mean(body_mass_g))
+```
+
+Answer: `NA`, because some penguins have no body mass.
+
+```{r}
+#| label: na-rm-example
+penguins |>
+  summarize(mean_mass = mean(body_mass_g, na.rm = TRUE))
+```
+
+Answer: 4,202 g.
+
+### Your turn 0
+
+```{r}
+#| label: turn-0
+penguins |>
+  summarize(mean_flipper = mean(flipper_length_mm, na.rm = TRUE))
+```
+
+Answer: `na.rm`. The mean is 200.9 mm.
+
+## 1. Split, apply, combine
+
+```{r}
+#| label: group-example
+penguins |>
+  group_by(species) |>
+  summarize(mean_mass = mean(body_mass_g, na.rm = TRUE))
+```
+
+Answer: Adelie 3,701 g, Chinstrap 3,733 g, Gentoo 5,076 g.
+
+### Your turn 1
+
+```{r}
+#| label: turn-1
+penguins |>
+  group_by(species) |>
+  summarize(mean_flipper = mean(flipper_length_mm, na.rm = TRUE))
+```
+
+Answer: `species`. Gentoo has the longest flippers, 217 mm (Adelie 190, Chinstrap 196).
+
+## 2. Rows behind each mean
+
+```{r}
+#| label: n-example
+penguins |>
+  group_by(species) |>
+  summarize(n = n(), mean_mass = mean(body_mass_g, na.rm = TRUE))
+```
+
+Answer: 152 Adelie, 68 Chinstrap and 124 Gentoo penguins.
+
+```{r}
+#| label: count-example
+penguins |>
+  count(species, island)
+```
+
+Answer: 5 rows. Adelie lives on Biscoe (44), Dream (56) and Torgersen (52). Chinstrap lives only on Dream (68). Gentoo lives only on Biscoe (124).
+
+### Your turn 2
+
+```{r}
+#| label: turn-2
+penguins |>
+  group_by(island) |>
+  summarize(n = n(), mean_bill = mean(bill_length_mm, na.rm = TRUE))
+```
+
+Answer: `n()`. Torgersen has the shortest bills. Biscoe: 168 penguins and 45.3 mm. Dream: 124 penguins and 44.2 mm. Torgersen: 52 penguins and 39.0 mm.
+
+## 3. Combine the verbs
+
+```{r}
+#| label: combine-example
+penguins |>
+  filter(sex == "female") |>
+  group_by(species) |>
+  summarize(n = n(), mean_mass = mean(body_mass_g, na.rm = TRUE)) |>
+  arrange(desc(mean_mass))
+```
+
+Answer: Gentoo 4,680 g (58 females), Chinstrap 3,527 g (34), Adelie 3,369 g (73).
+
+### Your turn 3
+
+```{r}
+#| label: turn-3
+penguins |>
+  filter(sex == "male") |>
+  group_by(species) |>
+  summarize(n = n(), mean_flipper = mean(flipper_length_mm, na.rm = TRUE)) |>
+  arrange(desc(mean_flipper))
+```
+
+Answer: `male` and `desc`. Gentoo is first with 222 mm, then Chinstrap 200 mm and Adelie 192 mm.
+
+## 4. Gapminder: a mean of countries or of people?
+
+```{r}
+#| label: look-rosling
+rosling_tidy |>
+  glimpse()
+```
+
+Answer: 1,704 rows, one for each country and year.
+
+```{r}
+#| label: mean-asia
+rosling_tidy |>
+  filter(year == 2007, continent == "Asia") |>
+  summarize(mean_life = mean(life_exp))
+```
+
+Answer: 70.7 years. Each country counts once.
+
+```{r}
+#| label: countries-asia
+rosling_tidy |>
+  filter(year == 2007, continent == "Asia") |>
+  arrange(desc(population)) |>
+  head(3)
+```
+
+Answer: China 1,318,683,096 people (life expectancy 73.0), India 1,110,396,331 (64.7), Indonesia 223,547,000 (70.6). The smallest is Bahrain with 708,573 people (75.6). Use `arrange(population)` to see the three smallest.
+
+```{r}
+#| label: by-hand
+rosling_tidy |>
+  filter(year == 2007, continent == "Asia") |>
+  summarize(mean_life_people = sum(life_exp * population) / sum(population))
+```
+
+Answer: 69.4 years. Each person counts once.
+
+```{r}
+#| label: weighted-mean
+rosling_tidy |>
+  filter(year == 2007, continent == "Asia") |>
+  summarize(mean_life_people = weighted.mean(life_exp, population))
+```
+
+Answer: 69.4 years, equal to the by-hand result.
+
+### Your turn 4
+
+```{r}
+#| label: turn-4
+rosling_tidy |>
+  filter(year == 2007) |>
+  group_by(continent) |>
+  summarize(mean_people = weighted.mean(life_exp, population)) |>
+  arrange(desc(mean_people))
+```
+
+Answer: `population` and `desc`. Oceania is first with 81.1 years, then Europe 77.9, the Americas 75.4, Asia 69.4 and Africa 54.6.
+
+## Notes for the teacher
+
+- No chunk groups by two variables with `summarize()`, so R prints no message about leftover groups. The table of life expectancy by continent and year (60 rows) comes in the graphs class.
+- Topic 4 shows the problem first: the mean of countries gives Bahrain the same weight as China. The by-hand version comes before `weighted.mean()` so students see what the function does.
+- If time runs short, topic 4 becomes homework.

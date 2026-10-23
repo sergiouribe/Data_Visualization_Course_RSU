@@ -1,0 +1,199 @@
+---
+title: "Split, apply, combine (worksheet)"
+format: html
+---
+
+Replace each `___` with code, remove `#| eval: false` and run the chunk. Write your answer under each chunk.
+
+The penguins come with the palmerpenguins package. Put `rosling_tidy.csv` in the `data` folder of the project.
+
+```{r}
+#| label: setup
+pacman::p_load(here, tidyverse, palmerpenguins)
+```
+
+```{r}
+#| label: load-data
+rosling_tidy <- read_csv(here("data", "rosling_tidy.csv"))
+```
+
+## 0. One number for the whole table
+
+The mean of a column with missing values is `NA`.
+
+```{r}
+#| label: na-example
+penguins |>
+  summarize(mean_mass = mean(body_mass_g))
+```
+
+`na.rm = TRUE` removes the missing values before the mean.
+
+```{r}
+#| label: na-rm-example
+penguins |>
+  summarize(mean_mass = mean(body_mass_g, na.rm = TRUE))
+```
+
+### Your turn 0
+
+Compute the mean flipper length of all penguins.
+
+```{r}
+#| label: turn-0
+#| eval: false
+penguins |>
+  summarize(mean_flipper = mean(flipper_length_mm, ___ = TRUE))
+```
+
+Answer: [YOUR ANSWER HERE] mm.
+
+## 1. Split, apply, combine
+
+`group_by()` splits the rows, `mean()` applies, `summarize()` combines.
+
+```{r}
+#| label: group-example
+penguins |>
+  group_by(species) |>
+  summarize(mean_mass = mean(body_mass_g, na.rm = TRUE))
+```
+
+### Your turn 1
+
+Compute the mean flipper length of each species.
+
+```{r}
+#| label: turn-1
+#| eval: false
+penguins |>
+  group_by(___) |>
+  summarize(mean_flipper = mean(flipper_length_mm, na.rm = TRUE))
+```
+
+Answer: [YOUR ANSWER HERE] has the longest flippers.
+
+## 2. Rows behind each mean
+
+`n()` counts the rows of each group.
+
+```{r}
+#| label: n-example
+penguins |>
+  group_by(species) |>
+  summarize(n = n(), mean_mass = mean(body_mass_g, na.rm = TRUE))
+```
+
+`count()` splits and counts in one step. With two variables it gives one row for each combination.
+
+```{r}
+#| label: count-example
+penguins |>
+  count(species, island)
+```
+
+### Your turn 2
+
+For each island, count the penguins and compute the mean bill length.
+
+```{r}
+#| label: turn-2
+#| eval: false
+penguins |>
+  group_by(island) |>
+  summarize(n = ___, mean_bill = mean(bill_length_mm, na.rm = TRUE))
+```
+
+Answer: [YOUR ANSWER HERE] has the shortest bills.
+
+## 3. Combine the verbs
+
+Females only, the mean mass of each species, from the heaviest to the lightest.
+
+```{r}
+#| label: combine-example
+penguins |>
+  filter(sex == "female") |>
+  group_by(species) |>
+  summarize(n = n(), mean_mass = mean(body_mass_g, na.rm = TRUE)) |>
+  arrange(desc(mean_mass))
+```
+
+### Your turn 3
+
+Males only: the mean flipper length of each species, from the longest to the shortest.
+
+```{r}
+#| label: turn-3
+#| eval: false
+penguins |>
+  filter(sex == "___") |>
+  group_by(species) |>
+  summarize(n = n(), mean_flipper = mean(flipper_length_mm, na.rm = TRUE)) |>
+  arrange(___(mean_flipper))
+```
+
+Answer: [YOUR ANSWER HERE] is first, with [YOUR ANSWER HERE] mm.
+
+## 4. Gapminder: a mean of countries or of people?
+
+Look at the data first. One row for each country and year.
+
+```{r}
+#| label: look-rosling
+rosling_tidy |>
+  glimpse()
+```
+
+`mean()` gives each country one vote.
+
+```{r}
+#| label: mean-asia
+rosling_tidy |>
+  filter(year == 2007, continent == "Asia") |>
+  summarize(mean_life = mean(life_exp))
+```
+
+The countries behind the mean: China has 1,318,683,096 people and Bahrain has 708,573.
+
+```{r}
+#| label: countries-asia
+rosling_tidy |>
+  filter(year == 2007, continent == "Asia") |>
+  arrange(desc(population)) |>
+  head(3)
+```
+
+To count each person once, multiply each life expectancy by the population, add them up and divide by the total population.
+
+```{r}
+#| label: by-hand
+rosling_tidy |>
+  filter(year == 2007, continent == "Asia") |>
+  summarize(mean_life_people = sum(life_exp * population) / sum(population))
+```
+
+`weighted.mean()` gives the same result. Give the values first, then the weights.
+
+```{r}
+#| label: weighted-mean
+rosling_tidy |>
+  filter(year == 2007, continent == "Asia") |>
+  summarize(mean_life_people = weighted.mean(life_exp, population))
+```
+
+### Your turn 4
+
+Which continent has the highest life expectancy for a typical person in 2007?
+
+```{r}
+#| label: turn-4
+#| eval: false
+rosling_tidy |>
+  filter(year == 2007) |>
+  group_by(continent) |>
+  summarize(mean_people = weighted.mean(life_exp, ___)) |>
+  arrange(___(mean_people))
+```
+
+Answer: [YOUR ANSWER HERE] is first, with [YOUR ANSWER HERE] years.
