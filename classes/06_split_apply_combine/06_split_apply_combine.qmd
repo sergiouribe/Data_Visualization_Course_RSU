@@ -3,89 +3,156 @@ title: "Class 6. Split, apply, combine"
 format: html
 ---
 
-**Questions for today:** How did life expectancy change by continent? What is the mean BMI by group in NHANES?
+Replace each `___` with code, remove `#| eval: false` and run the chunk. Write answers under the chunks.
+
+**Question for today:** How did life expectancy change in each continent since 1952?
 
 ```{r}
 #| label: setup
-pacman::p_load(tidyverse, gapminder, NHANES, here)
+pacman::p_load(here, tidyverse, janitor, countrycode)
 ```
 
-## The idea
+## 1. Download the CSV once
 
-1. **Split** the table into groups: `group_by()`.
-2. **Apply** a function to each group: `summarize()`.
-3. **Combine** the results into a new table (dplyr does this for you).
-
-## 1. count(): the shortest summary
+Run this chunk one time. It saves a copy of the file in your `data` folder.
 
 ```{r}
-#| label: count
-gapminder |>
+#| label: download
+#| eval: false
+read_csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vQMKvrshkL1R55vcnXnXQ14VfJM6HB62bed8U6ukVc-9ncRg79co2GoaS84eb1o4aEg1bqLFiWNJAS3/pub?gid=554197504&single=true&output=csv") |>
+  write_csv(here("data", "gapminder.csv"))
+```
+
+## 2. Add continent and subregion
+
+`countrycode()` takes the names, the `origin` (what we have) and the `destination` (what we want). Use `"continent"` and `"un.regionsub.name"`.
+
+```{r}
+#| label: prepare
+#| eval: false
+here("data", "gapminder.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  clean_names() |>
+  rename(population = pop, income = gdp_percap) |>
+  mutate(
+    continent = countrycode(country, origin = "country.name", destination = "___"),
+    subregion = countrycode(country, origin = "country.name", destination = "___"),
+    .after = country
+  ) |>
+  write_csv(here("data", "gapminder_regions.csv"))
+```
+
+## 3. Check: did every country find a continent?
+
+```{r}
+#| label: check
+#| eval: false
+here("data", "gapminder_regions.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(is.na(___)) |>
+  distinct(country)
+```
+
+Answer: [YOUR ANSWER HERE] countries have no continent.
+
+## 4. Your turn: a third column
+
+Add `wb_region` with the World Bank region (`destination = "region"`). List the distinct values.
+
+```{r}
+#| label: wb-region
+#| eval: false
+here("data", "gapminder.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  clean_names() |>
+  mutate(
+    wb_region = countrycode(country, origin = "country.name", destination = "___")
+  ) |>
+  distinct(___)
+```
+
+Answer: [YOUR ANSWER HERE] World Bank regions.
+
+## 5. Your turn: count
+
+How many countries are in each subregion in 2007? Sort from most to fewest.
+
+```{r}
+#| label: count-subregion
+#| eval: false
+here("data", "gapminder_regions.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(year == ___) |>
+  count(___) |>
+  arrange(___)
+```
+
+Answer: [YOUR ANSWER HERE] has the most countries.
+
+## 6. Mean of countries and mean of people
+
+Compute the mean and the population-weighted mean of life expectancy by continent in 2007.
+
+```{r}
+#| label: weighted
+#| eval: false
+here("data", "gapminder_regions.csv") |>
+  read_csv(show_col_types = FALSE) |>
   filter(year == 2007) |>
-  count(continent)
+  group_by(___) |>
+  summarize(
+    mean_life = mean(life_exp),
+    weighted_life = weighted.mean(___, ___)
+  )
 ```
 
-## 2. group_by() + summarize()
+Answer: In [YOUR ANSWER HERE] the two means differ most, because [YOUR ANSWER HERE].
+
+## 7. Life expectancy by continent over time
 
 ```{r}
-#| label: sac
-# Population-weighted mean life expectancy by continent and year
-gapminder |>
-  group_by(continent, year) |>
-  summarize(life_exp = weighted.mean(lifeExp, pop), .groups = "drop")
+#| label: line
+#| eval: false
+here("data", "gapminder_regions.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  group_by(continent, ___) |>
+  summarize(life_exp = weighted.mean(life_exp, population), .groups = "drop") |>
+  ggplot(aes(x = year, y = life_exp, color = ___)) +
+  geom_line(linewidth = 1)
 ```
 
-## 3. Summary table into a line plot
+Answer: [YOUR ANSWER HERE] gained the most years between 1952 and 2007.
+
+## 8. Median income, 1952 and 2007
 
 ```{r}
-#| label: sac-line
-gapminder |>
-  group_by(continent, year) |>
-  summarize(life_exp = weighted.mean(lifeExp, pop), .groups = "drop") |>
-  ggplot(aes(x = year, y = life_exp, color = continent)) +
-  geom_line()
-```
-
-## 4. Summary table into a bar chart
-
-Here the table already holds the values, so we use `geom_col()`.
-
-```{r}
-#| label: sac-col
-gapminder |>
-  filter(year == 2007) |>
-  group_by(continent) |>
-  summarize(life_exp = weighted.mean(lifeExp, pop)) |>
-  ggplot(aes(x = continent, y = life_exp)) +
-  geom_col()
-```
-
-## 5. arrange(): sort a summary table
-
-```{r}
-#| label: arrange
-# Rank continents by life expectancy in 2007, highest first
-gapminder |>
-  filter(year == 2007) |>
-  group_by(continent) |>
-  summarize(life_exp = weighted.mean(lifeExp, pop)) |>
-  arrange(desc(life_exp))
-```
-
-## 6. NHANES: mean BMI by group
-
-```{r}
-#| label: nhanes
-NHANES |>
-  filter(Age >= 18, !is.na(BMI), !is.na(PhysActive)) |>
-  group_by(Gender, PhysActive) |>
-  summarize(mean_bmi = mean(BMI), n = n(), .groups = "drop") |>
-  ggplot(aes(x = PhysActive, y = mean_bmi, fill = Gender)) +
+#| label: income
+#| eval: false
+here("data", "gapminder_regions.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(year %in% c(___, ___)) |>
+  group_by(___, year) |>
+  summarize(median_income = median(___), .groups = "drop") |>
+  ggplot(aes(x = continent, y = median_income, fill = factor(year))) +
   geom_col(position = "dodge")
 ```
 
-## 7. Your turn
+Answer: [YOUR ANSWER HERE]
 
-Compute the median income per person (`gdpPercap`) by continent for 1952 and 2007. Plot it.
+## 9. The subregions of Europe
 
-> Deliverable: life expectancy by continent over time, and one NHANES mean by group.
+```{r}
+#| label: europe
+#| eval: false
+here("data", "gapminder_regions.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(continent == "___") |>
+  group_by(subregion, year) |>
+  summarize(life_exp = weighted.mean(life_exp, population), .groups = "drop") |>
+  ggplot(aes(x = year, y = life_exp, color = ___)) +
+  geom_line(linewidth = 1)
+```
+
+Answer: [YOUR ANSWER HERE] has the lowest life expectancy in 1952 and [YOUR ANSWER HERE] in 2007.
+
+> Deliverable: life expectancy by continent over time (section 7) and one more plot of your choice from sections 8 or 9.
