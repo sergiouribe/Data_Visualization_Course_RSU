@@ -1,0 +1,415 @@
+---
+title: "dplyr recap: select() and filter()"
+subtitle: "[SZF_184 Data Visualisation and Storytelling](https://estudijas.rsu.lv/course/view.php?id=83740)"
+author: "Sergio Uribe"
+institute: "Rīga Stradiņš University"
+format:
+  revealjs:
+    theme: simple
+    slide-number: true
+    code-block-bg: true
+    highlight-style: github
+    footer: '<a href="https://estudijas.rsu.lv/course/view.php?id=83740">SZF_184</a> RSU · Uribe'
+    transition: fade
+execute:
+  echo: true
+  warning: false
+  message: false
+---
+
+```{r}
+#| label: setup
+#| include: false
+pacman::p_load(here, tidyverse)
+```
+
+## Recap of Friday
+
+| Verb | Job |
+|------|-----|
+| `select()` | Keep columns |
+| `filter()` | Keep rows that match a condition |
+| `count()` | Count rows |
+| `n()` | Count rows inside `summarize()` |
+| `arrange()` | Sort rows |
+
+The pipe `|>` connects them. Today we add three tools for `select()` and `filter()`.
+
+---
+
+## Our data: all flights from New York in 2013
+
+```{r}
+# The file is in the data folder of the project
+here("data", "flights.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  glimpse()
+```
+
+Examples from *R for Data Science* (2e), chapter 3.
+
+---
+
+# 1. Select a range {background-color="#1a5276" style="color: white;"}
+
+**Neighbouring columns**
+
+---
+
+## select(): typing every name is long
+
+```{r}
+# Seven names for a block of neighbouring columns
+here("data", "flights.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  select(year, month, day, dep_time, sched_dep_time, dep_delay, arr_time)
+```
+
+---
+
+## A range with a colon
+
+```{r}
+# year:day means every column from year to day
+here("data", "flights.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  select(year:day)
+```
+
+---
+
+## All columns except a range
+
+```{r}
+# ! means not: every column except year to day
+here("data", "flights.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  select(!year:day)
+```
+
+The result has 16 columns, the 19 of `flights` minus 3.
+
+---
+
+## Your turn 1 {background-color="#d5e8d4"}
+
+**Select the columns from `dep_time` to `arr_delay`.**
+
+```{r}
+#| eval: false
+here("data", "flights.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  select(___:___)
+```
+
+Answer: [YOUR ANSWER HERE] columns.
+
+**Select all columns except `dep_time` to `arr_delay`.**
+
+```{r}
+#| eval: false
+here("data", "flights.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  select(!___:___)
+```
+
+Answer: [YOUR ANSWER HERE] columns.
+
+---
+
+# 2. Select by pattern {background-color="#1a5276" style="color: white;"}
+
+**Columns that share a start or an end**
+
+---
+
+## select(): columns that share a start
+
+```{r}
+# Two columns begin with dep. Typing both names is easy,
+# but a table with 50 such columns is not.
+here("data", "flights.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  select(dep_time, dep_delay)
+```
+
+---
+
+## starts_with() picks columns by their first letters
+
+```{r}
+# starts_with("abc") keeps every column whose name begins with abc
+here("data", "flights.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  select(starts_with("dep"))
+```
+
+The result has 2 columns: `dep_time` and `dep_delay`.
+
+---
+
+## ends_with() picks columns by their last letters
+
+```{r}
+# ends_with("xyz") keeps every column whose name ends with xyz
+here("data", "flights.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  select(ends_with("delay"))
+```
+
+The result has 2 columns: `dep_delay` and `arr_delay`.
+
+---
+
+## Your turn 2 {background-color="#d5e8d4"}
+
+**Select the columns that end in `time`.**
+
+```{r}
+#| eval: false
+here("data", "flights.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  select(ends_with("___"))
+```
+
+Answer: [YOUR ANSWER HERE] columns.
+
+**Select the columns that start with `sched`.**
+
+```{r}
+#| eval: false
+here("data", "flights.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  select(starts_with("___"))
+```
+
+Answer: [YOUR ANSWER HERE] columns.
+
+---
+
+# 3. AND and OR {background-color="#1a5276" style="color: white;"}
+
+**More than one condition in `filter()`**
+
+---
+
+## filter(): AND
+
+```{r}
+# & means and: both conditions must be TRUE
+# Flights that departed on January 1
+here("data", "flights.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(month == 1 & day == 1)
+```
+
+A comma gives the same result: `filter(month == 1, day == 1)`.
+
+---
+
+## Flights in January or February?
+
+```{r}
+# A flight has one month, so no row can be January and February
+here("data", "flights.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(month == 1 & month == 2)
+```
+
+The result has 0 rows.
+
+---
+
+## filter(): OR
+
+```{r}
+# | means or: one condition is enough
+# Flights that departed in January or February
+here("data", "flights.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(month == 1 | month == 2)
+```
+
+---
+
+## A shortcut: %in%
+
+```{r}
+# %in% checks if the value is one of the values in c()
+here("data", "flights.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(month %in% c(1, 2))
+```
+
+The result is the same as the previous slide.
+
+---
+
+## A common mistake with OR
+
+```{r}
+# Written as in English: "month is 1 or 2"
+here("data", "flights.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(month == 1 | 2) |>
+  count(month)
+```
+
+R runs this without an error. `|` checks `month == 1`, then checks `2`, and `2` counts as TRUE for every row. The table shows all 12 months.
+
+---
+
+## The fix
+
+```{r}
+# Repeat the full condition, or use %in%
+here("data", "flights.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(month %in% c(1, 2)) |>
+  count(month)
+```
+
+---
+
+## Your turn 3 {background-color="#d5e8d4"}
+
+**Flights that departed on December 25.**
+
+```{r}
+#| eval: false
+here("data", "flights.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(month == ___ & day == ___)
+```
+
+**Flights that departed in June or July, with `|`.**
+
+```{r}
+#| eval: false
+here("data", "flights.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(month == ___ | month == ___)
+```
+
+**The same flights as the previous question, with `%in%`.**
+
+```{r}
+#| eval: false
+here("data", "flights.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(month %in% c(___, ___))
+```
+
+Answer: both versions return [YOUR ANSWER HERE] rows. Check it with `count()`.
+
+---
+
+# 4. NOT {background-color="#1a5276" style="color: white;"}
+
+**Reverse a condition**
+
+---
+
+## Every month except January and February
+
+```{r}
+# Works, but we repeat the column name and use two conditions
+here("data", "flights.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(month != 1 & month != 2)
+```
+
+---
+
+## ! reverses a condition
+
+```{r}
+# month %in% c(1, 2) is TRUE for January and February
+# ! turns TRUE into FALSE and FALSE into TRUE
+here("data", "flights.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(!(month %in% c(1, 2)))
+```
+
+The result is the same as the previous slide, with one condition.
+
+---
+
+## Finding missing values
+
+```{r}
+# NA means "unknown", so a comparison with NA is never TRUE
+here("data", "flights.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(dep_delay == NA)
+```
+
+The result has 0 rows.
+
+```{r}
+# is.na() is TRUE when the value is missing
+here("data", "flights.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(is.na(dep_delay))
+```
+
+---
+
+## Keep the rows that have a value
+
+```{r}
+# ! reverses is.na(): keep flights with a departure delay
+here("data", "flights.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(!is.na(dep_delay))
+```
+
+---
+
+## Your turn 4 {background-color="#d5e8d4"}
+
+**Flights that did not depart from JFK.**
+
+```{r}
+#| eval: false
+here("data", "flights.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(origin ___ "JFK") |>
+  count(origin)
+```
+
+Answer: [YOUR ANSWER HERE] airports remain.
+
+**Flights that did not depart from JFK or LGA.**
+
+```{r}
+#| eval: false
+here("data", "flights.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(!(origin %in% c("___", "___"))) |>
+  count(origin)
+```
+
+Answer: [YOUR ANSWER HERE] is the only airport left.
+
+---
+
+## Recap {.smaller}
+
+| Task | Code |
+|------|------|
+| A range of columns | `select(year:day)` |
+| All columns except a range | `select(!year:day)` |
+| Columns by pattern | `select(starts_with("dep"))`, `select(ends_with("delay"))` |
+| AND | `filter(month == 1 & day == 1)` |
+| OR | `filter(month == 1 \| month == 2)`, or `month %in% c(1, 2)` |
+| NOT | `filter(!(month %in% c(1, 2)))` |
+| Missing values | `filter(is.na(dep_delay))`, `filter(!is.na(dep_delay))` |
+
+---
+
+## {background-color="#1a5276" style="color: white; text-align: center;"}
+
+<br><br>
+
+### See you in the next class!

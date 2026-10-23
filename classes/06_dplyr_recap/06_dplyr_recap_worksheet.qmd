@@ -1,0 +1,127 @@
+---
+title: "dplyr recap: select() and filter() (worksheet)"
+format: html
+---
+
+Replace each `___` with code, remove `#| eval: false` and run the chunk. Write your answer under each chunk.
+
+The data are all flights that departed from New York in 2013. Put `flights.csv` in the `data` folder of the project.
+
+```{r}
+#| label: setup
+pacman::p_load(here, tidyverse)
+```
+
+## Your turn 1: select a range
+
+Select the columns from `dep_time` to `arr_delay`.
+
+```{r}
+#| label: turn-1a
+#| eval: false
+here("data", "flights.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  select(___:___)
+```
+
+Answer: [YOUR ANSWER HERE] columns.
+
+Select all columns except `dep_time` to `arr_delay`.
+
+```{r}
+#| label: turn-1b
+#| eval: false
+here("data", "flights.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  select(!___:___)
+```
+
+Answer: [YOUR ANSWER HERE] columns.
+
+## Your turn 2: select by pattern
+
+Select the columns that end in `time`.
+
+```{r}
+#| label: turn-2a
+#| eval: false
+here("data", "flights.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  select(ends_with("___"))
+```
+
+Answer: [YOUR ANSWER HERE] columns.
+
+Select the columns that start with `sched`.
+
+```{r}
+#| label: turn-2b
+#| eval: false
+here("data", "flights.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  select(starts_with("___"))
+```
+
+Answer: [YOUR ANSWER HERE] columns.
+
+## Your turn 3: AND and OR
+
+Flights that departed on December 25.
+
+```{r}
+#| label: turn-3a
+#| eval: false
+here("data", "flights.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(month == ___ & day == ___)
+```
+
+Flights that departed in June or July, with `|`.
+
+```{r}
+#| label: turn-3b
+#| eval: false
+here("data", "flights.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(month == ___ | month == ___)
+```
+
+The same flights as the previous question, with `%in%`.
+
+```{r}
+#| label: turn-3c
+#| eval: false
+here("data", "flights.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(month %in% c(___, ___))
+```
+
+Answer: both versions return [YOUR ANSWER HERE] rows. Check it with `count()`.
+
+## Your turn 4: NOT
+
+Flights that did not depart from JFK.
+
+```{r}
+#| label: turn-4a
+#| eval: false
+here("data", "flights.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(origin ___ "JFK") |>
+  count(origin)
+```
+
+Answer: [YOUR ANSWER HERE] airports remain.
+
+Flights that did not depart from JFK or LGA.
+
+```{r}
+#| label: turn-4b
+#| eval: false
+here("data", "flights.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(!(origin %in% c("___", "___"))) |>
+  count(origin)
+```
+
+Answer: [YOUR ANSWER HERE] is the only airport left.
