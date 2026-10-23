@@ -1,0 +1,158 @@
+---
+title: "Data cleaning and data wrangling, classes 3 and 4"
+format: html
+editor: visual
+---
+
+```{r}
+#| label: setup
+pacman::p_load(tidyverse,
+               janitor,
+               readxl,
+               here,
+               naniar)
+```
+
+# Data loading
+
+```{r}
+#| label: load
+# Read the downloaded file
+df <- here("data", "dirty_data.xlsx") |>
+  read_xlsx()
+```
+
+# Data exploration
+
+```{r}
+#| label: glimpse
+# 1. Types and first values
+df |>
+  glimpse()
+```
+
+```{r}
+#| label: summary
+# 2. Missing values and ranges
+df |>
+  summary()
+```
+
+```{r}
+#| label: rows
+# 3. Rows and repeated rows. If the two numbers differ, rows repeat
+df |>
+  count()
+
+df |>
+  distinct() |>
+  count()
+```
+
+```{r}
+#| label: dupes
+# 4. Which rows repeat
+df |>
+  get_dupes()
+```
+
+```{r}
+#| label: empty
+# 5. Empty rows and columns. Compare with the dimensions in step 1
+df |>
+  remove_empty(which = c("rows", "cols")) |>
+  dim()
+```
+
+## Missing values
+
+```{r}
+#| label: miss-table
+# Table: missing count and percent per column, most missing first
+df |>
+  miss_var_summary()
+```
+
+```{r}
+#| label: miss-plot
+# Plot: the same as bars
+df |>
+  gg_miss_var()
+```
+
+```{r}
+#| label: miss-map
+# Map of the whole table: black cells are missing
+df |>
+  vis_miss()
+```
+
+```{r}
+#| label: miss-rows
+# Rows with the most missing values
+df |>
+  miss_case_summary()
+```
+
+# Data cleaning
+
+Each chunk updates `df`. Run them in order.
+
+```{r}
+#| label: clean-names
+# Names: lower case, no spaces
+df <- df |>
+  clean_names()
+
+df |>
+  names()
+```
+
+```{r}
+#| label: remove-empty
+# Drop rows and columns where every cell is missing
+df <- df |>
+  remove_empty(which = c("rows", "cols"))
+
+df |>
+  dim()
+```
+
+```{r}
+#| label: drop-dupes
+# Keep one copy of each repeated row
+df <- df |>
+  distinct()
+
+df |>
+  count()
+```
+
+```{r}
+#| label: odd-values
+#| eval: false
+# Look for "-", "n/a", "999" in a text column. Replace column_name with your column
+df |>
+  tabyl(column_name)
+```
+
+```{r}
+#| label: na-text
+#| eval: false
+# Turn text that means missing into NA
+df <- df |>
+  replace_with_na_all(condition = ~ .x %in% c("-", "n/a", "N/A", "999"))
+
+df |>
+  vis_miss()
+```
+
+```{r}
+#| label: final-check
+# Types, missing values, rows
+df |>
+  glimpse()
+
+df |>
+  miss_var_summary()
+```

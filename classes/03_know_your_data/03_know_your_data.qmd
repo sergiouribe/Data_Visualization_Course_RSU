@@ -61,7 +61,6 @@ Which principle failed in each graph? Write it down. The rest of today answers: 
 
 ```{r}
 #| label: glimpse
-# dbl and int are numbers, chr and fct are categories, date is time
 penguins |>
   glimpse()
 ```
