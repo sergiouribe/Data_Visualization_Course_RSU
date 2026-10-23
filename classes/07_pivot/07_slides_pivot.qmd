@@ -1,0 +1,274 @@
+---
+title: "Reshaping data: pivot_longer() and pivot_wider()"
+subtitle: "[SZF_184 Data Visualisation and Storytelling](https://estudijas.rsu.lv/course/view.php?id=83740)"
+author: "Sergio Uribe"
+institute: "Rīga Stradiņš University"
+format:
+  revealjs:
+    theme: simple
+    slide-number: true
+    code-block-bg: true
+    highlight-style: github
+    footer: '<a href="https://estudijas.rsu.lv/course/view.php?id=83740">SZF_184</a> RSU · Uribe'
+    transition: fade
+execute:
+  echo: true
+  warning: false
+  message: false
+---
+
+```{r}
+#| label: setup
+#| include: false
+pacman::p_load(here, tidyverse)
+```
+
+## Our data: life expectancy by country and year
+
+```{r}
+# Load the file once. Every chunk after this one starts from gapminder_wide
+gapminder_wide <- read_csv(here("data", "gapminder_life_expectancy_wide.csv"))
+```
+
+Source: Gapminder. The table has 194 rows and 303 columns.
+
+---
+
+## One row per country, one column per year
+
+```{r}
+# Three Baltic countries and four of the 301 year columns
+gapminder_wide |>
+  filter(name %in% c("Estonia", "Latvia", "Lithuania")) |>
+  select(name, `1990`, `2000`, `2010`, `2023`)
+```
+
+Column names that start with a digit need backticks.
+
+---
+
+## Your turn 1 {background-color="#d5e8d4"}
+
+**Draw a line plot of life expectancy over time for Estonia, Latvia and Lithuania.**
+
+Use Excel, R or any other tool. Write down what stops you.
+
+```{r}
+#| eval: false
+gapminder_wide |>
+  filter(name %in% c("Estonia", "Latvia", "Lithuania")) |>
+  ggplot(aes(x = ___, y = ___, color = name)) +
+  geom_line()
+```
+
+Answer: [YOUR ANSWER HERE]
+
+---
+
+## Why the plot has no x
+
+The years are the names of 301 columns. `ggplot()` needs one column that holds the years.
+
+*R for Data Science* (2e), chapter 5, gives three rules for tidy data:
+
+1. Each variable is a column.
+2. Each observation is a row.
+3. Each value is a cell.
+
+Here, `year` is a variable spread over 301 columns. The table breaks rule 1.
+
+---
+
+# 1. Wide to long {background-color="#1a5276" style="color: white;"}
+
+**pivot_longer()**
+
+---
+
+## pivot_longer() takes three arguments
+
+| Argument | Job |
+|----------|-----|
+| `cols` | The columns to stack |
+| `names_to` | Name of the new column that receives the old column names |
+| `values_to` | Name of the new column that receives the values |
+
+---
+
+## Create gapminder_long
+
+```{r}
+# Keep the columns we need, then stack the year columns
+gapminder_long <- gapminder_wide |>
+  filter(name %in% c("Estonia", "Latvia", "Lithuania")) |>
+  select(name, `1950`:`2023`) |>
+  pivot_longer(
+    cols = `1950`:`2023`,
+    names_to = "year",
+    values_to = "life_exp"
+  )
+
+gapminder_long
+```
+
+3 countries and 74 years give 222 rows. `names_to = "year"` avoids the default name, `name`, which already exists in our table.
+
+---
+
+## Your turn 2 {background-color="#d5e8d4"}
+
+**Draw the line plot with `gapminder_long`.**
+
+```{r}
+#| eval: false
+gapminder_long |>
+  ggplot(aes(x = ___, y = ___, color = ___)) +
+  geom_line()
+```
+
+Answer: [YOUR ANSWER HERE]
+
+---
+
+## The plot is empty
+
+```{r}
+#| message: true
+gapminder_long |>
+  ggplot(aes(x = year, y = life_exp, color = name)) +
+  geom_line()
+```
+
+Let us look at the data.
+
+---
+
+## year is text
+
+```{r}
+gapminder_long |>
+  glimpse()
+```
+
+`year` is `<chr>`. `pivot_longer()` took the year from a column name, and column names are text. `ggplot()` puts text on a discrete axis and does not connect the points.
+
+---
+
+## Your turn 3 {background-color="#d5e8d4"}
+
+**Turn `year` into a whole number, then draw the line plot again.**
+
+```{r}
+#| eval: false
+gapminder_long |>
+  mutate(year = ___(year)) |>
+  ggplot(aes(x = year, y = life_exp, color = name)) +
+  geom_line()
+```
+
+Answer: the function is [YOUR ANSWER HERE].
+
+---
+
+## The fix: as.integer()
+
+```{r}
+# as.integer() turns "1990" into 1990
+gapminder_long |>
+  mutate(year = as.integer(year)) |>
+  ggplot(aes(x = year, y = life_exp, color = name)) +
+  geom_line()
+```
+
+---
+
+## Rewrite gapminder_long with the fix
+
+```{r}
+# One pipeline: filter, select, pivot, change the type of year
+gapminder_long <- gapminder_wide |>
+  filter(name %in% c("Estonia", "Latvia", "Lithuania")) |>
+  select(name, `1950`:`2023`) |>
+  pivot_longer(
+    cols = `1950`:`2023`,
+    names_to = "year",
+    values_to = "life_exp"
+  ) |>
+  mutate(year = as.integer(year))
+```
+
+```{r}
+gapminder_long |>
+  ggplot(aes(x = year, y = life_exp, color = name)) +
+  geom_line() +
+  labs(x = "Year", y = "Life expectancy (years)", color = NULL)
+```
+
+---
+
+# 2. Long to wide {background-color="#1a5276" style="color: white;"}
+
+**pivot_wider()**
+
+---
+
+## table2 is long
+
+```{r}
+# table2 comes with the tidyr package
+table2
+```
+
+The column `type` holds the names of two variables: `cases` and `population`. Each country and year takes two rows.
+
+---
+
+## pivot_wider() takes two arguments
+
+| Argument | Job |
+|----------|-----|
+| `names_from` | The column whose values become new column names |
+| `values_from` | The column whose values fill the new columns |
+
+```{r}
+# One column for cases and one for population
+table2 |>
+  pivot_wider(names_from = type, values_from = count)
+```
+
+12 rows become 6 rows.
+
+---
+
+## Your turn 4 {background-color="#d5e8d4"}
+
+**Which Baltic country gained the most life expectancy from 1990 to 2023?**
+
+```{r}
+#| eval: false
+gapminder_long |>
+  filter(year %in% c(___, ___)) |>
+  pivot_wider(names_from = ___, values_from = ___) |>
+  mutate(change = `___` - `___`)
+```
+
+Answer: [YOUR ANSWER HERE] gained the most, [YOUR ANSWER HERE] years.
+
+---
+
+## Recap {.smaller}
+
+| Task | Code |
+|------|------|
+| Wide to long | `pivot_longer(cols = , names_to = , values_to = )` |
+| Long to wide | `pivot_wider(names_from = , values_from = )` |
+| Text to whole number | `mutate(year = as.integer(year))` |
+| Columns named with digits | Use backticks: `` `1990` `` |
+
+---
+
+## {background-color="#1a5276" style="color: white; text-align: center;"}
+
+<br><br>
+
+### See you in the next class!

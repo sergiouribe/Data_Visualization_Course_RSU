@@ -1,0 +1,139 @@
+---
+title: "Reshaping data: pivot_longer() and pivot_wider() (worksheet)"
+format: html
+---
+
+Replace each `___` with code, remove `#| eval: false` and run the chunk. Write your answer under each chunk.
+
+The data are life expectancy values from Gapminder. Put `gapminder_life_expectancy_wide.csv` in the `data` folder of the project.
+
+```{r}
+#| label: setup
+pacman::p_load(here, tidyverse)
+```
+
+```{r}
+#| label: load-data
+gapminder_wide <- read_csv(here("data", "gapminder_life_expectancy_wide.csv"))
+```
+
+## One row per country, one column per year
+
+```{r}
+#| label: look-wide
+gapminder_wide |>
+  filter(name %in% c("Estonia", "Latvia", "Lithuania")) |>
+  select(name, `1990`, `2000`, `2010`, `2023`)
+```
+
+## Your turn 1: plot the wide table
+
+Draw a line plot of life expectancy over time for Estonia, Latvia and Lithuania. Write down what stops you.
+
+```{r}
+#| label: turn-1
+#| eval: false
+gapminder_wide |>
+  filter(name %in% c("Estonia", "Latvia", "Lithuania")) |>
+  ggplot(aes(x = ___, y = ___, color = name)) +
+  geom_line()
+```
+
+Answer: [YOUR ANSWER HERE]
+
+## Wide to long: pivot_longer()
+
+Run this chunk. We wrote it together in class.
+
+```{r}
+#| label: make-long
+gapminder_long <- gapminder_wide |>
+  filter(name %in% c("Estonia", "Latvia", "Lithuania")) |>
+  select(name, `1950`:`2023`) |>
+  pivot_longer(
+    cols = `1950`:`2023`,
+    names_to = "year",
+    values_to = "life_exp"
+  )
+
+gapminder_long
+```
+
+## Your turn 2: plot the long table
+
+Draw the line plot with `gapminder_long`. Write down what you see.
+
+```{r}
+#| label: turn-2
+#| eval: false
+gapminder_long |>
+  ggplot(aes(x = ___, y = ___, color = ___)) +
+  geom_line()
+```
+
+Answer: [YOUR ANSWER HERE]
+
+Look at the data. Which type is `year`?
+
+```{r}
+#| label: look-long
+gapminder_long |>
+  glimpse()
+```
+
+Answer: `year` is [YOUR ANSWER HERE].
+
+## Your turn 3: change the type of year
+
+Turn `year` into a whole number, then draw the line plot again.
+
+```{r}
+#| label: turn-3
+#| eval: false
+gapminder_long |>
+  mutate(year = ___(year)) |>
+  ggplot(aes(x = year, y = life_exp, color = name)) +
+  geom_line()
+```
+
+Answer: the function is [YOUR ANSWER HERE].
+
+Run this chunk. It rewrites `gapminder_long` with the fix inside the pipeline.
+
+```{r}
+#| label: make-long-fixed
+gapminder_long <- gapminder_wide |>
+  filter(name %in% c("Estonia", "Latvia", "Lithuania")) |>
+  select(name, `1950`:`2023`) |>
+  pivot_longer(
+    cols = `1950`:`2023`,
+    names_to = "year",
+    values_to = "life_exp"
+  ) |>
+  mutate(year = as.integer(year))
+```
+
+## Long to wide: pivot_wider()
+
+`table2` comes with the tidyr package. Run this chunk.
+
+```{r}
+#| label: table2-example
+table2 |>
+  pivot_wider(names_from = type, values_from = count)
+```
+
+## Your turn 4: back to wide
+
+Which Baltic country gained the most life expectancy from 1990 to 2023?
+
+```{r}
+#| label: turn-4
+#| eval: false
+gapminder_long |>
+  filter(year %in% c(___, ___)) |>
+  pivot_wider(names_from = ___, values_from = ___) |>
+  mutate(change = `___` - `___`)
+```
+
+Answer: [YOUR ANSWER HERE] gained the most, [YOUR ANSWER HERE] years.
