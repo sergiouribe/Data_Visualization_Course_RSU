@@ -1,8 +1,7 @@
 ---
-title: "Class 4. Row and column verbs"
-subtitle: "[SZF_184 Data Visualisation and Storytelling](https://estudijas.rsu.lv/course/view.php?id=83740)"
-author: "Sergio Uribe"
-institute: "Rīga Stradiņš University"
+title: "Data Manipulation with dplyr"
+subtitle: "SZF_184 Data Visualisation and Storytelling "
+author: "Sergio.Uribe@rsu.lv"
 format:
   revealjs:
     theme: simple
@@ -39,7 +38,7 @@ pacman::p_load(here, tidyverse, gtsummary, nycflights13)
 | `distance` | Distance in miles |
 | `month` | 1 = January … 12 = December |
 
----
+------------------------------------------------------------------------
 
 ## The dplyr toolkit
 
@@ -52,19 +51,19 @@ pacman::p_load(here, tidyverse, gtsummary, nycflights13)
 | `mutate()` | Add a calculated column |
 | `group_by()` + `summarize()` | Summarize groups |
 
-```r
+``` r
 data |>
   verb_1(...) |>
   verb_2(...)
 ```
 
----
+------------------------------------------------------------------------
 
 # 1. head() and tail() {background-color="#1a5276" style="color: white;"}
 
 **Look at the data before anything else**
 
----
+------------------------------------------------------------------------
 
 ## head() shows the first rows
 
@@ -72,7 +71,7 @@ data |>
 flights |> head()
 ```
 
----
+------------------------------------------------------------------------
 
 ## tail() shows the last rows
 
@@ -80,7 +79,7 @@ flights |> head()
 flights |> tail(3)
 ```
 
----
+------------------------------------------------------------------------
 
 ## Your turn 1 {background-color="#d5e8d4"}
 
@@ -100,13 +99,13 @@ flights |>
   ___
 ```
 
----
+------------------------------------------------------------------------
 
 # 2. select() {background-color="#1a5276" style="color: white;"}
 
 **Choose the columns you need**
 
----
+------------------------------------------------------------------------
 
 ## The problem: 19 columns
 
@@ -126,7 +125,7 @@ flights |>
   head(4)
 ```
 
----
+------------------------------------------------------------------------
 
 ## Your turn 2 {background-color="#d5e8d4"}
 
@@ -140,13 +139,13 @@ flights |>
   tbl_summary(by = carrier)
 ```
 
----
+------------------------------------------------------------------------
 
 # 3. filter() {background-color="#1a5276" style="color: white;"}
 
 **Keep only the rows you want**
 
----
+------------------------------------------------------------------------
 
 ## filter() keeps rows where the condition is TRUE
 
@@ -157,7 +156,7 @@ flights |>
   head(4)
 ```
 
----
+------------------------------------------------------------------------
 
 ## But how many rows is that?
 
@@ -168,7 +167,7 @@ flights |>
   count()
 ```
 
----
+------------------------------------------------------------------------
 
 ## Comparison symbols {.smaller}
 
@@ -187,7 +186,7 @@ flights |>
 Text goes inside **quotes**. Numbers do not. Use `==` not `=`.
 :::
 
----
+------------------------------------------------------------------------
 
 ## Your turn 3 {background-color="#d5e8d4"}
 
@@ -216,13 +215,13 @@ flights |>
   filter(___)
 ```
 
----
+------------------------------------------------------------------------
 
 # 4. Combining conditions {background-color="#1a5276" style="color: white;"}
 
 **Filter by more than one thing at once**
 
----
+------------------------------------------------------------------------
 
 ## One condition
 
@@ -244,7 +243,7 @@ flights |>
   count()
 ```
 
----
+------------------------------------------------------------------------
 
 ## Add a third condition
 
@@ -280,27 +279,17 @@ flights |>
   count()
 ```
 
----
+------------------------------------------------------------------------
 
 # 5. arrange() {background-color="#1a5276" style="color: white;"}
 
 **Sort rows**
 
----
+------------------------------------------------------------------------
 
 ## arrange() sorts ascending by default
 
-```{r}
-# Smallest dep_delay first, left earliest
-flights |>
-  select(carrier, origin, dest, dep_delay) |>
-  arrange(dep_delay) |>
-  head(4)
-```
-
----
-
-## What if we want most delayed first?
+`arrange()` sorts rows in **ascending** order by default. Wrap the column in `desc()` to sort descending.
 
 ```{r}
 # desc() reverses the order
@@ -310,7 +299,7 @@ flights |>
   head(4)
 ```
 
----
+------------------------------------------------------------------------
 
 ## Chain verbs: filter → select → arrange → head
 
@@ -323,7 +312,7 @@ flights |>
   head(5)
 ```
 
----
+------------------------------------------------------------------------
 
 ## Your turn 5 {background-color="#d5e8d4"}
 
@@ -338,13 +327,13 @@ flights |>
   head(5)
 ```
 
----
+------------------------------------------------------------------------
 
 # 6. mutate() {background-color="#1a5276" style="color: white;"}
 
 **Add a calculated column**
 
----
+------------------------------------------------------------------------
 
 ## mutate() adds the new column at the far right
 
@@ -357,7 +346,7 @@ flights |>
 
 ---
 
-## Use select() to bring it into focus
+`mutate()` adds a column derived from existing columns. The new name goes on the **left** of `=`.
 
 ```{r}
 # Show only the columns that matter
@@ -367,7 +356,7 @@ flights |>
   head(4)
 ```
 
----
+------------------------------------------------------------------------
 
 ## Your turn 6 {background-color="#d5e8d4"}
 
@@ -382,15 +371,17 @@ flights |>
   select(___)
 ```
 
----
+------------------------------------------------------------------------
 
 # 7. group_by() + summarize() {background-color="#1a5276" style="color: white;"}
 
 **Compare groups**
 
----
+------------------------------------------------------------------------
 
-## summarize() alone: one result for the whole table
+## group_by() + summarize()
+
+`group_by()` splits the table into groups. `summarize()` reduces each group to **one summary row**.
 
 ```{r}
 # Mean departure delay for all flights
@@ -398,7 +389,11 @@ flights |>
   summarize(mean_dep_delay = mean(dep_delay))
 ```
 
----
+::: callout-note
+`na.rm = TRUE` ignores missing values — cancelled flights have no delay recorded.
+:::
+
+------------------------------------------------------------------------
 
 ## Why NA? Cancelled flights have no delay recorded
 
@@ -408,7 +403,7 @@ flights |>
   summarize(mean_dep_delay = mean(dep_delay, na.rm = TRUE))
 ```
 
----
+------------------------------------------------------------------------
 
 ## group_by() splits into groups first
 
@@ -419,9 +414,15 @@ flights |>
   summarize(mean_dep_delay = mean(dep_delay, na.rm = TRUE))
 ```
 
----
+------------------------------------------------------------------------
 
-## Which carrier is worst? Add arrange()
+# 8. Putting it together {background-color="#1a5276" style="color: white;"}
+
+**Chain as many verbs as you need**
+
+------------------------------------------------------------------------
+
+## Chain everything
 
 ```{r}
 flights |>
@@ -433,7 +434,7 @@ flights |>
   arrange(desc(mean_dep_delay))
 ```
 
----
+------------------------------------------------------------------------
 
 ## Your turn 7 {background-color="#d5e8d4"}
 
@@ -468,7 +469,7 @@ flights |>
   arrange(desc(mean_dep_delay))
 ```
 
----
+------------------------------------------------------------------------
 
 ## Your turn 8 {background-color="#d5e8d4"}
 
@@ -493,41 +494,17 @@ flights |>
   arrange(___)
 ```
 
----
+------------------------------------------------------------------------
 
 # 9. Summary tables {background-color="#1a5276" style="color: white;"}
 
 **Publication-ready tables with gtsummary**
 
----
+------------------------------------------------------------------------
 
 ## tbl_summary(), first attempt
 
-```{r}
-flights |>
-  filter(carrier %in% c("AA", "UA", "DL")) |>
-  select(carrier, dep_delay, arr_delay) |>
-  tbl_summary(by = carrier)
-```
-
----
-
-## How to get rid of Unknown?
-
-```{r}
-# missing = "no" removes the Unknown rows
-flights |>
-  filter(carrier %in% c("AA", "UA", "DL")) |>
-  select(carrier, dep_delay, arr_delay) |>
-  tbl_summary(
-    by = carrier,
-    missing = "no"
-  )
-```
-
----
-
-## And how to reduce the digits?
+`tbl_summary()` makes a summary table in one step. `by =` gives one column per group.
 
 ```{r}
 # digits = all_continuous() ~ 1 rounds to 1 decimal
@@ -541,7 +518,7 @@ flights |>
   )
 ```
 
----
+------------------------------------------------------------------------
 
 ## Your turn 9 {background-color="#d5e8d4"}
 
@@ -559,7 +536,7 @@ flights |>
   )
 ```
 
----
+------------------------------------------------------------------------
 
 ## Recap {.smaller}
 
@@ -573,9 +550,9 @@ flights |>
 | `group_by()` + `summarize()` | Summarize groups | `na.rm = TRUE` always |
 | `tbl_summary()` | Summary table | `missing = "no"`, `digits` |
 
----
+------------------------------------------------------------------------
 
-## {background-color="#1a5276" style="color: white; text-align: center;"}
+##  {background-color="#1a5276" style="color: white; text-align: center;"}
 
 <br><br>
 
