@@ -40,9 +40,12 @@ The pipe `|>` connects them. Today we add three tools for `select()` and `filter
 ## Our data: all flights from New York in 2013
 
 ```{r}
-# The file is in the data folder of the project
-here("data", "flights.csv") |>
-  read_csv(show_col_types = FALSE) |>
+# Load the file once. Every chunk after this one starts from flights
+flights <- read_csv(here("data", "flights.csv"))
+```
+
+```{r}
+flights |>
   glimpse()
 ```
 
@@ -60,8 +63,7 @@ Examples from *R for Data Science* (2e), chapter 3.
 
 ```{r}
 # Seven names for a block of neighbouring columns
-here("data", "flights.csv") |>
-  read_csv(show_col_types = FALSE) |>
+flights |>
   select(year, month, day, dep_time, sched_dep_time, dep_delay, arr_time)
 ```
 
@@ -71,8 +73,7 @@ here("data", "flights.csv") |>
 
 ```{r}
 # year:day means every column from year to day
-here("data", "flights.csv") |>
-  read_csv(show_col_types = FALSE) |>
+flights |>
   select(year:day)
 ```
 
@@ -82,8 +83,7 @@ here("data", "flights.csv") |>
 
 ```{r}
 # ! means not: every column except year to day
-here("data", "flights.csv") |>
-  read_csv(show_col_types = FALSE) |>
+flights |>
   select(!year:day)
 ```
 
@@ -97,8 +97,7 @@ The result has 16 columns, the 19 of `flights` minus 3.
 
 ```{r}
 #| eval: false
-here("data", "flights.csv") |>
-  read_csv(show_col_types = FALSE) |>
+flights |>
   select(___:___)
 ```
 
@@ -108,8 +107,7 @@ Answer: [YOUR ANSWER HERE] columns.
 
 ```{r}
 #| eval: false
-here("data", "flights.csv") |>
-  read_csv(show_col_types = FALSE) |>
+flights |>
   select(!___:___)
 ```
 
@@ -128,8 +126,7 @@ Answer: [YOUR ANSWER HERE] columns.
 ```{r}
 # Two columns begin with dep. Typing both names is easy,
 # but a table with 50 such columns is not.
-here("data", "flights.csv") |>
-  read_csv(show_col_types = FALSE) |>
+flights |>
   select(dep_time, dep_delay)
 ```
 
@@ -139,8 +136,7 @@ here("data", "flights.csv") |>
 
 ```{r}
 # starts_with("abc") keeps every column whose name begins with abc
-here("data", "flights.csv") |>
-  read_csv(show_col_types = FALSE) |>
+flights |>
   select(starts_with("dep"))
 ```
 
@@ -152,8 +148,7 @@ The result has 2 columns: `dep_time` and `dep_delay`.
 
 ```{r}
 # ends_with("xyz") keeps every column whose name ends with xyz
-here("data", "flights.csv") |>
-  read_csv(show_col_types = FALSE) |>
+flights |>
   select(ends_with("delay"))
 ```
 
@@ -167,8 +162,7 @@ The result has 2 columns: `dep_delay` and `arr_delay`.
 
 ```{r}
 #| eval: false
-here("data", "flights.csv") |>
-  read_csv(show_col_types = FALSE) |>
+flights |>
   select(ends_with("___"))
 ```
 
@@ -178,8 +172,7 @@ Answer: [YOUR ANSWER HERE] columns.
 
 ```{r}
 #| eval: false
-here("data", "flights.csv") |>
-  read_csv(show_col_types = FALSE) |>
+flights |>
   select(starts_with("___"))
 ```
 
@@ -198,8 +191,7 @@ Answer: [YOUR ANSWER HERE] columns.
 ```{r}
 # & means and: both conditions must be TRUE
 # Flights that departed on January 1
-here("data", "flights.csv") |>
-  read_csv(show_col_types = FALSE) |>
+flights |>
   filter(month == 1 & day == 1)
 ```
 
@@ -211,8 +203,7 @@ A comma gives the same result: `filter(month == 1, day == 1)`.
 
 ```{r}
 # A flight has one month, so no row can be January and February
-here("data", "flights.csv") |>
-  read_csv(show_col_types = FALSE) |>
+flights |>
   filter(month == 1 & month == 2)
 ```
 
@@ -225,8 +216,7 @@ The result has 0 rows.
 ```{r}
 # | means or: one condition is enough
 # Flights that departed in January or February
-here("data", "flights.csv") |>
-  read_csv(show_col_types = FALSE) |>
+flights |>
   filter(month == 1 | month == 2)
 ```
 
@@ -236,8 +226,7 @@ here("data", "flights.csv") |>
 
 ```{r}
 # %in% checks if the value is one of the values in c()
-here("data", "flights.csv") |>
-  read_csv(show_col_types = FALSE) |>
+flights |>
   filter(month %in% c(1, 2))
 ```
 
@@ -249,8 +238,7 @@ The result is the same as the previous slide.
 
 ```{r}
 # Written as in English: "month is 1 or 2"
-here("data", "flights.csv") |>
-  read_csv(show_col_types = FALSE) |>
+flights |>
   filter(month == 1 | 2) |>
   count(month)
 ```
@@ -263,8 +251,7 @@ R runs this without an error. `|` checks `month == 1`, then checks `2`, and `2` 
 
 ```{r}
 # Repeat the full condition, or use %in%
-here("data", "flights.csv") |>
-  read_csv(show_col_types = FALSE) |>
+flights |>
   filter(month %in% c(1, 2)) |>
   count(month)
 ```
@@ -277,8 +264,7 @@ here("data", "flights.csv") |>
 
 ```{r}
 #| eval: false
-here("data", "flights.csv") |>
-  read_csv(show_col_types = FALSE) |>
+flights |>
   filter(month == ___ & day == ___)
 ```
 
@@ -286,8 +272,7 @@ here("data", "flights.csv") |>
 
 ```{r}
 #| eval: false
-here("data", "flights.csv") |>
-  read_csv(show_col_types = FALSE) |>
+flights |>
   filter(month == ___ | month == ___)
 ```
 
@@ -295,8 +280,7 @@ here("data", "flights.csv") |>
 
 ```{r}
 #| eval: false
-here("data", "flights.csv") |>
-  read_csv(show_col_types = FALSE) |>
+flights |>
   filter(month %in% c(___, ___))
 ```
 
@@ -314,8 +298,7 @@ Answer: both versions return [YOUR ANSWER HERE] rows. Check it with `count()`.
 
 ```{r}
 # Works, but we repeat the column name and use two conditions
-here("data", "flights.csv") |>
-  read_csv(show_col_types = FALSE) |>
+flights |>
   filter(month != 1 & month != 2)
 ```
 
@@ -326,8 +309,7 @@ here("data", "flights.csv") |>
 ```{r}
 # month %in% c(1, 2) is TRUE for January and February
 # ! turns TRUE into FALSE and FALSE into TRUE
-here("data", "flights.csv") |>
-  read_csv(show_col_types = FALSE) |>
+flights |>
   filter(!(month %in% c(1, 2)))
 ```
 
@@ -339,8 +321,7 @@ The result is the same as the previous slide, with one condition.
 
 ```{r}
 # NA means "unknown", so a comparison with NA is never TRUE
-here("data", "flights.csv") |>
-  read_csv(show_col_types = FALSE) |>
+flights |>
   filter(dep_delay == NA)
 ```
 
@@ -348,8 +329,7 @@ The result has 0 rows.
 
 ```{r}
 # is.na() is TRUE when the value is missing
-here("data", "flights.csv") |>
-  read_csv(show_col_types = FALSE) |>
+flights |>
   filter(is.na(dep_delay))
 ```
 
@@ -359,8 +339,7 @@ here("data", "flights.csv") |>
 
 ```{r}
 # ! reverses is.na(): keep flights with a departure delay
-here("data", "flights.csv") |>
-  read_csv(show_col_types = FALSE) |>
+flights |>
   filter(!is.na(dep_delay))
 ```
 
@@ -372,8 +351,7 @@ here("data", "flights.csv") |>
 
 ```{r}
 #| eval: false
-here("data", "flights.csv") |>
-  read_csv(show_col_types = FALSE) |>
+flights |>
   filter(origin ___ "JFK") |>
   count(origin)
 ```
@@ -384,8 +362,7 @@ Answer: [YOUR ANSWER HERE] airports remain.
 
 ```{r}
 #| eval: false
-here("data", "flights.csv") |>
-  read_csv(show_col_types = FALSE) |>
+flights |>
   filter(!(origin %in% c("___", "___"))) |>
   count(origin)
 ```
@@ -412,4 +389,4 @@ Answer: [YOUR ANSWER HERE] is the only airport left.
 
 <br><br>
 
-### See you in the next class!
+### Next: pivot
