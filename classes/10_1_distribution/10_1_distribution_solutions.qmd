@@ -1,0 +1,123 @@
+---
+title: "How is the data distributed? (solutions)"
+format: html
+---
+
+Teacher version. Chunks run. The penguins come with the palmerpenguins package, so no data file is needed.
+
+```{r}
+#| label: setup
+pacman::p_load(here, tidyverse, palmerpenguins)
+```
+
+## The question
+
+```{r}
+#| label: look-data
+penguins |>
+  glimpse()
+```
+
+Answer: 344 rows. `body_mass_g` is continuous.
+
+## 1. The first histogram
+
+```{r}
+#| label: first-histogram
+penguins |>
+  ggplot(aes(x = body_mass_g)) +
+  geom_histogram()
+```
+
+Answer: two messages. `using bins = 30` means R cut the weights into 30 bars. `Removed 2 rows` means 2 penguins have no body mass.
+
+```{r}
+#| label: fixed-histogram
+penguins |>
+  filter(!is.na(body_mass_g)) |>
+  ggplot(aes(x = body_mass_g)) +
+  geom_histogram(binwidth = 200)
+```
+
+### Your turn 1
+
+```{r}
+#| label: turn-1
+penguins |>
+  filter(species == "Gentoo", !is.na(body_mass_g)) |>
+  ggplot(aes(x = body_mass_g)) +
+  geom_histogram(binwidth = 200)
+```
+
+Answer: the tallest bar of each species, with `binwidth = 200`.
+
+| Species | Penguins with a weight | Tallest bar (g) | Rows in the tallest bar |
+|---------|------------------------|-----------------|-------------------------|
+| Adelie | 151 | 3,300 to 3,500 | 27 |
+| Chinstrap | 68 | 3,500 to 3,700 | 17 |
+| Gentoo | 123 | 4,700 to 4,900 | 18 |
+
+The chunk shows Gentoo. Students who choose another species change the name in the filter.
+
+## 2. One histogram for all species
+
+```{r}
+#| label: fill-species
+penguins |>
+  filter(!is.na(body_mass_g)) |>
+  ggplot(aes(x = body_mass_g, fill = species)) +
+  geom_histogram(binwidth = 200)
+```
+
+Answer: the bars stack. Chinstrap floats on top of Adelie, so the shapes cannot be compared.
+
+```{r}
+#| label: position-identity
+penguins |>
+  filter(!is.na(body_mass_g)) |>
+  ggplot(aes(x = body_mass_g, fill = species)) +
+  geom_histogram(binwidth = 200, position = "identity")
+```
+
+Answer: every species starts at zero. Adelie sits behind Chinstrap, and the overlap is hidden.
+
+```{r}
+#| label: alpha
+penguins |>
+  filter(!is.na(body_mass_g)) |>
+  ggplot(aes(x = body_mass_g, fill = species)) +
+  geom_histogram(binwidth = 200, position = "identity", alpha = 0.5)
+```
+
+Answer: Adelie and Chinstrap overlap across most of their range. Gentoo is shifted to the right, with its tallest bar near 4,800 g.
+
+### Your turn 2
+
+```{r}
+#| label: turn-2
+penguins |>
+  filter(!is.na(flipper_length_mm)) |>
+  ggplot(aes(x = flipper_length_mm, fill = species)) +
+  geom_histogram(binwidth = 3, position = "identity", alpha = 0.5)
+```
+
+Answer: `flipper_length_mm` and `species`. Gentoo has the longest flippers (217 mm on average, range 203 to 231 mm). Adelie (190 mm, range 172 to 210) and Chinstrap (196 mm, range 178 to 212) overlap the most.
+
+## 3. A smooth curve
+
+```{r}
+#| label: density
+penguins |>
+  filter(!is.na(body_mass_g)) |>
+  ggplot(aes(x = body_mass_g, fill = species)) +
+  geom_density(alpha = 0.5)
+```
+
+Answer: each curve has the same area. Chinstrap (68 penguins) looks as large as Adelie (152). The curves compare shapes, and the histograms compare counts.
+
+## Notes for the teacher
+
+- The first histogram shows two messages on purpose. Students see both, then the fix.
+- `alpha = 0.5` alone does not help while the bars are stacked. The plot only becomes see-through. `position = "identity"` comes first, then `alpha`.
+- Penguins with a weight: Adelie 151 of 152, Chinstrap 68 of 68, Gentoo 123 of 124. The plots of one species show `Removed 1 rows` unless the filter includes `!is.na()`.
+- If time runs short, section 3 (density) becomes homework.
