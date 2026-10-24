@@ -1,0 +1,216 @@
+---
+title: "How many? Pie and treemap"
+subtitle: "[SZF_184 Data Visualisation and Storytelling](https://estudijas.rsu.lv/course/view.php?id=83740)"
+author: "Sergio Uribe"
+institute: "Rīga Stradiņš University"
+format:
+  revealjs:
+    theme: simple
+    slide-number: true
+    code-block-bg: true
+    highlight-style: github
+    footer: '<a href="https://estudijas.rsu.lv/course/view.php?id=83740">SZF_184</a> RSU · Uribe'
+    transition: fade
+execute:
+  echo: true
+  warning: false
+  message: false
+  fig-width: 8
+  fig-height: 4.2
+---
+
+```{r}
+#| label: setup
+#| include: false
+pacman::p_load(here, tidyverse, palmerpenguins, treemapify)
+```
+
+## The question
+
+**How many?**
+
+Two charts that show the counts of a discrete variable: the pie plot and the treemap.
+
+---
+
+# 1. A pie plot {background-color="#1a5276" style="color: white;"}
+
+**coord_polar()**
+
+---
+
+## One bar
+
+```{r}
+penguins |>
+  count(species) |>
+  ggplot(aes(x = "", y = n, fill = species)) +
+  geom_col()
+```
+
+There is no `geom_pie()` in ggplot2. We start with one stacked bar. Each segment is one species.
+
+---
+
+## Pie
+
+```{r}
+penguins |>
+  count(species) |>
+  ggplot(aes(x = "", y = n, fill = species)) +
+  geom_col(width = 1) +
+  coord_polar(theta = "y")
+```
+
+`coord_polar(theta = "y")` bends the bar into a circle. `width = 1` closes the hole in the middle.
+
+---
+
+## Pie void
+
+```{r}
+penguins |>
+  count(species) |>
+  ggplot(aes(x = "", y = n, fill = species)) +
+  geom_col(width = 1) +
+  coord_polar(theta = "y") +
+  theme_void()
+```
+
+`theme_void()` removes the axes. A pie has no use for them. Adelie has 152 penguins and Gentoo has 124, and the two slices look almost the same. A bar plot would show the difference at once.
+
+---
+
+## Your turn 1 {background-color="#d5e8d4"}
+
+**Draw a pie plot of the penguins on each island.**
+
+```{r}
+#| eval: false
+penguins |>
+  count(island) |>
+  ggplot(aes(x = "", y = n, fill = ___)) +
+  geom_col(width = 1) +
+  coord_polar(theta = "y") +
+  theme_void()
+```
+
+Answer: the largest slice is [YOUR ANSWER HERE]. The second largest slice is [YOUR ANSWER HERE].
+
+---
+
+# 2. A treemap {background-color="#1a5276" style="color: white;"}
+
+**geom_treemap()**
+
+---
+
+A treemap draws one rectangle for each category. The area of the rectangle is proportional to the count. The `treemapify` package draws treemaps. `pacman::p_load(treemapify)` installs it on the first run.
+
+---
+
+## Treemap no label
+
+```{r}
+#| error: true
+penguins |>
+  count(species) |>
+  ggplot(aes(area = n, fill = species)) +
+  geom_treemap() +
+  geom_treemap_text()
+```
+
+Read the error: `geom_treemap_text()` requires the missing aesthetic `label`. The text layer needs to know what to write.
+
+---
+
+## Treemap
+
+```{r}
+penguins |>
+  count(species) |>
+  ggplot(aes(area = n, fill = species, label = species)) +
+  geom_treemap() +
+  geom_treemap_text()
+```
+
+`label = species` writes the species name on each rectangle. Adelie and Gentoo differ visibly, and Chinstrap is the smallest.
+
+---
+
+## Your turn 2 {background-color="#d5e8d4"}
+
+**Draw a treemap of the penguins on each island.**
+
+```{r}
+#| eval: false
+penguins |>
+  count(island) |>
+  ggplot(aes(area = ___, fill = island, label = island)) +
+  geom_treemap() +
+  geom_treemap_text()
+```
+
+Answer: the rectangle of [YOUR ANSWER HERE] is the largest. [YOUR ANSWER HERE] has the smallest rectangle.
+
+---
+
+# 3. Species inside each island {background-color="#1a5276" style="color: white;"}
+
+**subgroup**
+
+---
+
+## Treemap subgroup
+
+```{r}
+penguins |>
+  count(island, species) |>
+  ggplot(aes(area = n, fill = species, label = species, subgroup = island)) +
+  geom_treemap() +
+  geom_treemap_subgroup_border() +
+  geom_treemap_text(colour = "white") +
+  geom_treemap_subgroup_text()
+```
+
+`subgroup = island` draws a border around each island. The species rectangles sit inside. Biscoe has Gentoo (124) and Adelie (44). Dream has Chinstrap (68) and Adelie (56). Torgersen has Adelie (52).
+
+---
+
+## Your turn 3 {background-color="#d5e8d4"}
+
+**Swap the roles: one border for each species, with one color for each island.**
+
+```{r}
+#| eval: false
+penguins |>
+  count(island, species) |>
+  ggplot(aes(area = n, fill = island, label = island, subgroup = ___)) +
+  geom_treemap() +
+  geom_treemap_subgroup_border() +
+  geom_treemap_text(colour = "white") +
+  geom_treemap_subgroup_text()
+```
+
+Answer: [YOUR ANSWER HERE] has three rectangles. [YOUR ANSWER HERE] and [YOUR ANSWER HERE] have one rectangle each.
+
+---
+
+## Recap {.smaller}
+
+| Task | Code |
+|------|------|
+| One stacked bar | `geom_col()` with `x = ""` |
+| Bend the bar into a pie | `coord_polar(theta = "y")` |
+| Remove the axes | `theme_void()` |
+| Treemap rectangles | `geom_treemap()` with `aes(area = n)` |
+| Text on the rectangles | `geom_treemap_text()` with `aes(label = species)` |
+| Borders around groups | `aes(subgroup = island)` and `geom_treemap_subgroup_border()` |
+
+---
+
+## {background-color="#1a5276" style="color: white; text-align: center;"}
+
+<br><br>
+
+### See you in the next class!

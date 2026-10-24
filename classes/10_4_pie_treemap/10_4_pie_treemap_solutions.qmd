@@ -1,0 +1,148 @@
+---
+title: "How many? Pie and treemap (solutions)"
+format: html
+---
+
+Teacher version. Chunks run. The penguins come with the palmerpenguins package, so no data file is needed.
+
+```{r}
+#| label: setup
+pacman::p_load(here, tidyverse, palmerpenguins, treemapify)
+```
+
+## The question
+
+Two charts that show the counts of a discrete variable: the pie plot and the treemap.
+
+## 1. A pie plot
+
+There is no `geom_pie()` in ggplot2. We start with one stacked bar. Each segment is one species.
+
+```{r}
+#| label: one-bar
+penguins |>
+  count(species) |>
+  ggplot(aes(x = "", y = n, fill = species)) +
+  geom_col()
+```
+
+`coord_polar(theta = "y")` bends the bar into a circle. `width = 1` closes the hole in the middle.
+
+```{r}
+#| label: pie
+penguins |>
+  count(species) |>
+  ggplot(aes(x = "", y = n, fill = species)) +
+  geom_col(width = 1) +
+  coord_polar(theta = "y")
+```
+
+`theme_void()` removes the axes. A pie has no use for them. Adelie has 152 penguins and Gentoo has 124, and the two slices look almost the same. A bar plot would show the difference at once.
+
+```{r}
+#| label: pie-void
+penguins |>
+  count(species) |>
+  ggplot(aes(x = "", y = n, fill = species)) +
+  geom_col(width = 1) +
+  coord_polar(theta = "y") +
+  theme_void()
+```
+
+### Your turn 1
+
+Draw a pie plot of the penguins on each island.
+
+```{r}
+#| label: turn-1
+penguins |>
+  count(island) |>
+  ggplot(aes(x = "", y = n, fill = island)) +
+  geom_col(width = 1) +
+  coord_polar(theta = "y") +
+  theme_void()
+```
+
+Answer: `island`. Biscoe is the largest slice (168 penguins), then Dream (124). Torgersen has 52. Biscoe and Dream are hard to tell apart in a pie.
+
+## 2. A treemap
+
+A treemap draws one rectangle for each category. The area of the rectangle is proportional to the count. The `treemapify` package draws treemaps. `pacman::p_load(treemapify)` installs it on the first run.
+
+Read the error: `geom_treemap_text()` requires the missing aesthetic `label`. The text layer needs to know what to write.
+
+```{r}
+#| label: treemap-no-label
+#| error: true
+penguins |>
+  count(species) |>
+  ggplot(aes(area = n, fill = species)) +
+  geom_treemap() +
+  geom_treemap_text()
+```
+
+`label = species` writes the species name on each rectangle. Adelie and Gentoo differ visibly, and Chinstrap is the smallest.
+
+```{r}
+#| label: treemap
+penguins |>
+  count(species) |>
+  ggplot(aes(area = n, fill = species, label = species)) +
+  geom_treemap() +
+  geom_treemap_text()
+```
+
+### Your turn 2
+
+Draw a treemap of the penguins on each island.
+
+```{r}
+#| label: turn-2
+penguins |>
+  count(island) |>
+  ggplot(aes(area = n, fill = island, label = island)) +
+  geom_treemap() +
+  geom_treemap_text()
+```
+
+Answer: `n`. Biscoe has the largest rectangle (168) and Torgersen has the smallest (52).
+
+## 3. Species inside each island
+
+`subgroup = island` draws a border around each island. The species rectangles sit inside. Biscoe has Gentoo (124) and Adelie (44). Dream has Chinstrap (68) and Adelie (56). Torgersen has Adelie (52).
+
+```{r}
+#| label: treemap-subgroup
+penguins |>
+  count(island, species) |>
+  ggplot(aes(area = n, fill = species, label = species, subgroup = island)) +
+  geom_treemap() +
+  geom_treemap_subgroup_border() +
+  geom_treemap_text(colour = "white") +
+  geom_treemap_subgroup_text()
+```
+
+### Your turn 3
+
+Swap the roles: one border for each species, with one color for each island.
+
+```{r}
+#| label: turn-3
+penguins |>
+  count(island, species) |>
+  ggplot(aes(area = n, fill = island, label = island, subgroup = species)) +
+  geom_treemap() +
+  geom_treemap_subgroup_border() +
+  geom_treemap_text(colour = "white") +
+  geom_treemap_subgroup_text()
+```
+
+Answer: `species`. Adelie has three rectangles, one for each island. Chinstrap (Dream) and Gentoo (Biscoe) have one rectangle each.
+
+## Notes for the teacher
+
+- Counts by species: Adelie 152, Chinstrap 68, Gentoo 124. By island: Biscoe 168, Dream 124, Torgersen 52.
+- Species by island: Biscoe has Adelie 44 and Gentoo 124. Dream has Adelie 56 and Chinstrap 68. Torgersen has Adelie 52.
+- The treemap chunk with the missing `label` uses `#| error: true`, so the file renders with the error visible.
+- `treemapify` needs a recent R and ggplot2 (3.5 or later). If the install fails on a student machine, ask them to update ggplot2 first.
+- If time runs short, section 3 becomes homework.
