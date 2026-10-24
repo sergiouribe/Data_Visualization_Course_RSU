@@ -1,0 +1,185 @@
+---
+title: "How many? (solutions)"
+format: html
+---
+
+Teacher version. Chunks run. The penguins come with the palmerpenguins package, so no data file is needed.
+
+```{r}
+#| label: setup
+pacman::p_load(here, tidyverse, palmerpenguins)
+```
+
+## The question
+
+How many? One discrete variable, such as the island or the species. We count the rows in each category.
+
+## 1. Count the rows
+
+`count()` gives a table with the number of penguins on each island.
+
+```{r}
+#| label: count-island
+penguins |>
+  count(island)
+```
+
+### Your turn 1
+
+Count the penguins of each species.
+
+```{r}
+#| label: turn-1
+penguins |>
+  count(species)
+```
+
+Answer: `species`. Adelie has the most penguins, with 152. Chinstrap has 68 and Gentoo has 124.
+
+## 2. The same count as a bar plot
+
+`geom_bar()` counts the rows itself. We only give `x`.
+
+```{r}
+#| label: bar-island
+penguins |>
+  ggplot(aes(x = island)) +
+  geom_bar()
+```
+
+### Your turn 2
+
+Draw the bars of the penguins of each species.
+
+```{r}
+#| label: turn-2
+penguins |>
+  ggplot(aes(x = species)) +
+  geom_bar()
+```
+
+Answer: `species`. The tallest bar is Adelie (152 penguins).
+
+## 3. geom_bar() and geom_col()
+
+The table from section 1 already has the counts. Give it to `geom_bar()` with `y = n` and read the error.
+
+```{r}
+#| label: bar-with-y
+#| error: true
+penguins |>
+  count(island) |>
+  ggplot(aes(x = island, y = n)) +
+  geom_bar()
+```
+
+`stat_count() must only have an x or y aesthetic`: `geom_bar()` counts rows, and the table has nothing left to count. `geom_col()` draws a number we already have.
+
+```{r}
+#| label: col-island
+penguins |>
+  count(island) |>
+  ggplot(aes(x = island, y = n)) +
+  geom_col()
+```
+
+The picture is the same. The reverse mistake, `geom_col()` without `y`, gives `geom_col() requires the following missing aesthetics: y`.
+
+```{r}
+#| label: col-no-y
+#| error: true
+penguins |>
+  count(island) |>
+  ggplot(aes(x = island)) +
+  geom_col()
+```
+
+### Your turn 3
+
+Draw the species counts with `geom_col()`.
+
+```{r}
+#| label: turn-3
+penguins |>
+  count(species) |>
+  ggplot(aes(x = species, y = n)) +
+  geom_col()
+```
+
+Answer: `n`. The picture equals the bars of Your turn 2.
+
+## 4. Color by a second variable
+
+`fill = species` splits each island bar by species.
+
+```{r}
+#| label: fill-species
+penguins |>
+  ggplot(aes(x = island, fill = species)) +
+  geom_bar()
+```
+
+### Your turn 4
+
+Draw the bars of the species, with one color for each island.
+
+```{r}
+#| label: turn-4
+penguins |>
+  ggplot(aes(x = species, fill = island)) +
+  geom_bar()
+```
+
+Answer: `island`. Chinstrap lives on Dream only and Gentoo lives on Biscoe only. Adelie lives on all three islands.
+
+## 5. Female and male penguins by island
+
+`fill = sex` splits each island bar by sex. Read the grey segment.
+
+```{r}
+#| label: fill-sex
+penguins |>
+  ggplot(aes(x = island, fill = sex)) +
+  geom_bar()
+```
+
+The grey segment is `NA`: 11 penguins have no sex (Biscoe 5, Dream 1, Torgersen 5). `filter(!is.na(sex))` removes them.
+
+```{r}
+#| label: fill-sex-filter
+penguins |>
+  filter(!is.na(sex)) |>
+  ggplot(aes(x = island, fill = sex)) +
+  geom_bar()
+```
+
+Stacked bars make females and males hard to compare, because the top segment does not start at zero. `position = "dodge"` puts the bars side by side.
+
+```{r}
+#| label: dodge
+penguins |>
+  filter(!is.na(sex)) |>
+  ggplot(aes(x = island, fill = sex)) +
+  geom_bar(position = "dodge")
+```
+
+### Your turn 5
+
+Draw the females and males in each species, side by side.
+
+```{r}
+#| label: turn-5
+penguins |>
+  filter(!is.na(sex)) |>
+  ggplot(aes(x = species, fill = sex)) +
+  geom_bar(position = "dodge")
+```
+
+Answer: `species` and `dodge`. The numbers are nearly equal: Adelie 73 and 73, Chinstrap 34 and 34, Gentoo 58 females and 61 males.
+
+## Notes for the teacher
+
+- Counts by island: Biscoe 168, Dream 124, Torgersen 52. By species: Adelie 152, Chinstrap 68, Gentoo 124.
+- The two error chunks use `#| error: true`, so the file renders with the errors visible.
+- 11 penguins have no sex: Adelie 6, Gentoo 5. Females and males by island: Biscoe 80 and 83, Dream 61 and 62, Torgersen 24 and 23.
+- If time runs short, section 5 becomes homework.
