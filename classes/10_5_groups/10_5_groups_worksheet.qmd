@@ -1,0 +1,197 @@
+---
+title: "Are there differences? (worksheet)"
+format: html
+---
+
+Replace each `___` with code, remove `#| eval: false` and run the chunk. Write your answer under each chunk.
+
+The penguins come with the palmerpenguins package.
+
+```{r}
+#| label: setup
+pacman::p_load(here, tidyverse, palmerpenguins)
+```
+
+## The question
+
+Are there differences? One continuous variable, such as the weight, across groups, such as the species.
+
+## 1. The boxplot
+
+`Removed 2 rows`: 2 penguins have no body mass. `filter(!is.na(body_mass_g))` removes them.
+
+```{r}
+#| label: box-default
+#| message: true
+#| warning: true
+penguins |>
+  ggplot(aes(x = species, y = body_mass_g)) +
+  geom_boxplot()
+```
+
+The line in the box is the median. The box holds the middle half of the penguins. The whiskers reach the rest, and a dot marks a value far from the box. Medians: Adelie 3,700 g, Chinstrap 3,700 g, Gentoo 5,000 g.
+
+```{r}
+#| label: box
+penguins |>
+  filter(!is.na(body_mass_g)) |>
+  ggplot(aes(x = species, y = body_mass_g)) +
+  geom_boxplot()
+```
+
+### Your turn 1
+
+Draw the boxplot of the flipper length of each species.
+
+```{r}
+#| label: turn-1
+#| eval: false
+penguins |>
+  filter(!is.na(flipper_length_mm)) |>
+  ggplot(aes(x = species, y = ___)) +
+  geom_boxplot()
+```
+
+Answer: the median flipper length of Gentoo is [YOUR ANSWER HERE] mm.
+
+## 2. The box hides the shape
+
+The boxes of Adelie and Chinstrap look alike: both medians are 3,700 g, and the boxes run from 3,350 to 4,000 g and from 3,488 to 3,950 g. Let us add each penguin as a point.
+
+Every point of a species sits on one vertical line, so we cannot count them.
+
+```{r}
+#| label: box-point
+penguins |>
+  filter(!is.na(body_mass_g)) |>
+  ggplot(aes(x = species, y = body_mass_g)) +
+  geom_boxplot() +
+  geom_point()
+```
+
+`geom_jitter()` moves each point a random distance sideways. The horizontal position has no meaning. The vertical position is still the real weight. `width = 0.2` sets how far a point can move.
+
+```{r}
+#| label: box-jitter
+penguins |>
+  filter(!is.na(body_mass_g)) |>
+  ggplot(aes(x = species, y = body_mass_g)) +
+  geom_boxplot() +
+  geom_jitter(width = 0.2)
+```
+
+### Your turn 2
+
+Draw the flipper length boxplot with the jittered points.
+
+```{r}
+#| label: turn-2
+#| eval: false
+penguins |>
+  filter(!is.na(flipper_length_mm)) |>
+  ggplot(aes(x = species, y = flipper_length_mm)) +
+  geom_boxplot() +
+  geom_jitter(width = ___)
+```
+
+Answer: the species with the fewest points is [YOUR ANSWER HERE].
+
+## 3. The violin
+
+The violin is wide where many penguins have that weight. Gentoo shows two bumps, and the box of Gentoo hid them. Chinstrap has one symmetric bump, and Adelie is wider at the top.
+
+```{r}
+#| label: violin
+penguins |>
+  filter(!is.na(body_mass_g)) |>
+  ggplot(aes(x = species, y = body_mass_g)) +
+  geom_violin()
+```
+
+### Your turn 3
+
+Draw the violin of the flipper length of each species.
+
+```{r}
+#| label: turn-3
+#| eval: false
+penguins |>
+  filter(!is.na(flipper_length_mm)) |>
+  ggplot(aes(x = species, y = ___)) +
+  geom_violin()
+```
+
+Answer: the violin of [YOUR ANSWER HERE] sits highest.
+
+## 4. All together
+
+ggplot draws the layers in the order we add them, so the violin goes first. `width = 0.1` makes the box narrow. `alpha = 0.3` makes the points see-through.
+
+```{r}
+#| label: together
+penguins |>
+  filter(!is.na(body_mass_g)) |>
+  ggplot(aes(x = species, y = body_mass_g)) +
+  geom_violin() +
+  geom_boxplot(width = 0.1) +
+  geom_jitter(width = 0.1, alpha = 0.3)
+```
+
+### Your turn 4
+
+Combine the violin, the boxplot and the jittered points for flipper length.
+
+```{r}
+#| label: turn-4
+#| eval: false
+penguins |>
+  filter(!is.na(flipper_length_mm)) |>
+  ggplot(aes(x = species, y = flipper_length_mm)) +
+  geom_violin() +
+  geom_boxplot(width = ___) +
+  geom_jitter(width = 0.1, alpha = ___)
+```
+
+Answer: the box covers [YOUR ANSWER HERE] of the penguins of each species.
+
+## 5. Why two bumps? (optional)
+
+Color the jittered points by sex. The grey `NA` group has 11 penguins without a sex.
+
+A grey group appears. `filter(!is.na(sex))` removes it.
+
+```{r}
+#| label: sex-na
+penguins |>
+  filter(!is.na(body_mass_g)) |>
+  ggplot(aes(x = species, y = body_mass_g)) +
+  geom_violin() +
+  geom_jitter(aes(color = sex), width = 0.1)
+```
+
+The two bumps of Gentoo are the two sexes. Females average 4,680 g and males average 5,485 g.
+
+```{r}
+#| label: sex
+penguins |>
+  filter(!is.na(body_mass_g), !is.na(sex)) |>
+  ggplot(aes(x = species, y = body_mass_g)) +
+  geom_violin() +
+  geom_jitter(aes(color = sex), width = 0.1)
+```
+
+### Your turn 5
+
+Draw the violin of flipper length, with the jittered points colored by sex.
+
+```{r}
+#| label: turn-5
+#| eval: false
+penguins |>
+  filter(!is.na(flipper_length_mm), !is.na(sex)) |>
+  ggplot(aes(x = species, y = flipper_length_mm)) +
+  geom_violin() +
+  geom_jitter(aes(color = ___), width = 0.1)
+```
+
+Answer: within each species, [YOUR ANSWER HERE] have the longer flippers.
