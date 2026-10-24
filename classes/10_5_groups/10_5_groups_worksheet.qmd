@@ -195,3 +195,81 @@ penguins |>
 ```
 
 Answer: within each species, [YOUR ANSWER HERE] have the longer flippers.
+
+## 6. Bars with the mean and its error bar
+
+Run the chunk and read the error: `stat_count() must only have an x or y aesthetic`. `geom_bar()` counts rows. It cannot compute a mean for us.
+
+```{r}
+#| label: bar-with-y
+#| error: true
+penguins |>
+  filter(!is.na(body_mass_g)) |>
+  ggplot(aes(x = species, y = body_mass_g)) +
+  geom_bar()
+```
+
+In class 09 we computed means with `summarize()`. `stat_summary()` computes them inside the plot. `fun = mean` applies the mean to each species and `geom = "bar"` draws it as a bar. Heights: Adelie 3,701 g, Chinstrap 3,733 g, Gentoo 5,076 g.
+
+```{r}
+#| label: mean-bar
+penguins |>
+  filter(!is.na(body_mass_g)) |>
+  ggplot(aes(x = species, y = body_mass_g)) +
+  stat_summary(fun = mean, geom = "bar")
+```
+
+`mean_se` returns the mean and the mean plus or minus one standard error. The standard error says how much the mean would move with a different sample of penguins. `fun.data` takes a function that returns three numbers (y, ymin, ymax). `fun` takes a function that returns one number. Adelie runs from 3,663 to 3,738 g and Chinstrap from 3,686 to 3,780 g. The error bars overlap, as the boxes did in section 2.
+
+```{r}
+#| label: error-bar
+penguins |>
+  filter(!is.na(body_mass_g)) |>
+  ggplot(aes(x = species, y = body_mass_g)) +
+  stat_summary(fun = mean, geom = "bar") +
+  stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.2)
+```
+
+The bar shows only the mean and the error bar. The jittered points keep the real penguins visible.
+
+```{r}
+#| label: bar-jitter
+penguins |>
+  filter(!is.na(body_mass_g)) |>
+  ggplot(aes(x = species, y = body_mass_g)) +
+  stat_summary(fun = mean, geom = "bar", alpha = 0.4) +
+  geom_jitter(width = 0.1, alpha = 0.3) +
+  stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.2)
+```
+
+### Your turn 6
+
+Draw bars of the mean flipper length of each species.
+
+```{r}
+#| label: turn-6
+#| eval: false
+penguins |>
+  filter(!is.na(flipper_length_mm)) |>
+  ggplot(aes(x = species, y = flipper_length_mm)) +
+  stat_summary(fun = ___, geom = "bar")
+```
+
+Answer: the mean flipper length of Gentoo is [YOUR ANSWER HERE] mm.
+
+### Your turn 7
+
+Add the error bars to the flipper length plot.
+
+```{r}
+#| label: turn-7
+#| eval: false
+penguins |>
+  filter(!is.na(flipper_length_mm)) |>
+  ggplot(aes(x = species, y = flipper_length_mm)) +
+  stat_summary(fun = mean, geom = "bar") +
+  stat_summary(fun.data = ___, geom = "errorbar", width = 0.2)
+```
+
+Answer: the error bars of the three species [YOUR ANSWER HERE] overlap.
+
