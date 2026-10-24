@@ -1,0 +1,121 @@
+---
+title: "How is the data distributed? (worksheet)"
+format: html
+---
+
+Replace each `___` with code, remove `#| eval: false` and run the chunk. Write your answer under each chunk.
+
+The penguins come with the palmerpenguins package.
+
+```{r}
+#| label: setup
+pacman::p_load(here, tidyverse, palmerpenguins)
+```
+
+## The question
+
+How is the data distributed? One continuous variable: `body_mass_g`, the weight of each penguin in grams. A histogram cuts the variable into intervals and counts the rows in each interval.
+
+```{r}
+#| label: look-data
+penguins |>
+  glimpse()
+```
+
+## 1. The first histogram
+
+Run the chunk and read the two messages from R.
+
+```{r}
+#| label: first-histogram
+penguins |>
+  ggplot(aes(x = body_mass_g)) +
+  geom_histogram()
+```
+
+- `using bins = 30`: R cut the weights into 30 bars. `binwidth = 200` sets the width of each bar.
+- `Removed 2 rows`: 2 penguins have no body mass. `filter(!is.na(body_mass_g))` keeps the penguins with a weight.
+
+Run the fixed version.
+
+```{r}
+#| label: fixed-histogram
+penguins |>
+  filter(!is.na(body_mass_g)) |>
+  ggplot(aes(x = body_mass_g)) +
+  geom_histogram(binwidth = 200)
+```
+
+### Your turn 1
+
+Draw the histogram of one species. Choose Adelie, Chinstrap or Gentoo.
+
+```{r}
+#| label: turn-1
+#| eval: false
+penguins |>
+  filter(species == "___", !is.na(body_mass_g)) |>
+  ggplot(aes(x = body_mass_g)) +
+  geom_histogram(binwidth = 200)
+```
+
+Answer: the species is [YOUR ANSWER HERE]. The tallest bar is near [YOUR ANSWER HERE] g.
+
+## 2. One histogram for all species
+
+Fill by species. The bars stack on top of each other.
+
+```{r}
+#| label: fill-species
+penguins |>
+  filter(!is.na(body_mass_g)) |>
+  ggplot(aes(x = body_mass_g, fill = species)) +
+  geom_histogram(binwidth = 200)
+```
+
+`position = "identity"` draws each species from zero, one in front of the other. Adelie sits behind Chinstrap.
+
+```{r}
+#| label: position-identity
+penguins |>
+  filter(!is.na(body_mass_g)) |>
+  ggplot(aes(x = body_mass_g, fill = species)) +
+  geom_histogram(binwidth = 200, position = "identity")
+```
+
+`alpha = 0.5` makes the bars half transparent.
+
+```{r}
+#| label: alpha
+penguins |>
+  filter(!is.na(body_mass_g)) |>
+  ggplot(aes(x = body_mass_g, fill = species)) +
+  geom_histogram(binwidth = 200, position = "identity", alpha = 0.5)
+```
+
+### Your turn 2
+
+Draw the histogram of the flipper length of all penguins, with one color for each species.
+
+```{r}
+#| label: turn-2
+#| eval: false
+penguins |>
+  filter(!is.na(flipper_length_mm)) |>
+  ggplot(aes(x = ___, fill = ___)) +
+  geom_histogram(binwidth = 3, position = "identity", alpha = 0.5)
+```
+
+Answer: [YOUR ANSWER HERE] has the longest flippers. [YOUR ANSWER HERE] and [YOUR ANSWER HERE] overlap the most.
+
+## 3. A smooth curve
+
+`geom_density()` draws a smooth curve. Each curve has the same area, so a species with few penguins looks as large as a species with many.
+
+```{r}
+#| label: density
+penguins |>
+  filter(!is.na(body_mass_g)) |>
+  ggplot(aes(x = body_mass_g, fill = species)) +
+  geom_density(alpha = 0.5)
+```
