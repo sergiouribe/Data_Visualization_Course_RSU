@@ -214,7 +214,7 @@ The result has 0 rows.
 ## filter(): OR
 
 ```{r}
-# | means or: one condition is enough
+# The symbol | means or: one condition is enough
 # Flights that departed in January or February
 flights |>
   filter(month == 1 | month == 2)
