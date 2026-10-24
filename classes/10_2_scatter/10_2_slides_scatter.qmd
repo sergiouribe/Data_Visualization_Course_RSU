@@ -1,0 +1,306 @@
+---
+title: "Is there a correlation?"
+subtitle: "[SZF_184 Data Visualisation and Storytelling](https://estudijas.rsu.lv/course/view.php?id=83740)"
+author: "Sergio Uribe"
+institute: "Rīga Stradiņš University"
+format:
+  revealjs:
+    theme: simple
+    slide-number: true
+    code-block-bg: true
+    highlight-style: github
+    footer: '<a href="https://estudijas.rsu.lv/course/view.php?id=83740">SZF_184</a> RSU · Uribe'
+    transition: fade
+execute:
+  echo: true
+  warning: false
+  message: false
+  fig-width: 8
+  fig-height: 4.2
+---
+
+```{r}
+#| label: setup
+#| include: false
+pacman::p_load(here, tidyverse, palmerpenguins)
+```
+
+## The question
+
+**Is there a correlation?**
+
+Two continuous variables. When one goes up, what does the other do?
+
+A **scatter plot** answers this. Each row is one point. The x position is one variable and the y position is the other.
+
+---
+
+# 1. The scatter plot {background-color="#1a5276" style="color: white;"}
+
+**geom_point()**
+
+---
+
+## A first scatter plot
+
+```{r}
+#| message: true
+#| warning: true
+penguins |>
+  ggplot(aes(x = flipper_length_mm, y = body_mass_g)) +
+  geom_point()
+```
+
+`Removed 2 rows`: 2 penguins have no flipper length or no body mass.
+
+---
+
+## Fix the message
+
+```{r}
+# !is.na() keeps penguins with both measurements
+penguins |>
+  filter(!is.na(flipper_length_mm), !is.na(body_mass_g)) |>
+  ggplot(aes(x = flipper_length_mm, y = body_mass_g)) +
+  geom_point()
+```
+
+The points rise to the right. Penguins with longer flippers weigh more.
+
+---
+
+## Your turn 1 {background-color="#d5e8d4"}
+
+**Draw flipper length (x) against bill length (y).**
+
+```{r}
+#| eval: false
+penguins |>
+  filter(!is.na(flipper_length_mm), !is.na(bill_length_mm)) |>
+  ggplot(aes(x = flipper_length_mm, y = ___)) +
+  geom_point()
+```
+
+Answer: when the flipper gets longer, the bill gets [YOUR ANSWER HERE].
+
+---
+
+# 2. One color for each species {background-color="#1a5276" style="color: white;"}
+
+**color**
+
+---
+
+## Color by species
+
+```{r}
+penguins |>
+  filter(!is.na(flipper_length_mm), !is.na(body_mass_g)) |>
+  ggplot(aes(x = flipper_length_mm, y = body_mass_g, color = species)) +
+  geom_point()
+```
+
+The cloud splits into three groups. Gentoo sits at the top right.
+
+---
+
+## Your turn 2 {background-color="#d5e8d4"}
+
+**Color the flipper and bill length plot by species.**
+
+```{r}
+#| eval: false
+penguins |>
+  filter(!is.na(flipper_length_mm), !is.na(bill_length_mm)) |>
+  ggplot(aes(x = flipper_length_mm, y = bill_length_mm, color = ___)) +
+  geom_point()
+```
+
+Answer: [YOUR ANSWER HERE] has the longest flippers. [YOUR ANSWER HERE] has the shortest bills.
+
+---
+
+# 3. A line through the points {background-color="#1a5276" style="color: white;"}
+
+**geom_smooth()**
+
+---
+
+## geom_smooth()
+
+```{r}
+#| message: true
+penguins |>
+  filter(!is.na(flipper_length_mm), !is.na(body_mass_g)) |>
+  ggplot(aes(x = flipper_length_mm, y = body_mass_g, color = species)) +
+  geom_point() +
+  geom_smooth()
+```
+
+---
+
+## What the message says
+
+`using method = 'loess'`: R drew a curve that bends with the data. The grey band shows the uncertainty of the curve.
+
+To draw a straight line, we set `method = "lm"`. The line shows how much y changes when x goes up by one unit.
+
+---
+
+## method = "lm"
+
+```{r}
+# "lm" draws a straight line. One line for each species
+penguins |>
+  filter(!is.na(flipper_length_mm), !is.na(body_mass_g)) |>
+  ggplot(aes(x = flipper_length_mm, y = body_mass_g, color = species)) +
+  geom_point() +
+  geom_smooth(method = "lm")
+```
+
+We got three lines, one for each species. We wanted one line for all penguins.
+
+---
+
+## One line for all penguins
+
+```{r}
+# color inside ggplot() applies to every layer.
+# color inside geom_point() applies to the points only
+penguins |>
+  filter(!is.na(flipper_length_mm), !is.na(body_mass_g)) |>
+  ggplot(aes(x = flipper_length_mm, y = body_mass_g)) +
+  geom_point(aes(color = species)) +
+  geom_smooth(method = "lm")
+```
+
+The line rises 50 g for each extra millimeter of flipper.
+
+---
+
+## Your turn 3 {background-color="#d5e8d4"}
+
+**Add one straight line to the flipper and bill length plot. Keep the colors on the points.**
+
+```{r}
+#| eval: false
+penguins |>
+  filter(!is.na(flipper_length_mm), !is.na(bill_length_mm)) |>
+  ggplot(aes(x = flipper_length_mm, y = bill_length_mm)) +
+  geom_point(aes(color = species)) +
+  geom_smooth(method = "___")
+```
+
+Answer: the line rises about [YOUR ANSWER HERE] mm of bill for each extra millimeter of flipper.
+
+---
+
+# 4. One panel for each species {background-color="#1a5276" style="color: white;"}
+
+**facet_wrap()**
+
+---
+
+## facet_wrap()
+
+```{r}
+# ~ species: one panel for each species
+penguins |>
+  filter(!is.na(flipper_length_mm), !is.na(body_mass_g)) |>
+  ggplot(aes(x = flipper_length_mm, y = body_mass_g, color = species)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  facet_wrap(~ species)
+```
+
+Each species has its own cloud and its own line. Gentoo has the steepest line.
+
+---
+
+## Your turn 4 {background-color="#d5e8d4"}
+
+**Draw the flipper and bill length plot with one panel for each species.**
+
+```{r}
+#| eval: false
+penguins |>
+  filter(!is.na(flipper_length_mm), !is.na(bill_length_mm)) |>
+  ggplot(aes(x = flipper_length_mm, y = bill_length_mm, color = species)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  facet_wrap(~ ___)
+```
+
+Answer: the line is steepest for [YOUR ANSWER HERE] and flattest for [YOUR ANSWER HERE].
+
+---
+
+# 5. When the groups change the story {background-color="#1a5276" style="color: white;"}
+
+**Optional: homework if time runs short**
+
+---
+
+## Bill depth: one line
+
+```{r}
+penguins |>
+  filter(!is.na(flipper_length_mm), !is.na(bill_depth_mm)) |>
+  ggplot(aes(x = flipper_length_mm, y = bill_depth_mm)) +
+  geom_point(aes(color = species)) +
+  geom_smooth(method = "lm")
+```
+
+The line goes down. Penguins with longer flippers have shallower bills.
+
+---
+
+## Bill depth: one line for each species
+
+```{r}
+penguins |>
+  filter(!is.na(flipper_length_mm), !is.na(bill_depth_mm)) |>
+  ggplot(aes(x = flipper_length_mm, y = bill_depth_mm, color = species)) +
+  geom_point() +
+  geom_smooth(method = "lm")
+```
+
+Inside every species the line goes up. Gentoo has long flippers and shallow bills, so the groups pull the overall line down. One line for all penguins gives the wrong story.
+
+---
+
+## Your turn 5 {background-color="#d5e8d4"}
+
+**Facet the bill depth plot by species. Which line is steepest?**
+
+```{r}
+#| eval: false
+penguins |>
+  filter(!is.na(flipper_length_mm), !is.na(bill_depth_mm)) |>
+  ggplot(aes(x = flipper_length_mm, y = bill_depth_mm, color = species)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  facet_wrap(~ ___)
+```
+
+Answer: [YOUR ANSWER HERE] has the steepest line.
+
+---
+
+## Recap {.smaller}
+
+| Task | Code |
+|------|------|
+| Two continuous variables | `geom_point()` |
+| One color for each group | `aes(color = species)` |
+| Straight line | `geom_smooth(method = "lm")` |
+| Color on the points only | `geom_point(aes(color = species))` |
+| One panel for each group | `facet_wrap(~ species)` |
+
+---
+
+## {background-color="#1a5276" style="color: white; text-align: center;"}
+
+<br><br>
+
+### See you in the next class!
