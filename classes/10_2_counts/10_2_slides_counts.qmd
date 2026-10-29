@@ -22,251 +22,549 @@ execute:
 ```{r}
 #| label: setup
 #| include: false
-pacman::p_load(here, tidyverse, palmerpenguins)
+pacman::p_load(tidyverse, here, mosaicData, NHANES, treemapify)
+
+whickham <- Whickham |>
+  as_tibble() |>
+  mutate(age_group = case_when(
+    age < 35 ~ "18-34",
+    age < 45 ~ "35-44",
+    age < 55 ~ "45-54",
+    age < 65 ~ "55-64",
+    age < 75 ~ "65-74",
+    .default = "75+"
+  ))
+nhanes <- NHANES
+companies_lv <- read_csv("https://raw.githubusercontent.com/sergiouribe/Data_Visualization_Course_RSU/main/data/companies_lv_smaller_2020_2025.csv", show_col_types = FALSE)
+world_exports <- read_csv("https://raw.githubusercontent.com/sergiouribe/Data_Visualization_Course_RSU/main/data/world_exports_1998_2000.csv", col_types = cols(product = col_character()))
+rosling <- read_csv("https://raw.githubusercontent.com/sergiouribe/Data_Visualization_Course_RSU/main/data/rosling_tidy.csv", show_col_types = FALSE)
 ```
 
 ## The question
 
 **How many?**
 
-One discrete variable, such as the island or the species. We count the rows in each category.
+One categorical variable, such as the age group or the legal form. We count the rows in each category.
+
+Four datasets today: Whickham (women and smoking), NHANES (US survey), Latvian companies and Latvian exports.
 
 ---
 
-# 1. Count the rows {background-color="#1a5276" style="color: white;"}
+## Datasets
 
-**count()**
+| Object | Source | Rows |
+|---|---|---|
+| `whickham` | package `mosaicData` | 1,314 women |
+| `nhanes` | package `NHANES` | 10,000 people |
+| `companies_lv` | course repository | 55,261 companies |
+| `world_exports` | course repository | export value by country and product |
+| `rosling` | course repository | 142 countries, 1952 to 2007 |
 
 ---
 
-## Count island
+# 3.1 Pie or bars? {background-color="#1a5276" style="color: white;"}
+
+---
+
+## Question 1: How many women are in each age group? {background-color="#d5e8d4"}
+
+Draw a pie chart of the age groups. Then rank the six slices from largest to smallest.
+
+Start from `whickham`.
+
+---
+
+## Q1: How many women are in each age group?
 
 ```{r}
-penguins |>
-  count(island)
+#| label: s-q1
+whickham |>
+  ggplot(aes(x = "", fill = age_group)) +
+  geom_bar(width = 1) +
+  coord_polar(theta = "y") +   # bends the bar into a circle
+  theme_void()
 ```
 
-`count()` gives a table with the number of penguins on each island.
+The counts are 408, 216, 209, 238, 166 and 77. The slices of 216, 209 and 238 look the same. The pie hides the ranking.
 
 ---
 
-## Your turn 1 {background-color="#d5e8d4"}
+## Question 2: Same counts, drawn as bars {background-color="#d5e8d4"}
 
-**Count the penguins of each species.**
+Draw the same counts as bars. Is the ranking easier to read? Write how sure you are about the third largest group on the pie and on the bars.
+
+Start from `whickham`.
+
+---
+
+## Q2: Same counts, drawn as bars
 
 ```{r}
-#| eval: false
-penguins |>
-  count(___)
+#| label: s-q2
+whickham |>
+  ggplot(aes(x = age_group)) +
+  geom_bar()   # geom_bar() counts the rows for you
 ```
 
-Answer: [YOUR ANSWER HERE] has the most penguins, with [YOUR ANSWER HERE] penguins.
+The bars rank the groups at once: 238 (55 to 64) is the third largest. `geom_bar()` needs only `x`, because it counts the rows.
 
 ---
 
-# 2. The same count as a bar plot {background-color="#1a5276" style="color: white;"}
-
-**geom_bar()**
+# 3.2 Order the bars {background-color="#1a5276" style="color: white;"}
 
 ---
 
-## Bar island
+## Question 3: How many people of each race are in the survey? {background-color="#d5e8d4"}
+
+Count the people by `Race1`. Which order do the bars follow?
+
+Start from `nhanes`.
+
+---
+
+## Q3: How many people of each race are in the survey?
 
 ```{r}
-penguins |>
-  ggplot(aes(x = island)) +
+#| label: s-q3
+nhanes |>
+  ggplot(aes(x = Race1)) +
   geom_bar()
 ```
 
-`geom_bar()` counts the rows itself. We only give `x`.
+The bars follow the order of the factor levels (Black, Hispanic, Mexican, White, Other), not their size.
 
 ---
 
-## Your turn 2 {background-color="#d5e8d4"}
+## Question 4: Sort the bars from largest to smallest {background-color="#d5e8d4"}
 
-**Draw the bars of the penguins of each species.**
+Reorder the bars by count. Why can we reorder race, but should keep the order of the age groups?
+
+Start from `nhanes`.
+
+---
+
+## Q4: Sort the bars from largest to smallest
 
 ```{r}
-#| eval: false
-penguins |>
-  ggplot(aes(x = ___)) +
+#| label: s-q4
+nhanes |>
+  ggplot(aes(x = fct_infreq(Race1))) +   # fct_infreq() orders by frequency
+  geom_bar() +
+  labs(x = "Race1")
+```
+
+White has 6,372 people, Black 1,197, Mexican 1,015, Other 806 and Hispanic 610. Race is nominal, so any order is valid and size is the most useful. Age groups are ordinal, so their natural order carries meaning.
+
+---
+
+# 3.3 Many categories {background-color="#1a5276" style="color: white;"}
+
+---
+
+## Question 5: Which legal forms do the new companies use? {background-color="#d5e8d4"}
+
+Draw one bar per legal form (`type_text`). What happens to the labels?
+
+Start from `companies_lv`.
+
+---
+
+## Q5: Which legal forms do the new companies use?
+
+```{r}
+#| label: s-q5
+companies_lv |>
+  ggplot(aes(x = type_text)) +
   geom_bar()
 ```
 
-Answer: the tallest bar is [YOUR ANSWER HERE].
+The data have 24 legal forms. The labels overlap and nobody can read them.
 
 ---
 
-# 3. geom_bar() and geom_col() {background-color="#1a5276" style="color: white;"}
+## Question 6: Make the labels readable {background-color="#d5e8d4"}
 
-**geom_col()**
+Flip the plot so the labels sit on the vertical axis. Which order do the bars follow now?
+
+Start from `companies_lv`.
 
 ---
 
-## Bar with y
+## Q6: Make the labels readable
 
 ```{r}
-#| error: true
-penguins |>
-  count(island) |>
-  ggplot(aes(x = island, y = n)) +
+#| label: s-q6
+companies_lv |>
+  ggplot(aes(y = type_text)) +   # y instead of x flips the bars
   geom_bar()
 ```
 
-The table from section 1 already has the counts. Give it to `geom_bar()` with `y = n` and read the error.
+The labels are readable. The bars follow the alphabet, so the ranking is still hidden.
 
 ---
 
-## Col island
+## Question 7: Sort the flipped bars {background-color="#d5e8d4"}
+
+Order the legal forms from largest to smallest, with the largest at the top.
+
+Start from `companies_lv`.
+
+---
+
+## Q7: Sort the flipped bars
 
 ```{r}
-penguins |>
-  count(island) |>
-  ggplot(aes(x = island, y = n)) +
-  geom_col()
+#| label: s-q7
+companies_lv |>
+  ggplot(aes(y = fct_rev(fct_infreq(type_text)))) +   # fct_rev() puts the largest on top
+  geom_bar() +
+  labs(y = NULL)
 ```
 
-`stat_count() must only have an x or y aesthetic`: `geom_bar()` counts rows, and the table has nothing left to count. `geom_col()` draws a number we already have.
+SIA has 44,633 companies, BDR 5,110 and IK 3,951. The other 21 forms have 1,567 companies together and appear as thin lines.
 
 ---
 
-## Col no y
+## Question 8: Pool the small forms {background-color="#d5e8d4"}
+
+Keep the 5 most common legal forms and pool the others into one category. Then draw the sorted, flipped bars. Change `5` to `3` and describe what happens to the pooled bar.
+
+Start from `companies_lv`.
+
+---
+
+## Q8: Pool the small forms
 
 ```{r}
-#| error: true
-penguins |>
-  count(island) |>
-  ggplot(aes(x = island)) +
-  geom_col()
+#| label: s-q8
+companies_lv |>
+  mutate(type_text = fct_lump_n(type_text, n = 5)) |>   # keeps the 5 largest, pools the rest as Other
+  ggplot(aes(y = fct_rev(fct_infreq(type_text)))) +
+  geom_bar() +
+  labs(y = NULL)
 ```
 
-The picture is the same. The reverse mistake, `geom_col()` without `y`, gives `geom_col() requires the following missing aesthetics: y`.
+Seven bars remain: the five largest forms and Other (690 companies). With `n = 3`, Other holds 1,567 companies.
 
 ---
 
-## Your turn 3 {background-color="#d5e8d4"}
+## Other ways to pool
 
-**Draw the species counts with `geom_col()`.**
+| Code | Result on the legal forms |
+|---|---|
+| `fct_lump_n(type_text, n = 5)` | the 5 most common forms, plus Other |
+| `fct_lump_n(type_text, n = -3)` | the 3 least common forms (2, 1 and 1 companies), Other holds 55,257 |
+| `fct_lump_min(type_text, min = 300)` | forms with at least 300 companies (4 forms), Other holds 1,227 |
+| `fct_lump_prop(type_text, prop = .01)` | forms with at least 1% of companies (3 forms), Other holds 1,567 |
+| `fct_lump_prop(type_text, prop = .10)` | SIA only, Other holds 10,628 |
+| `fct_lump_lowfreq(type_text)` | automatic: Other stays smaller than every named bar. Here SIA plus Other (10,628) |
+| `fct_other(type_text, keep = c("SIA", "IK"))` | the forms you name, everything else becomes Other |
+| `fct_other(type_text, drop = c("SIA", "IK"))` | pools the forms you name and keeps all others |
+
+Use `other_level = "Rest"` to rename the pooled bar.
+
+---
+
+# 3.4 Groups inside the bars {background-color="#1a5276" style="color: white;"}
+
+---
+
+## Question 9: How many smokers are in each age group? {background-color="#d5e8d4"}
+
+Draw the age groups as bars and split each bar by `smoker`. Write what you can compare in this graph.
+
+Start from `whickham`.
+
+---
+
+## Q9: How many smokers are in each age group?
 
 ```{r}
-#| eval: false
-penguins |>
-  count(species) |>
-  ggplot(aes(x = species, y = ___)) +
-  geom_col()
+#| label: s-q9
+whickham |>
+  ggplot(aes(x = age_group, fill = smoker)) +
+  geom_bar()   # stacked is the default
 ```
 
-Answer: the column with the counts is called [YOUR ANSWER HERE].
+Stacked bars compare the totals of the groups. Comparing smokers across age groups is harder, because the smoker segments do not start at the same line.
 
 ---
 
-# 4. Color by a second variable {background-color="#1a5276" style="color: white;"}
+## Question 10: Put the groups side by side {background-color="#d5e8d4"}
 
-**fill**
+Draw the same counts with the smoker and non-smoker bars next to each other. Write what you can compare now.
+
+Start from `whickham`.
 
 ---
 
-## Fill species
+## Q10: Put the groups side by side
 
 ```{r}
-penguins |>
-  ggplot(aes(x = island, fill = species)) +
-  geom_bar()
-```
-
-`fill = species` splits each island bar by species.
-
----
-
-## Your turn 4 {background-color="#d5e8d4"}
-
-**Draw the bars of the species, with one color for each island.**
-
-```{r}
-#| eval: false
-penguins |>
-  ggplot(aes(x = species, fill = ___)) +
-  geom_bar()
-```
-
-Answer: [YOUR ANSWER HERE] lives on one island only. It is [YOUR ANSWER HERE].
-
----
-
-# 5. Female and male penguins by island {background-color="#1a5276" style="color: white;"}
-
-**position**
-
----
-
-## Fill sex
-
-```{r}
-penguins |>
-  ggplot(aes(x = island, fill = sex)) +
-  geom_bar()
-```
-
-`fill = sex` splits each island bar by sex. Read the grey segment.
-
----
-
-## Fill sex filter
-
-```{r}
-penguins |>
-  filter(!is.na(sex)) |>
-  ggplot(aes(x = island, fill = sex)) +
-  geom_bar()
-```
-
-The grey segment is `NA`: 11 penguins have no sex (Biscoe 5, Dream 1, Torgersen 5). `filter(!is.na(sex))` removes them.
-
----
-
-## Dodge
-
-```{r}
-penguins |>
-  filter(!is.na(sex)) |>
-  ggplot(aes(x = island, fill = sex)) +
+#| label: s-q10
+whickham |>
+  ggplot(aes(x = age_group, fill = smoker)) +
   geom_bar(position = "dodge")
 ```
 
-Stacked bars make females and males hard to compare, because the top segment does not start at zero. `position = "dodge"` puts the bars side by side.
+The bars start at the same line, so smokers and non-smokers compare directly inside each age group.
 
 ---
 
-## Your turn 5 {background-color="#d5e8d4"}
+## Question 11: What share of each age group smokes? {background-color="#d5e8d4"}
 
-**Draw the females and males in each species, side by side.**
+Draw bars that all reach 100% and show the share of smokers in each age group.
+
+Start from `whickham`.
+
+---
+
+## Q11: What share of each age group smokes?
 
 ```{r}
-#| eval: false
-penguins |>
-  filter(!is.na(sex)) |>
-  ggplot(aes(x = ___, fill = sex)) +
-  geom_bar(position = "___")
+#| label: s-q11
+whickham |>
+  ggplot(aes(x = age_group, fill = smoker)) +
+  geom_bar(position = "fill") +   # every bar reaches 1
+  labs(y = "share")
 ```
 
-Answer: in every species, the number of females is [YOUR ANSWER HERE] the number of males.
+The share of smokers is 44% (18 to 34), 49% (35 to 44), 63% (45 to 54), 49% (55 to 64), 22% (65 to 74) and 17% (75+). Use `fill` for shares, `stack` or `dodge` for counts.
 
 ---
 
-## Recap {.smaller}
-
-| Task | Code |
-|------|------|
-| Table of counts | `count(island)` |
-| Bars from rows | `geom_bar()` |
-| Bars from a table of counts | `geom_col()` |
-| Split bars by a second variable | `aes(fill = sex)` |
-| Bars side by side | `position = "dodge"` |
+# 3.5 Differences in counts across a second variable {background-color="#1a5276" style="color: white;"}
 
 ---
 
-## {background-color="#1a5276" style="color: white; text-align: center;"}
+## Question 12: Did the race mix change between the two survey cycles? {background-color="#d5e8d4"}
 
-<br><br>
+Count the people by race and show the survey cycle (`SurveyYr`) with side-by-side bars. Which race changed the most?
 
-### See you in the next class!
+Start from `nhanes`.
+
+---
+
+## Q12: Did the race mix change between the two survey cycles?
+
+```{r}
+#| label: s-q12
+nhanes |>
+  ggplot(aes(x = Race1, fill = SurveyYr)) +
+  geom_bar(position = "dodge")
+```
+
+Each cycle has 5,000 people. Hispanic rose from 260 to 350, Other from 360 to 446, Mexican fell from 535 to 480 and White from 3,237 to 3,135.
+
+---
+
+## Question 13: One panel per survey cycle {background-color="#d5e8d4"}
+
+Draw the sorted race counts in one panel for each survey cycle with `facet_wrap()`. Compare the dodge graph with the panels.
+
+Start from `nhanes`.
+
+---
+
+## Q13: One panel per survey cycle
+
+```{r}
+#| label: s-q13
+nhanes |>
+  ggplot(aes(x = fct_infreq(Race1))) +
+  geom_bar() +
+  facet_wrap(~SurveyYr) +   # one panel per survey cycle
+  labs(x = "Race1")
+```
+
+The panels keep the same order in both cycles, so the ranking is easy to compare. The dodge graph compares the same race across cycles more directly.
+
+---
+
+# 3.6 Many parts of a whole: the treemap {background-color="#1a5276" style="color: white;"}
+
+---
+
+## Question 14: What did Latvia export in 1998 to 2000? {background-color="#d5e8d4"}
+
+The first digit of the product code is the broad sector. Sum the export value by sector for Latvia (`lva`) and draw a treemap. Which sector has the largest area?
+
+Start from `world_exports`.
+
+---
+
+## Q14: What did Latvia export in 1998 to 2000?
+
+```{r}
+#| label: s-q14
+world_exports |>
+  filter(country == "lva") |>
+  mutate(section = str_sub(product, 1, 1)) |>   # first digit of the code = sector
+  mutate(section = case_when(
+    section == "0" ~ "Food",
+    section == "1" ~ "Drinks and tobacco",
+    section == "2" ~ "Crude materials",
+    section == "3" ~ "Fuels",
+    section == "4" ~ "Oils and fats",
+    section == "5" ~ "Chemicals",
+    section == "6" ~ "Goods by material",
+    section == "7" ~ "Machinery and vehicles",
+    section == "8" ~ "Other manufactures",
+    .default = "Other"
+  )) |>
+  group_by(section) |>
+  summarise(value = sum(value)) |>
+  ggplot(aes(area = value, fill = section, label = section)) +
+  geom_treemap() +
+  geom_treemap_text(colour = "white", reflow = TRUE) +
+  theme(legend.position = "none")
+```
+
+Fuels hold 37.4% of the export value (84.2 million of 225.2 million USD), crude materials 17.3% and goods by material 16.9%. The treemap shows ten parts of one whole.
+
+---
+
+## Question 15: Treemap or bars? {background-color="#d5e8d4"}
+
+Draw the same sector values as sorted bars. Which graph ranks the sectors better, and which shows the whole better?
+
+Start from `world_exports`.
+
+---
+
+## Q15: Treemap or bars?
+
+```{r}
+#| label: s-q15
+world_exports |>
+  filter(country == "lva") |>
+  mutate(section = str_sub(product, 1, 1)) |>
+  mutate(section = case_when(
+    section == "0" ~ "Food",
+    section == "1" ~ "Drinks and tobacco",
+    section == "2" ~ "Crude materials",
+    section == "3" ~ "Fuels",
+    section == "4" ~ "Oils and fats",
+    section == "5" ~ "Chemicals",
+    section == "6" ~ "Goods by material",
+    section == "7" ~ "Machinery and vehicles",
+    section == "8" ~ "Other manufactures",
+    .default = "Other"
+  )) |>
+  group_by(section) |>
+  summarise(value = sum(value)) |>
+  ggplot(aes(x = fct_reorder(section, value), y = value)) +
+  geom_col() +
+  coord_flip() +
+  labs(x = NULL, y = "Export value (USD)")
+```
+
+The bars rank the sectors from fuels (84.2 million USD) down to other (0.8 million USD). The treemap shows the whole. Use the treemap for many parts and the bars when the reader must compare values.
+
+---
+
+# 3.7 Bars from a calculation: geom_col() {background-color="#1a5276" style="color: white;"}
+
+---
+
+## Question 16: Why does geom_bar() fail on a table of counts? {background-color="#d5e8d4"}
+
+Count the companies by `type` in a table. Draw the table with `geom_bar()` and `y = n`. Read the error, then fix the plot.
+
+Start from `companies_lv`.
+
+---
+
+## Q16: Why does geom_bar() fail on a table of counts?
+
+```{r}
+#| label: s-q16
+#| error: true
+companies_lv |>
+  count(type) |>
+  ggplot(aes(x = type, y = n)) +
+  geom_bar()   # error: geom_bar() counts rows itself
+```
+
+---
+
+## Q16: the fix
+
+```{r}
+#| label: s-q16-fix
+companies_lv |>
+  count(type) |>
+  ggplot(aes(x = type, y = n)) +
+  geom_col()
+```
+
+`geom_bar()` counts the rows, so it rejects a `y` value. `geom_col()` takes the height from `y`.
+
+---
+
+## Question 17: What share of the companies has each legal form? {background-color="#d5e8d4"}
+
+Calculate the share of each legal form, keep the three largest and draw them as bars with the percent written on each bar.
+
+Start from `companies_lv`.
+
+---
+
+## Q17: What share of the companies has each legal form?
+
+```{r}
+#| label: s-q17
+companies_lv |>
+  count(type) |>
+  mutate(p = n / sum(n)) |>   # share of all companies
+  slice_max(p, n = 3) |>
+  ggplot(aes(x = fct_reorder(type, p), y = p)) +
+  geom_col() +
+  geom_text(aes(label = scales::percent(p, accuracy = .1)), hjust = -0.1) +
+  scale_y_continuous(labels = scales::percent, expand = expansion(mult = c(0, .15))) +
+  coord_flip() +
+  labs(x = NULL, y = "share of companies")
+```
+
+SIA has 80.8% of the companies, BDR 9.2% and IK 7.1%.
+
+---
+
+## Question 18: Where do people live? {background-color="#d5e8d4"}
+
+Sum the population of the 142 countries by continent in 2007 and draw the totals as bars. Which continent has the largest total?
+
+Start from `rosling`.
+
+---
+
+## Q18: Where do people live?
+
+```{r}
+#| label: s-q18
+rosling |>
+  filter(year == 2007) |>
+  group_by(continent) |>
+  summarise(population = sum(population) / 1e6) |>   # millions
+  ggplot(aes(x = fct_reorder(continent, population), y = population)) +
+  geom_col() +
+  coord_flip() +
+  labs(x = NULL, y = "Population in 2007 (millions)")
+```
+
+Asia has 3,812 million people (61.0%), Africa 930 million (14.9%), the Americas 899 million (14.4%), Europe 586 million (9.4%) and Oceania 24.5 million (0.4%). A sum cannot come from `geom_bar()`, because no row counts it.
+
+---
+
+## Summary
+
+| Question | Graph | Code |
+|---|---|---|
+| How many in each group? | bars | `geom_bar()` |
+| Which order? | sorted bars | `fct_infreq()`, `fct_reorder()` |
+| Many categories? | flipped bars, pooled small groups | `y = `, `fct_lump_n()` |
+| Groups inside bars? | stack, dodge, fill | `position = ` |
+| Many parts of a whole? | treemap | `geom_treemap()` |
+| Bars from a calculation? | columns | `count()`, `summarise()`, `geom_col()` |
+
+Pie charts hide the ranking. Use bars.
