@@ -30,16 +30,35 @@ Each dataset loads once into a named object. Every question below starts from on
 
 ### 2.1 whickham (package `mosaicData`)
 
-1,314 women in a survey in Whickham, England. The variables are age, `smoker` and `outcome` (alive or dead 20 years later). The code adds `age_group`.
+1,314 women in a survey in Whickham, England. The variables are age, `smoker` and `outcome` (alive or dead 20 years later). The code makes the age groups in two ways, `case_when()` and `cut()`, and the next chunk checks that both give the same groups. The questions use `age_group`.
 
 ```{r}
 #| label: data-whickham
 whickham <- Whickham |>
   as_tibble() |>
-  mutate(age_group = cut(age,
-                         breaks = c(17, 34, 44, 54, 64, 74, 99),
-                         labels = c("18-34", "35-44", "45-54", "55-64", "65-74", "75+")))
+  mutate(
+    # way 1: case_when(), the first matching line wins
+    age_group = case_when(
+      age < 35 ~ "18-34",
+      age < 45 ~ "35-44",
+      age < 55 ~ "45-54",
+      age < 65 ~ "55-64",
+      age < 75 ~ "65-74",
+      .default = "75+"
+    ),
+    # way 2: cut(), shorter, but you give the breaks and the labels
+    age_group_cut = cut(age,
+                        breaks = c(17, 34, 44, 54, 64, 74, 99),
+                        labels = c("18-34", "35-44", "45-54", "55-64", "65-74", "75+"))
+  )
 whickham |> glimpse()
+```
+
+```{r}
+#| label: check-age-groups
+# both ways give the same six groups: 408, 216, 209, 238, 166 and 77 women
+whickham |>
+  count(age_group, age_group_cut)
 ```
 
 ### 2.2 nhanes (package `NHANES`)
