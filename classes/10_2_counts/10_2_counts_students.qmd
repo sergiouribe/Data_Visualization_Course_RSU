@@ -123,12 +123,14 @@ Draw a pie chart of the age groups. Then rank the six slices from largest to sma
 #| label: q1
 #| eval: false
 whickham |>
+  ggplot(aes(x = "", fill = age_group)) +
+  geom_bar(width = 1) +
+  coord_polar(theta = "y") +   # bends the bar into a circle
+  theme_void()
 
 ```
 
 **Your finding:**
-
-
 
 #### Question 2: Same counts, drawn as bars
 
@@ -142,8 +144,6 @@ whickham |>
 ```
 
 **Your finding:**
-
-
 
 ### 3.2 Order the bars
 
@@ -160,8 +160,6 @@ nhanes |>
 
 **Your finding:**
 
-
-
 #### Question 4: Sort the bars from largest to smallest
 
 Reorder the bars by count. Why can we reorder race, but should keep the order of the age groups?
@@ -174,8 +172,6 @@ nhanes |>
 ```
 
 **Your finding:**
-
-
 
 ### 3.3 Many categories
 
@@ -192,8 +188,6 @@ companies_lv |>
 
 **Your finding:**
 
-
-
 #### Question 6: Make the labels readable
 
 Flip the plot so the labels sit on the vertical axis. Which order do the bars follow now?
@@ -206,8 +200,6 @@ companies_lv |>
 ```
 
 **Your finding:**
-
-
 
 #### Question 7: Sort the flipped bars
 
@@ -222,8 +214,6 @@ companies_lv |>
 
 **Your finding:**
 
-
-
 #### Question 8: Pool the small forms
 
 Keep the 5 most common legal forms and pool the others into one category. Then draw the sorted, flipped bars. Change `5` to `3` and describe what happens to the pooled bar.
@@ -236,8 +226,6 @@ companies_lv |>
 ```
 
 **Your finding:**
-
-
 
 ### 3.4 Groups inside the bars
 
@@ -254,8 +242,6 @@ whickham |>
 
 **Your finding:**
 
-
-
 #### Question 10: Put the groups side by side
 
 Draw the same counts with the smoker and non-smoker bars next to each other. Write what you can compare now.
@@ -269,8 +255,6 @@ whickham |>
 
 **Your finding:**
 
-
-
 #### Question 11: What share of each age group smokes?
 
 Draw bars that all reach 100% and show the share of smokers in each age group.
@@ -283,8 +267,6 @@ whickham |>
 ```
 
 **Your finding:**
-
-
 
 ### 3.5 Differences in counts across a second variable
 
@@ -301,8 +283,6 @@ nhanes |>
 
 **Your finding:**
 
-
-
 #### Question 13: One panel per survey cycle
 
 Draw the sorted race counts in one panel for each survey cycle with `facet_wrap()`. Compare the dodge graph with the panels.
@@ -315,8 +295,6 @@ nhanes |>
 ```
 
 **Your finding:**
-
-
 
 ### 3.6 Many parts of a whole: the treemap
 
@@ -333,8 +311,6 @@ world_exports |>
 
 **Your finding:**
 
-
-
 #### Question 15: Treemap or bars?
 
 Draw the same sector values as sorted bars. Which graph ranks the sectors better, and which shows the whole better?
@@ -347,8 +323,6 @@ world_exports |>
 ```
 
 **Your finding:**
-
-
 
 ### 3.7 Bars from a calculation: geom_col()
 
@@ -365,8 +339,6 @@ companies_lv |>
 
 **Your finding:**
 
-
-
 #### Question 17: What share of the companies has each legal form?
 
 Calculate the share of each legal form, keep the three largest and draw them as bars with the percent written on each bar.
@@ -380,8 +352,6 @@ companies_lv |>
 
 **Your finding:**
 
-
-
 #### Question 18: Where do people live?
 
 Sum the population of the 142 countries by continent in 2007 and draw the totals as bars. Which continent has the largest total?
@@ -394,6 +364,3 @@ rosling |>
 ```
 
 **Your finding:**
-
-
-

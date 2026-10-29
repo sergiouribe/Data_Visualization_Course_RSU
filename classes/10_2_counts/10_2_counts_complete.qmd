@@ -51,7 +51,7 @@ whickham <- Whickham |>
                         breaks = c(17, 34, 44, 54, 64, 74, 99),
                         labels = c("18-34", "35-44", "45-54", "55-64", "65-74", "75+"))
   )
-whickham |> glimpse()
+whickham |> head()
 ```
 
 ```{r}
@@ -68,7 +68,7 @@ whickham |>
 ```{r}
 #| label: data-nhanes
 nhanes <- NHANES
-nhanes |> glimpse()
+nhanes |> head()
 ```
 
 ### 2.3 companies_lv (file in the course repository)
@@ -82,7 +82,7 @@ companies_lv <- read_csv(
   "https://raw.githubusercontent.com/sergiouribe/Data_Visualization_Course_RSU/main/data/companies_lv_smaller_2020_2025.csv",
   show_col_types = FALSE
 )
-companies_lv |> glimpse()
+companies_lv |> head()
 ```
 
 ### 2.4 world_exports (file in the course repository)
@@ -95,7 +95,7 @@ world_exports <- read_csv(
   "https://raw.githubusercontent.com/sergiouribe/Data_Visualization_Course_RSU/main/data/world_exports_1998_2000.csv",
   col_types = cols(product = col_character())
 )
-world_exports |> glimpse()
+world_exports |> head()
 ```
 
 ### 2.5 rosling (file in the course repository)
@@ -108,7 +108,7 @@ rosling <- read_csv(
   "https://raw.githubusercontent.com/sergiouribe/Data_Visualization_Course_RSU/main/data/rosling_tidy.csv",
   show_col_types = FALSE
 )
-rosling |> glimpse()
+rosling |> head()
 ```
 
 ## 3. Counting things
@@ -232,7 +232,7 @@ companies_lv |>
 #### Other ways to pool
 
 | Code | Result on the legal forms |
-|---|---|
+|------------------------------------|------------------------------------|
 | `fct_lump_n(type_text, n = 5)` | the 5 most common forms, plus Other |
 | `fct_lump_n(type_text, n = -3)` | the 3 least common forms (2, 1 and 1 companies), Other holds 55,257 |
 | `fct_lump_min(type_text, min = 300)` | forms with at least 300 companies (4 forms), Other holds 1,227 |
@@ -444,4 +444,3 @@ rosling |>
 ```
 
 **Finding:** Asia has 3,812 million people (61.0%), Africa 930 million (14.9%), the Americas 899 million (14.4%), Europe 586 million (9.4%) and Oceania 24.5 million (0.4%). A sum cannot come from `geom_bar()`, because no row counts it.
-
