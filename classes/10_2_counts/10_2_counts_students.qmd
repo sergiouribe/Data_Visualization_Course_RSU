@@ -348,8 +348,6 @@ companies_lv |>
 
 **Your finding:**
 
-
-
 #### Question 17: What share of the companies has each legal form?
 
 Calculate the share of each legal form, keep the three largest and draw them as bars with the percent written on each bar.
@@ -363,8 +361,6 @@ companies_lv |>
 
 **Your finding:**
 
-
-
 #### Question 18: Which airline departs late most often?
 
 A flight is late when it departs more than 15 minutes after schedule. Calculate the share of late flights for each airline (`carrier`). Keep the airlines with 1,000 or more flights and draw the shares as bars with the percent written on each bar.
@@ -377,8 +373,6 @@ flights |>
 ```
 
 **Your finding:**
-
-
 
 ### 3.8 Likert data
 
@@ -395,8 +389,6 @@ nhanes |>
 
 **Your finding:**
 
-
-
 #### Question 20: Does the rating change with education?
 
 Draw one bar per education level that shows the share of each answer. Use a color scale with two ends, so good ratings and poor ratings sit at opposite ends.
@@ -409,8 +401,6 @@ nhanes |>
 ```
 
 **Your finding:**
-
-
 
 ### 3.9 Homework
 
@@ -426,6 +416,3 @@ rosling |>
 ```
 
 **Your finding:**
-
-
-

@@ -21,7 +21,12 @@ if (!requireNamespace("pacman", quietly = TRUE)) install.packages("pacman")
 
 ```{r}
 #| label: packages
-pacman::p_load(tidyverse, here, mosaicData, NHANES, nycflights13, treemapify)
+pacman::p_load(tidyverse, 
+               here, 
+               mosaicData, 
+               NHANES, 
+               nycflights13, 
+               treemapify)
 ```
 
 ## 2. Datasets
@@ -400,7 +405,8 @@ Count the companies by `type` in a table. Draw the table with `geom_bar()` and `
 #| error: true
 companies_lv |>
   count(type) |>
-  ggplot(aes(x = type, y = n)) +
+  ggplot(aes(x = type, 
+             y = n)) +
   geom_bar()   # error: geom_bar() counts rows itself
 ```
 
@@ -410,7 +416,8 @@ Fix:
 #| label: q16-fix
 companies_lv |>
   count(type) |>
-  ggplot(aes(x = type, y = n)) +
+  ggplot(aes(x = type, 
+             y = n)) +
   geom_col()
 ```
 
@@ -423,13 +430,14 @@ Calculate the share of each legal form, keep the three largest and draw them as 
 ```{r}
 #| label: q17
 companies_lv |>
+  mutate(type = fct_lump_n(type, n = 3)) |> 
   count(type) |>
   mutate(p = n / sum(n)) |>   # share of all companies
-  slice_max(p, n = 3) |>
+  
   ggplot(aes(x = fct_reorder(type, p), y = p)) +
   geom_col() +
-  geom_text(aes(label = scales::percent(p, accuracy = .1)), hjust = -0.1) +
-  scale_y_continuous(labels = scales::percent, expand = expansion(mult = c(0, .15))) +
+  # geom_text(aes(label = scales::percent(p, accuracy = .1)), hjust = -0.1) +
+  # scale_y_continuous(labels = scales::percent, expand = expansion(mult = c(0, .15))) +
   coord_flip() +
   labs(x = NULL, y = "share of companies")
 ```
@@ -451,8 +459,8 @@ flights |>
   filter(late, total >= 1000) |>     # late flights only, airlines with 1,000+ flights
   ggplot(aes(x = fct_reorder(carrier, p), y = p)) +
   geom_col() +
-  geom_text(aes(label = scales::percent(p, accuracy = .1)), hjust = -0.1) +
-  scale_y_continuous(labels = scales::percent, expand = expansion(mult = c(0, .15))) +
+  # geom_text(aes(label = scales::percent(p, accuracy = .1)), hjust = -0.1) +
+  # scale_y_continuous(labels = scales::percent, expand = expansion(mult = c(0, .15))) +
   coord_flip() +
   labs(x = NULL, y = "share of late departures")
 ```
@@ -513,4 +521,3 @@ rosling |>
 ```
 
 **Finding:** Asia has 3,812 million people (61.0%), Africa 930 million (14.9%), the Americas 899 million (14.4%), Europe 586 million (9.4%) and Oceania 24.5 million (0.4%). A sum cannot come from `geom_bar()`, because no row counts it.
-
