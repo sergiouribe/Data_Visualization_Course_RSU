@@ -1,5 +1,5 @@
 ---
-title: "Is there a correlation?"
+title: "Is there a relationship?"
 subtitle: "[SZF_184 Data Visualisation and Storytelling](https://estudijas.rsu.lv/course/view.php?id=83740)"
 author: "Sergio Uribe"
 institute: "Rīga Stradiņš University"
@@ -22,285 +22,483 @@ execute:
 ```{r}
 #| label: setup
 #| include: false
-pacman::p_load(here, tidyverse, palmerpenguins)
+pacman::p_load(tidyverse, here, palmerpenguins, NHANES, ggrepel, gganimate, gifski)
+
+rosling <- read_csv("https://raw.githubusercontent.com/sergiouribe/Data_Visualization_Course_RSU/main/data/rosling_tidy.csv", show_col_types = FALSE)
+nhanes <- NHANES
 ```
 
 ## The question
 
-**Is there a correlation?**
+**Is there a relationship?**
 
-Two continuous variables. When one goes up, what does the other do?
+Two continuous variables, such as income and life expectancy. Each country is one point.
 
-A **scatter plot** answers this. Each row is one point. The x position is one variable and the y position is the other.
-
----
-
-# 1. The scatter plot {background-color="#1a5276" style="color: white;"}
-
-**geom_point()**
+Today we build the Rosling graph step by step. It ends in an animation.
 
 ---
 
-## A first scatter plot
+## Datasets
+
+| Object | Source | Rows |
+|---|---|---|
+| `rosling` | course repository | 142 countries, 12 years |
+| `penguins` | package `palmerpenguins` | 344 penguins |
+| `nhanes` | package `NHANES` | 10,000 people |
+
+---
+
+# 3.1 Is there a relationship? {background-color="#1a5276" style="color: white;"}
+
+---
+
+## Question 1: Does higher income go with longer life? {background-color="#d5e8d4"}
+
+Draw each country in 2007 as a point: income on the horizontal axis, life expectancy on the vertical axis. Describe the shape of the cloud. Then calculate the correlation r with `cor(x, y)`. The value r runs from -1 to 1.
+
+Start from `rosling`.
+
+---
+
+## Does higher income go with longer life?
 
 ```{r}
-#| message: true
-#| warning: true
-penguins |>
-  ggplot(aes(x = flipper_length_mm, y = body_mass_g)) +
+#| label: s-q1
+rosling |>
+  filter(year == 2007) |>
+  ggplot(aes(x = income, y = life_exp)) +
   geom_point()
 ```
 
-`Removed 2 rows`: 2 penguins have no flipper length or no body mass.
-
 ---
 
-## Fix the message
+## Does higher income go with longer life? (continued)
 
 ```{r}
-# !is.na() keeps penguins with both measurements
-penguins |>
-  filter(!is.na(flipper_length_mm), !is.na(body_mass_g)) |>
-  ggplot(aes(x = flipper_length_mm, y = body_mass_g)) +
-  geom_point()
+#| label: s-q1-cor
+rosling |>
+  filter(year == 2007) |>
+  summarise(r = cor(income, life_exp))
 ```
 
-The points rise to the right. Penguins with longer flippers weigh more.
+The 142 countries form a curve that rises fast at low income and flattens at high income. The correlation is r = 0.68.
 
 ---
 
-## Your turn 1 {background-color="#d5e8d4"}
+## Question 2: Straighten the curve {background-color="#d5e8d4"}
 
-**Draw flipper length (x) against bill length (y).**
+Put income on a log scale with `scale_x_log10()` and add the straight line that fits best with `geom_smooth(method = "lm")`. Calculate r again with `log10(income)`. What changes?
+
+Start from `rosling`.
+
+---
+
+## Straighten the curve
 
 ```{r}
-#| eval: false
-penguins |>
-  filter(!is.na(flipper_length_mm), !is.na(bill_length_mm)) |>
-  ggplot(aes(x = flipper_length_mm, y = ___)) +
-  geom_point()
-```
-
-Answer: when the flipper gets longer, the bill gets [YOUR ANSWER HERE].
-
----
-
-# 2. One color for each species {background-color="#1a5276" style="color: white;"}
-
-**color**
-
----
-
-## Color by species
-
-```{r}
-penguins |>
-  filter(!is.na(flipper_length_mm), !is.na(body_mass_g)) |>
-  ggplot(aes(x = flipper_length_mm, y = body_mass_g, color = species)) +
-  geom_point()
-```
-
-The cloud splits into three groups. Gentoo sits at the top right.
-
----
-
-## Your turn 2 {background-color="#d5e8d4"}
-
-**Color the flipper and bill length plot by species.**
-
-```{r}
-#| eval: false
-penguins |>
-  filter(!is.na(flipper_length_mm), !is.na(bill_length_mm)) |>
-  ggplot(aes(x = flipper_length_mm, y = bill_length_mm, color = ___)) +
-  geom_point()
-```
-
-Answer: [YOUR ANSWER HERE] has the longest flippers. [YOUR ANSWER HERE] has the shortest bills.
-
----
-
-# 3. A line through the points {background-color="#1a5276" style="color: white;"}
-
-**geom_smooth()**
-
----
-
-## geom_smooth()
-
-```{r}
-#| message: true
-penguins |>
-  filter(!is.na(flipper_length_mm), !is.na(body_mass_g)) |>
-  ggplot(aes(x = flipper_length_mm, y = body_mass_g, color = species)) +
+#| label: s-q2
+rosling |>
+  filter(year == 2007) |>
+  ggplot(aes(x = income, y = life_exp)) +
   geom_point() +
-  geom_smooth()
+  scale_x_log10() +                  # equal distances on the axis are equal ratios of income
+  geom_smooth(method = "lm") +       # the straight line that fits best
+  labs(x = "Income per person (log scale)", y = "Life expectancy (years)")
 ```
 
 ---
 
-## What the message says
+## Straighten the curve (continued)
 
-`using method = 'loess'`: R drew a curve that bends with the data. The grey band shows the uncertainty of the curve.
-
-To draw a straight line, we set `method = "lm"`. The line shows how much y changes when x goes up by one unit.
+```{r}
+#| label: s-q2-cor
+rosling |>
+  filter(year == 2007) |>
+  summarise(r = cor(log10(income), life_exp))
+```
 
 ---
 
-## method = "lm"
+## Straighten the curve (continued)
 
 ```{r}
-# "lm" draws a straight line. One line for each species
+#| label: s-q2-slope
+rosling |>
+  filter(year == 2007) |>
+  lm(life_exp ~ log10(income), data = _)   # slope of the line
+```
+
+The cloud follows a straight line and r rises to 0.81. The line says that a tenfold higher income goes with about 16.6 more years of life expectancy (slope 16.6).
+
+---
+
+## Question 3: Do all continents follow the pattern? {background-color="#d5e8d4"}
+
+Color the points by `continent` with `scale_color_viridis_d()`. Then calculate r for each continent (use `group_by(continent)`). Which continent sits lowest?
+
+Start from `rosling`.
+
+---
+
+## Do all continents follow the pattern?
+
+```{r}
+#| label: s-q3
+rosling |>
+  filter(year == 2007) |>
+  ggplot(aes(x = income, y = life_exp, color = continent)) +
+  geom_point() +
+  scale_x_log10() +
+  scale_color_viridis_d() +
+  labs(x = "Income per person (log scale)", y = "Life expectancy (years)", color = "Continent")
+```
+
+---
+
+## Do all continents follow the pattern? (continued)
+
+```{r}
+#| label: s-q3-cor
+rosling |>
+  filter(year == 2007) |>
+  group_by(continent) |>
+  summarise(n = n(), r = cor(log10(income), life_exp))
+```
+
+Africa sits lowest (median life expectancy 52.9 years, median income 1,452). The correlation on the log scale is 0.45 in Africa, 0.78 in the Americas, 0.80 in Asia and 0.84 in Europe. Oceania has 2 countries, so its r = 1 means nothing.
+
+---
+
+# 3.2 Simpson's paradox {background-color="#1a5276" style="color: white;"}
+
+---
+
+## Question 4a: Do penguins with longer bills have deeper bills? {background-color="#d5e8d4"}
+
+Draw `bill_length_mm` against `bill_depth_mm` for all penguins and add one line with `geom_smooth(method = "lm")`. Predict what happens inside each species. Then add `color = species` and check your prediction. Calculate r for all penguins and for each species.
+
+Start from `penguins`.
+
+---
+
+## Do penguins with longer bills have deeper bills?
+
+```{r}
+#| label: s-q4a
 penguins |>
-  filter(!is.na(flipper_length_mm), !is.na(body_mass_g)) |>
-  ggplot(aes(x = flipper_length_mm, y = body_mass_g, color = species)) +
+  drop_na(bill_length_mm, bill_depth_mm) |>
+  ggplot(aes(x = bill_length_mm, y = bill_depth_mm)) +
   geom_point() +
   geom_smooth(method = "lm")
 ```
 
-We got three lines, one for each species. We wanted one line for all penguins.
-
 ---
 
-## One line for all penguins
+## Do penguins with longer bills have deeper bills? (continued)
 
 ```{r}
-# color inside ggplot() applies to every layer.
-# color inside geom_point() applies to the points only
+#| label: s-q4a-species
 penguins |>
-  filter(!is.na(flipper_length_mm), !is.na(body_mass_g)) |>
-  ggplot(aes(x = flipper_length_mm, y = body_mass_g)) +
-  geom_point(aes(color = species)) +
+  drop_na(bill_length_mm, bill_depth_mm) |>
+  ggplot(aes(x = bill_length_mm, y = bill_depth_mm, color = species)) +
+  geom_point() +
   geom_smooth(method = "lm")
 ```
 
-The line rises 50 g for each extra millimeter of flipper.
-
 ---
 
-## Your turn 3 {background-color="#d5e8d4"}
-
-**Add one straight line to the flipper and bill length plot. Keep the colors on the points.**
+## Do penguins with longer bills have deeper bills? (continued)
 
 ```{r}
-#| eval: false
+#| label: s-q4a-cor
 penguins |>
-  filter(!is.na(flipper_length_mm), !is.na(bill_length_mm)) |>
-  ggplot(aes(x = flipper_length_mm, y = bill_length_mm)) +
-  geom_point(aes(color = species)) +
-  geom_smooth(method = "___")
+  drop_na(bill_length_mm, bill_depth_mm) |>
+  group_by(species) |>
+  summarise(n = n(), r = cor(bill_length_mm, bill_depth_mm))
 ```
 
-Answer: the line rises about [YOUR ANSWER HERE] mm of bill for each extra millimeter of flipper.
-
 ---
 
-# 4. One panel for each species {background-color="#1a5276" style="color: white;"}
-
-**facet_wrap()**
-
----
-
-## facet_wrap()
+## Do penguins with longer bills have deeper bills? (continued)
 
 ```{r}
-# ~ species: one panel for each species
+#| label: s-q4a-cor-all
 penguins |>
-  filter(!is.na(flipper_length_mm), !is.na(body_mass_g)) |>
-  ggplot(aes(x = flipper_length_mm, y = body_mass_g, color = species)) +
-  geom_point() +
-  geom_smooth(method = "lm") +
-  facet_wrap(~ species)
+  drop_na(bill_length_mm, bill_depth_mm) |>
+  summarise(n = n(), r = cor(bill_length_mm, bill_depth_mm))
 ```
 
-Each species has its own cloud and its own line. Gentoo has the steepest line.
+Across all 342 penguins the line slopes down (r = -0.24). Inside each species the line slopes up: Adelie r = 0.39 (151 penguins), Chinstrap r = 0.65 (68) and Gentoo r = 0.64 (123). The species differ in both variables, and this creates the downward overall trend. This is Simpson's paradox.
 
 ---
 
-## Your turn 4 {background-color="#d5e8d4"}
+## Question 4b: Which line do we trust? {background-color="#d5e8d4"}
 
-**Draw the flipper and bill length plot with one panel for each species.**
+Write two sentences: which line would you report to a biologist, and why? Then repeat the analysis for `flipper_length_mm` against `bill_depth_mm`.
+
+Start from `penguins`.
+
+---
+
+## Which line do we trust?
 
 ```{r}
-#| eval: false
+#| label: s-q4b
 penguins |>
-  filter(!is.na(flipper_length_mm), !is.na(bill_length_mm)) |>
-  ggplot(aes(x = flipper_length_mm, y = bill_length_mm, color = species)) +
-  geom_point() +
-  geom_smooth(method = "lm") +
-  facet_wrap(~ ___)
-```
-
-Answer: the line is steepest for [YOUR ANSWER HERE] and flattest for [YOUR ANSWER HERE].
-
----
-
-# 5. When the groups change the story {background-color="#1a5276" style="color: white;"}
-
-**Optional: homework if time runs short**
-
----
-
-## Bill depth: one line
-
-```{r}
-penguins |>
-  filter(!is.na(flipper_length_mm), !is.na(bill_depth_mm)) |>
-  ggplot(aes(x = flipper_length_mm, y = bill_depth_mm)) +
-  geom_point(aes(color = species)) +
-  geom_smooth(method = "lm")
-```
-
-The line goes down. Penguins with longer flippers have shallower bills.
-
----
-
-## Bill depth: one line for each species
-
-```{r}
-penguins |>
-  filter(!is.na(flipper_length_mm), !is.na(bill_depth_mm)) |>
+  drop_na(flipper_length_mm, bill_depth_mm) |>
   ggplot(aes(x = flipper_length_mm, y = bill_depth_mm, color = species)) +
   geom_point() +
   geom_smooth(method = "lm")
 ```
 
-Inside every species the line goes up. Gentoo has long flippers and shallow bills, so the groups pull the overall line down. One line for all penguins gives the wrong story.
-
 ---
 
-## Your turn 5 {background-color="#d5e8d4"}
-
-**Facet the bill depth plot by species. Which line is steepest?**
+## Which line do we trust? (continued)
 
 ```{r}
-#| eval: false
+#| label: s-q4b-cor
 penguins |>
-  filter(!is.na(flipper_length_mm), !is.na(bill_depth_mm)) |>
-  ggplot(aes(x = flipper_length_mm, y = bill_depth_mm, color = species)) +
-  geom_point() +
-  geom_smooth(method = "lm") +
-  facet_wrap(~ ___)
+  drop_na(flipper_length_mm, bill_depth_mm) |>
+  group_by(species) |>
+  summarise(n = n(), r = cor(flipper_length_mm, bill_depth_mm))
 ```
 
-Answer: [YOUR ANSWER HERE] has the steepest line.
+---
+
+## Which line do we trust? (continued)
+
+```{r}
+#| label: s-q4b-cor-all
+penguins |>
+  drop_na(flipper_length_mm, bill_depth_mm) |>
+  summarise(n = n(), r = cor(flipper_length_mm, bill_depth_mm))
+```
+
+For all penguins r = -0.58. Inside each species r is positive: Adelie 0.31, Chinstrap 0.58 and Gentoo 0.71. Report the within-species lines, because they compare penguins of the same species. In the Whickham data (counts class) smokers died less overall and more inside every age group. The same paradox appears there with shares.
 
 ---
 
-## Recap {.smaller}
-
-| Task | Code |
-|------|------|
-| Two continuous variables | `geom_point()` |
-| One color for each group | `aes(color = species)` |
-| Straight line | `geom_smooth(method = "lm")` |
-| Color on the points only | `geom_point(aes(color = species))` |
-| One panel for each group | `facet_wrap(~ species)` |
+# 3.3 The Rosling graph (next class) {background-color="#1a5276" style="color: white;"}
 
 ---
 
-## {background-color="#1a5276" style="color: white; text-align: center;"}
+## Question 5: Does the size of a country matter? {background-color="#d5e8d4"}
 
-<br><br>
+Add `size = population` and `alpha = 0.7`. Which countries have the largest circles?
 
-### See you in the next class!
+Start from `rosling`.
+
+---
+
+## Does the size of a country matter?
+
+```{r}
+#| label: s-q5
+rosling |>
+  filter(year == 2007) |>
+  ggplot(aes(x = income, y = life_exp, color = continent, size = population)) +
+  geom_point(alpha = 0.7) +
+  scale_x_log10() +
+  scale_size(range = c(1, 12)) +   # smallest and largest circle
+  scale_color_viridis_d() +
+  labs(x = "Income per person (log scale)", y = "Life expectancy (years)",
+       color = "Continent", size = "Population")
+```
+
+China (1,319 million people), India (1,110 million) and the United States (301 million) have the largest circles. China and India sit at 73.0 and 64.7 years, below the line for countries of equal income at the top.
+
+---
+
+## Question 6: Which countries tell the story? {background-color="#d5e8d4"}
+
+Write the name of 5 countries next to their circle. Use `geom_text_repel()` from `ggrepel`, which moves labels apart. Choose countries from the data: highest income, lowest life expectancy, and the two largest populations.
+
+Start from `rosling`.
+
+---
+
+## Which countries tell the story?
+
+```{r}
+#| label: s-q6
+rosling |>
+  filter(year == 2007) |>
+  mutate(label = case_when(
+    country %in% c("China", "India", "United States", "Norway", "Swaziland") ~ country,
+    .default = ""
+  )) |>
+  ggplot(aes(x = income, y = life_exp, color = continent, size = population)) +
+  geom_point(alpha = 0.7) +
+  geom_text_repel(aes(label = label), size = 4, show.legend = FALSE) +
+  scale_x_log10() +
+  scale_size(range = c(1, 12)) +
+  scale_color_viridis_d() +
+  labs(x = "Income per person (log scale)", y = "Life expectancy (years)",
+       color = "Continent", size = "Population")
+```
+
+Swaziland has the lowest life expectancy (39.6 years) at an income of 4,513. Norway has the highest income (49,357) and 80.2 years. The labels tell the reader which circles to look at.
+
+---
+
+## Question 7: Has the relationship changed? {background-color="#d5e8d4"}
+
+Draw the graph for 1952, 1977 and 2007 in three panels with `facet_wrap(~year)`. Then calculate the median life expectancy and median income for each of the three years.
+
+Start from `rosling`.
+
+---
+
+## Has the relationship changed?
+
+```{r}
+#| label: s-q7
+rosling |>
+  filter(year %in% c(1952, 1977, 2007)) |>
+  ggplot(aes(x = income, y = life_exp, color = continent, size = population)) +
+  geom_point(alpha = 0.7) +
+  scale_x_log10() +
+  scale_size(range = c(1, 8)) +
+  scale_color_viridis_d() +
+  facet_wrap(~year) +
+  labs(x = "Income per person (log scale)", y = "Life expectancy (years)",
+       color = "Continent", size = "Population")
+```
+
+---
+
+## Has the relationship changed? (continued)
+
+```{r}
+#| label: s-q7-median
+rosling |>
+  filter(year %in% c(1952, 1977, 2007)) |>
+  group_by(year) |>
+  summarise(life = median(life_exp), income = median(income))
+```
+
+The median life expectancy rises from 45.1 years (1952) to 59.7 (1977) and 71.9 (2007). The median income rises from 1,969 to 3,799 and 6,124. China goes from 44 years and an income of 400 in 1952 to 73.0 years and 4,959 in 2007. The whole cloud moves up and to the right.
+
+---
+
+## Question 8: Animate it {background-color="#d5e8d4"}
+
+Replace the panels with `transition_time(year)` from `gganimate` and put the year in the title with `labs(title = "Year: {round(frame_time)}")`. Use all years, not only 2007. Save the animation with `anim_save()`.
+
+Start from `rosling`.
+
+---
+
+## Animate it
+
+```{r}
+#| label: s-q8
+rosling |>
+  ggplot(aes(x = income, y = life_exp, color = continent, size = population)) +
+  geom_point(alpha = 0.7) +
+  scale_x_log10() +
+  scale_size(range = c(1, 12), guide = "none") +
+  scale_color_viridis_d() +
+  labs(title = "Year: {round(frame_time)}",
+       x = "Income per person (log scale)", y = "Life expectancy (years)", color = "Continent") +
+  transition_time(year)   # one frame per year, R fills the steps between
+```
+
+---
+
+## Animate it (continued)
+
+```{r}
+#| label: s-q8-save
+#| eval: false
+anim_save("rosling.gif")   # saves the last animation
+```
+
+The countries move to the right and up from 1952 to 2007. Use `round(frame_time)` in the title, otherwise the year shows decimals. The animation needs the `gifski` package.
+
+---
+
+# 3.4 Homework: NHANES {background-color="#1a5276" style="color: white;"}
+
+---
+
+## Question 9: Does blood pressure rise with age? {background-color="#d5e8d4"}
+
+Use adults only. Draw `Age` against `BPSysAve` (systolic blood pressure). Many points overlap, so use `alpha`. Add a line and calculate r.
+
+Start from `nhanes`.
+
+---
+
+## Does blood pressure rise with age?
+
+```{r}
+#| label: s-q9
+nhanes |>
+  filter(Age >= 20) |>
+  ggplot(aes(x = Age, y = BPSysAve)) +
+  geom_point(alpha = 0.2) +
+  geom_smooth(method = "lm")
+```
+
+---
+
+## Does blood pressure rise with age? (continued)
+
+```{r}
+#| label: s-q9-cor
+nhanes |>
+  filter(Age >= 20) |>
+  drop_na(BPSysAve) |>   # cor() returns NA when a value is missing
+  summarise(r = cor(Age, BPSysAve))
+```
+
+Systolic pressure rises with age (r = 0.41, 6,971 adults).
+
+---
+
+## Question 10: Does a higher BMI go with lower HDL cholesterol? {background-color="#d5e8d4"}
+
+Use adults only. Draw `BMI` against `DirectChol` (HDL cholesterol). Add a line and calculate r.
+
+Start from `nhanes`.
+
+---
+
+## Does a higher BMI go with lower HDL cholesterol?
+
+```{r}
+#| label: s-q10
+nhanes |>
+  filter(Age >= 20) |>
+  ggplot(aes(x = BMI, y = DirectChol)) +
+  geom_point(alpha = 0.2) +
+  geom_smooth(method = "lm")
+```
+
+---
+
+## Does a higher BMI go with lower HDL cholesterol? (continued)
+
+```{r}
+#| label: s-q10-cor
+nhanes |>
+  filter(Age >= 20) |>
+  drop_na(BMI, DirectChol) |>   # cor() returns NA when a value is missing
+  summarise(r = cor(BMI, DirectChol))
+```
+
+HDL cholesterol falls as BMI rises (r = -0.34, 6,791 adults).
+
+---
+
+## Summary
+
+| Question | Graph | Code |
+|---|---|---|
+| Is there a relationship? | scatter plot | `geom_point()` |
+| Does a curve hide a line? | log axis | `scale_x_log10()` |
+| What is the trend? | line that fits best | `geom_smooth(method = "lm")` |
+| Does a third variable matter? | color, size | `color = `, `size = ` |
+| Does the trend flip inside groups? | color by group | Simpson's paradox |
+| What changed over time? | panels, animation | `facet_wrap()`, `transition_time()` |
