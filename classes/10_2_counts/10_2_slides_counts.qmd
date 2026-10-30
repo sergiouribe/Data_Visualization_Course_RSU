@@ -22,7 +22,7 @@ execute:
 ```{r}
 #| label: setup
 #| include: false
-pacman::p_load(tidyverse, here, mosaicData, NHANES, treemapify)
+pacman::p_load(tidyverse, here, mosaicData, NHANES, nycflights13, treemapify)
 
 whickham <- Whickham |>
   as_tibble() |>
@@ -59,6 +59,7 @@ Four datasets today: Whickham (women and smoking), NHANES (US survey), Latvian c
 | `companies_lv` | course repository | 55,261 companies |
 | `world_exports` | course repository | export value by country and product |
 | `rosling` | course repository | 142 countries, 1952 to 2007 |
+| `flights` | package `nycflights13` | 336,776 flights |
 
 ---
 
@@ -475,7 +476,7 @@ Start from `companies_lv`.
 
 ---
 
-## Q16: Why does geom_bar() fail on a table of counts?
+## Why does geom_bar() fail on a table of counts?
 
 ```{r}
 #| label: s-q16
@@ -488,7 +489,7 @@ companies_lv |>
 
 ---
 
-## Q16: the fix
+## The fix
 
 ```{r}
 #| label: s-q16-fix
@@ -510,7 +511,7 @@ Start from `companies_lv`.
 
 ---
 
-## Q17: What share of the companies has each legal form?
+## What share of the companies has each legal form?
 
 ```{r}
 #| label: s-q17
@@ -530,7 +531,95 @@ SIA has 80.8% of the companies, BDR 9.2% and IK 7.1%.
 
 ---
 
-## Question 18: Where do people live? {background-color="#d5e8d4"}
+## Question 18: Which airline departs late most often? {background-color="#d5e8d4"}
+
+A flight is late when it departs more than 15 minutes after schedule. Calculate the share of late flights for each airline (`carrier`). Keep the airlines with 1,000 or more flights and draw the shares as bars with the percent written on each bar.
+
+Start from `flights`.
+
+---
+
+## Which airline departs late most often?
+
+```{r}
+#| label: s-q18
+flights |>
+  drop_na(dep_delay) |>
+  mutate(late = dep_delay > 15) |>   # TRUE when the departure is more than 15 minutes late
+  count(carrier, late) |>
+  group_by(carrier) |>
+  mutate(p = n / sum(n), total = sum(n)) |>
+  filter(late, total >= 1000) |>     # late flights only, airlines with 1,000+ flights
+  ggplot(aes(x = fct_reorder(carrier, p), y = p)) +
+  geom_col() +
+  geom_text(aes(label = scales::percent(p, accuracy = .1)), hjust = -0.1) +
+  scale_y_continuous(labels = scales::percent, expand = expansion(mult = c(0, .15))) +
+  coord_flip() +
+  labs(x = NULL, y = "share of late departures")
+```
+
+EV (ExpressJet) has 30.5% late departures, WN 26.9%, FL 26.7% and 9E 25.7%. US has the lowest share, 12.2%. Airlines with few flights (HA has 342, OO has 29) give shares that mean little, so the code keeps airlines with 1,000 or more flights.
+
+---
+
+# 3.8 Likert data {background-color="#1a5276" style="color: white;"}
+
+---
+
+## Question 19: How do adults rate their health? {background-color="#d5e8d4"}
+
+`HealthGen` is a 5-point rating of general health: Excellent, Vgood, Good, Fair and Poor. Check the order of the levels with `levels()`. Count the adults who answered in each level and draw the counts as bars in the order of the scale.
+
+Start from `nhanes`.
+
+---
+
+## How do adults rate their health?
+
+```{r}
+#| label: s-q19
+nhanes |>
+  filter(Age >= 20) |>
+  drop_na(HealthGen) |>
+  count(HealthGen) |>
+  ggplot(aes(x = HealthGen, y = n)) +
+  geom_col()   # the levels keep the order of the scale
+```
+
+6,478 adults answered. Excellent has 738 (11.4%), Vgood 2,085 (32.2%), Good 2,552 (39.4%), Fair 923 (14.2%) and Poor 180 (2.8%). A Likert scale has an order, so the bars must keep it. A factor with levels in the wrong order (for example alphabetical) breaks the scale.
+
+---
+
+## Question 20: Does the rating change with education? {background-color="#d5e8d4"}
+
+Draw one bar per education level that shows the share of each answer. Use a color scale with two ends, so good ratings and poor ratings sit at opposite ends.
+
+Start from `nhanes`.
+
+---
+
+## Does the rating change with education?
+
+```{r}
+#| label: s-q20
+nhanes |>
+  filter(Age >= 20) |>
+  drop_na(HealthGen, Education) |>
+  ggplot(aes(y = Education, fill = HealthGen)) +
+  geom_bar(position = "fill") +   # every bar reaches 100%
+  scale_fill_brewer(palette = "RdYlBu", direction = -1) +
+  labs(x = "share", fill = "General health")
+```
+
+The share of adults who rate their health Excellent or Vgood rises from 17.6% (8th grade) to 26.6% (9 to 11th grade), 35.3% (high school), 43.0% (some college) and 62.5% (college graduates). The simplest way to handle Likert data: keep the answers as an ordered factor, show shares with `position = "fill"` and use a color scale with two ends.
+
+---
+
+# 3.9 Homework {background-color="#1a5276" style="color: white;"}
+
+---
+
+## Question 21: Where do people live? {background-color="#d5e8d4"}
 
 Sum the population of the 142 countries by continent in 2007 and draw the totals as bars. Which continent has the largest total?
 
@@ -538,10 +627,10 @@ Start from `rosling`.
 
 ---
 
-## Q18: Where do people live?
+## Where do people live?
 
 ```{r}
-#| label: s-q18
+#| label: s-q21
 rosling |>
   filter(year == 2007) |>
   group_by(continent) |>
@@ -565,6 +654,7 @@ Asia has 3,812 million people (61.0%), Africa 930 million (14.9%), the Americas 
 | Many categories? | flipped bars, pooled small groups | `y = `, `fct_lump_n()` |
 | Groups inside bars? | stack, dodge, fill | `position = ` |
 | Many parts of a whole? | treemap | `geom_treemap()` |
-| Bars from a calculation? | columns | `count()`, `summarise()`, `geom_col()` |
+| Bars from a calculation? | columns | `count()`, `mutate()`, `geom_col()` |
+| Likert scale? | ordered factor, 100% bars | `position = "fill"`, `scale_fill_brewer()` |
 
 Pie charts hide the ranking. Use bars.

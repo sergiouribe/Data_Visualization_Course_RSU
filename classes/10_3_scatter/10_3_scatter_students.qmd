@@ -1,0 +1,322 @@
+---
+title: "Relationships (students)"
+format:
+  html:
+    toc: true
+    code-fold: false
+---
+
+Read each question, then write the code in the empty chunk. Remove `#| eval: false` and run the chunk. Write what you see under **Your finding**.
+
+## 1. Packages
+
+### 1.1 Install pacman if it is missing
+
+```{r}
+#| label: install-pacman
+if (!requireNamespace("pacman", quietly = TRUE)) install.packages("pacman")
+```
+
+### 1.2 Load the packages
+
+```{r}
+#| label: packages
+pacman::p_load(tidyverse, here, palmerpenguins, NHANES, ggrepel, gganimate, gifski)
+```
+
+## 2. Datasets
+
+Each dataset loads once into a named object. Every question below starts from one of these objects.
+
+### 2.1 rosling (file in the course repository)
+
+Life expectancy (`life_exp`), income per person (`income`) and population (`population`) of 142 countries every 5 years from 1952 to 2007. One row per country and year (1,704 rows).
+
+```{r}
+#| label: data-rosling
+# Google Drive link to be added here later
+rosling <- read_csv(
+  "https://raw.githubusercontent.com/sergiouribe/Data_Visualization_Course_RSU/main/data/rosling_tidy.csv",
+  show_col_types = FALSE
+)
+rosling |> head()
+```
+
+### 2.2 penguins (package `palmerpenguins`)
+
+344 penguins of three species from the Palmer Archipelago. The data come with the package, so no loading step is needed.
+
+```{r}
+#| label: data-penguins
+penguins |> head()
+```
+
+### 2.3 nhanes (package `NHANES`)
+
+10,000 people from two US survey cycles (2009_10 and 2011_12).
+
+```{r}
+#| label: data-nhanes
+nhanes <- NHANES
+nhanes |> head()
+```
+
+## 3. Relationships between two continuous variables
+
+### 3.1 Is there a relationship?
+
+#### Question 1: Does higher income go with longer life?
+
+Draw each country in 2007 as a point: income on the horizontal axis, life expectancy on the vertical axis. Describe the shape of the cloud. Then calculate the correlation r with `cor(x, y)`. The value r runs from -1 to 1.
+
+```{r}
+#| label: q1
+#| eval: false
+rosling |>
+
+```
+
+```{r}
+#| label: q1-cor
+#| eval: false
+rosling |>
+
+```
+
+**Your finding:**
+
+
+
+#### Question 2: Straighten the curve
+
+Put income on a log scale with `scale_x_log10()` and add the straight line that fits best with `geom_smooth(method = "lm")`. Calculate r again with `log10(income)`. What changes?
+
+```{r}
+#| label: q2
+#| eval: false
+rosling |>
+
+```
+
+```{r}
+#| label: q2-cor
+#| eval: false
+rosling |>
+
+```
+
+**Your finding:**
+
+
+
+#### Question 3: Do all continents follow the pattern?
+
+Color the points by `continent` with `scale_color_viridis_d()`. Then calculate r for each continent (use `group_by(continent)`). Which continent sits lowest?
+
+```{r}
+#| label: q3
+#| eval: false
+rosling |>
+
+```
+
+```{r}
+#| label: q3-cor
+#| eval: false
+rosling |>
+
+```
+
+**Your finding:**
+
+
+
+### 3.2 Simpson's paradox
+
+#### Question 4a: Do penguins with longer bills have deeper bills?
+
+Draw `bill_length_mm` against `bill_depth_mm` for all penguins and add one line with `geom_smooth(method = "lm")`. Predict what happens inside each species. Then add `color = species` and check your prediction. Calculate r for all penguins and for each species.
+
+```{r}
+#| label: q4a
+#| eval: false
+penguins |>
+
+```
+
+```{r}
+#| label: q4a-species
+#| eval: false
+penguins |>
+
+```
+
+```{r}
+#| label: q4a-cor
+#| eval: false
+penguins |>
+
+```
+
+```{r}
+#| label: q4a-cor-all
+#| eval: false
+penguins |>
+
+```
+
+**Your finding:**
+
+
+
+#### Question 4b: Which line do we trust?
+
+Write two sentences: which line would you report to a biologist, and why? Then repeat the analysis for `flipper_length_mm` against `bill_depth_mm`.
+
+```{r}
+#| label: q4b
+#| eval: false
+penguins |>
+
+```
+
+```{r}
+#| label: q4b-cor
+#| eval: false
+penguins |>
+
+```
+
+```{r}
+#| label: q4b-cor-all
+#| eval: false
+penguins |>
+
+```
+
+**Your finding:**
+
+
+
+### 3.3 The Rosling graph (next class)
+
+#### Question 5: Does the size of a country matter?
+
+Add `size = population` and `alpha = 0.7`. Which countries have the largest circles?
+
+```{r}
+#| label: q5
+#| eval: false
+rosling |>
+
+```
+
+**Your finding:**
+
+
+
+#### Question 6: Which countries tell the story?
+
+Write the name of 5 countries next to their circle. Use `geom_text_repel()` from `ggrepel`, which moves labels apart. Choose countries from the data: highest income, lowest life expectancy, and the two largest populations.
+
+```{r}
+#| label: q6
+#| eval: false
+rosling |>
+
+```
+
+**Your finding:**
+
+
+
+#### Question 7: Has the relationship changed?
+
+Draw the graph for 1952, 1977 and 2007 in three panels with `facet_wrap(~year)`. Then calculate the median life expectancy and median income for each of the three years.
+
+```{r}
+#| label: q7
+#| eval: false
+rosling |>
+
+```
+
+```{r}
+#| label: q7-median
+#| eval: false
+rosling |>
+
+```
+
+**Your finding:**
+
+
+
+#### Question 8: Animate it
+
+Replace the panels with `transition_time(year)` from `gganimate` and put the year in the title with `labs(title = "Year: {round(frame_time)}")`. Use all years, not only 2007. Save the animation with `anim_save()`.
+
+```{r}
+#| label: q8
+#| eval: false
+rosling |>
+
+```
+
+```{r}
+#| label: q8-save
+#| eval: false
+rosling |>
+
+```
+
+**Your finding:**
+
+
+
+### 3.4 Homework: NHANES
+
+#### Question 9: Does blood pressure rise with age?
+
+Use adults only. Draw `Age` against `BPSysAve` (systolic blood pressure). Many points overlap, so use `alpha`. Add a line and calculate r.
+
+```{r}
+#| label: q9
+#| eval: false
+nhanes |>
+
+```
+
+```{r}
+#| label: q9-cor
+#| eval: false
+nhanes |>
+
+```
+
+**Your finding:**
+
+
+
+#### Question 10: Does a higher BMI go with lower HDL cholesterol?
+
+Use adults only. Draw `BMI` against `DirectChol` (HDL cholesterol). Add a line and calculate r.
+
+```{r}
+#| label: q10
+#| eval: false
+nhanes |>
+
+```
+
+```{r}
+#| label: q10-cor
+#| eval: false
+nhanes |>
+
+```
+
+**Your finding:**
+
+
+

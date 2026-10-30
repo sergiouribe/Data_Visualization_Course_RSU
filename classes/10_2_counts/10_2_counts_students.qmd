@@ -21,7 +21,7 @@ if (!requireNamespace("pacman", quietly = TRUE)) install.packages("pacman")
 
 ```{r}
 #| label: packages
-pacman::p_load(tidyverse, here, mosaicData, NHANES, treemapify)
+pacman::p_load(tidyverse, here, mosaicData, NHANES, nycflights13, treemapify)
 ```
 
 ## 2. Datasets
@@ -109,6 +109,15 @@ rosling <- read_csv(
   show_col_types = FALSE
 )
 rosling |> glimpse()
+```
+
+### 2.6 flights (package `nycflights13`)
+
+336,776 flights that left New York City airports in 2013. The data come with the `nycflights13` package, so no loading step is needed.
+
+```{r}
+#| label: data-flights
+flights |> head()
 ```
 
 ## 3. Counting things
@@ -339,6 +348,8 @@ companies_lv |>
 
 **Your finding:**
 
+
+
 #### Question 17: What share of the companies has each legal form?
 
 Calculate the share of each legal form, keep the three largest and draw them as bars with the percent written on each bar.
@@ -352,15 +363,69 @@ companies_lv |>
 
 **Your finding:**
 
-#### Question 18: Where do people live?
+
+
+#### Question 18: Which airline departs late most often?
+
+A flight is late when it departs more than 15 minutes after schedule. Calculate the share of late flights for each airline (`carrier`). Keep the airlines with 1,000 or more flights and draw the shares as bars with the percent written on each bar.
+
+```{r}
+#| label: q18
+#| eval: false
+flights |>
+
+```
+
+**Your finding:**
+
+
+
+### 3.8 Likert data
+
+#### Question 19: How do adults rate their health?
+
+`HealthGen` is a 5-point rating of general health: Excellent, Vgood, Good, Fair and Poor. Check the order of the levels with `levels()`. Count the adults who answered in each level and draw the counts as bars in the order of the scale.
+
+```{r}
+#| label: q19
+#| eval: false
+nhanes |>
+
+```
+
+**Your finding:**
+
+
+
+#### Question 20: Does the rating change with education?
+
+Draw one bar per education level that shows the share of each answer. Use a color scale with two ends, so good ratings and poor ratings sit at opposite ends.
+
+```{r}
+#| label: q20
+#| eval: false
+nhanes |>
+
+```
+
+**Your finding:**
+
+
+
+### 3.9 Homework
+
+#### Question 21: Where do people live?
 
 Sum the population of the 142 countries by continent in 2007 and draw the totals as bars. Which continent has the largest total?
 
 ```{r}
-#| label: q18
+#| label: q21
 #| eval: false
 rosling |>
 
 ```
 
 **Your finding:**
+
+
+
