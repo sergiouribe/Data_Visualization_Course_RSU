@@ -1,0 +1,430 @@
+---
+title: "Counting things (students)"
+format:
+  html:
+    toc: true
+    code-fold: false
+---
+
+Read each question, then write the code in the empty chunk. Remove `#| eval: false` and run the chunk. Write what you see under **Your finding**.
+
+## 1. Packages
+
+### 1.1 Install pacman if it is missing
+
+```{r}
+#| label: install-pacman
+if (!requireNamespace("pacman", quietly = TRUE)) install.packages("pacman")
+```
+
+### 1.2 Load the packages
+
+```{r}
+#| label: packages
+pacman::p_load(tidyverse, here, mosaicData, NHANES, treemapify, 
+               ggthemes, gtsummary)
+```
+
+## 2. Datasets
+
+Each dataset loads once into a named object. Every question below starts from one of these objects.
+
+### 2.1 whickham (package `mosaicData`)
+
+1,314 women in a survey in Whickham, England. The variables are age, `smoker` and `outcome` (alive or dead 20 years later). The code makes the age groups in two ways, `case_when()` and `cut()`, and the next chunk checks that both give the same groups. The questions use `age_group`.
+
+```{r}
+#| label: data-whickham
+whickham <- 
+  |>
+  as_tibble() |>
+  mutate(
+    # way 1: case_when(), the first matching line wins
+    age_group = case_when(
+      age < 35 ~ "18-34",
+      age < 45 ~ "35-44",
+      age < 55 ~ "45-54",
+      age < 65 ~ "55-64",
+      age < 75 ~ "65-74",
+      .default = "75+"
+    ),
+    # way 2: cut(), shorter, but you give the breaks and the labels
+    age_group_cut = cut(age,
+                        breaks = c(17, 34, 44, 54, 64, 74, 99),
+                        labels = c("18-34", "35-44", "45-54", "55-64", "65-74", "75+"))
+  )
+whickham |> head()
+```
+
+```{r}
+#| label: check-age-groups
+# both ways give the same six groups: 408, 216, 209, 238, 166 and 77 women
+whickham |>
+  count(age_group, age_group_cut)
+```
+
+### 2.2 nhanes (package `NHANES`)
+
+10,000 people from two US survey cycles (2009_10 and 2011_12).
+
+```{r}
+#| label: data-nhanes
+nhanes <- NHANES
+nhanes |> head()
+```
+
+### 2.3 companies_lv (file in the course repository)
+
+55,261 companies registered in Latvia from 2020 to 2025.
+
+```{r}
+#| label: data-companies
+# Google Drive link to be added here later
+companies_lv <- read_csv(
+  "https://raw.githubusercontent.com/sergiouribe/Data_Visualization_Course_RSU/main/data/companies_lv_smaller_2020_2025.csv",
+  show_col_types = FALSE
+)
+companies_lv |> head()
+```
+
+### 2.4 world_exports (file in the course repository)
+
+Export value in USD by country and product, average of 1998 to 2000. The product code follows the SITC classification, and its first digit gives the sector. The data come from the `economiccomplexity` package.
+
+```{r}
+#| label: data-exports
+world_exports <- read_csv(
+  "https://raw.githubusercontent.com/sergiouribe/Data_Visualization_Course_RSU/main/data/world_exports_1998_2000.csv",
+  col_types = cols(product = col_character())
+)
+world_exports |> head()
+```
+
+### 2.5 rosling (file in the course repository)
+
+Life expectancy, income and population of 142 countries from 1952 to 2007.
+
+```{r}
+#| label: data-rosling
+rosling <- read_csv(
+  "https://raw.githubusercontent.com/sergiouribe/Data_Visualization_Course_RSU/main/data/rosling_tidy.csv",
+  show_col_types = FALSE
+)
+rosling |> head()
+```
+
+## 3. Counting things
+
+### 3.1 Pie or bars?
+
+#### Question 1: How many women are in each age group?
+
+Draw a pie chart of the age groups. Then rank the six slices from largest to smallest.
+
+```{r}
+#| label: q1
+#| eval: false
+whickham |>
+  ggplot(aes(x = "", fill = age_group)) +
+  geom_bar(width = 1) +
+  coord_polar(theta = "y") +   # bends the bar into a circle
+  theme_void()
+
+```
+
+**Your finding:**
+
+#### Question 2: Same counts, drawn as bars
+
+Draw the same counts as bars. Is the ranking easier to read? Write how sure you are about the third largest group on the pie and on the bars.
+
+```{r}
+#| label: q2
+#| eval: false
+whickham |>
+  ggplot(aes(x = age_group)) +
+  geom_bar() +
+  labs(title = "My First Bar Plot", 
+       y = "Counts", 
+       subtitle = "Oct 28, 2026", 
+       caption = "Sergio Uribe")
+```
+
+**Your finding:**
+
+### 3.2 Order the bars
+
+#### Question 3: How many people of each race are in the survey?
+
+Count the people by `Race1`. Which order do the bars follow?
+
+```{r}
+#| label: q3
+#| eval: false
+nhanes |>
+  ggplot(aes(x = fct_infreq(Race1))) +
+  geom_bar()
+
+```
+
+**Your finding:**
+
+#### Question 4: Sort the bars from largest to smallest
+
+Reorder the bars by count. Why can we reorder race, but should keep the order of the age groups?
+
+```{r}
+#| label: q4
+#| eval: false
+nhanes |>
+
+
+```
+
+**Your finding:**
+
+### 3.3 Many categories
+
+#### Question 5: Which legal forms do the new companies use?
+
+Draw one bar per legal form (`type_text`). What happens to the labels?
+
+```{r}
+#| label: q5
+#| eval: false
+companies_lv |>
+  # create a new variable lumping the type_text factor
+  mutate(company_type = fct_lump_n(type_text, n = 5)) |> 
+  # the plot
+  ggplot(aes(x = fct_infreq(company_type))) +
+  geom_bar() +
+  coord_flip()
+
+```
+
+**Your finding:**
+
+#### Question 6: Make the labels readable
+
+Flip the plot so the labels sit on the vertical axis. Which order do the bars follow now?
+
+```{r}
+#| label: q6
+#| eval: false
+companies_lv |>
+
+```
+
+**Your finding:**
+
+#### Question 7: Sort the flipped bars
+
+Order the legal forms from largest to smallest, with the largest at the top.
+
+```{r}
+#| label: q7
+#| eval: false
+companies_lv |>
+
+```
+
+**Your finding:**
+
+#### Question 8: Pool the small forms
+
+Keep the 5 most common legal forms and pool the others into one category. Then draw the sorted, flipped bars. Change `5` to `3` and describe what happens to the pooled bar.
+
+```{r}
+#| label: q8
+#| eval: false
+companies_lv |>
+
+```
+
+**Your finding:**
+
+### 3.4 Groups inside the bars
+
+#### Question 9: How many smokers are in each age group?
+
+Draw the age groups as bars and split each bar by `smoker`. Write what you can compare in this graph.
+
+```{r}
+#| label: q9
+#| eval: false
+whickham |>
+  ggplot(aes(x = age_group, 
+             fill = smoker)) +
+  geom_bar(position = "dodge")
+
+```
+
+```{r}
+whickham |> 
+  select(age_group, 
+         smoker) |> 
+  gtsummary::tbl_summary(by = smoker)
+```
+
+**Your finding:**
+
+#### Question 10: Put the groups side by side
+
+Draw the same counts with the smoker and non-smoker bars next to each other. Write what you can compare now.
+
+```{r}
+#| label: q10
+#| eval: false
+whickham |>
+  ggplot(aes(x = age_group, 
+             fill = smoker)) +
+  geom_bar(position = "dodge")
+
+```
+
+**Your finding:**
+
+#### Question 11: What share of each age group smokes?
+
+Draw bars that all reach 100% and show the share of smokers in each age group.
+
+```{r}
+#| label: q11
+#| eval: false
+whickham |>
+  ggplot(aes(x = age_group, 
+             fill = smoker)) +
+  geom_bar(position = "fill")
+
+```
+
+**Your finding:**
+
+### 3.5 Differences in counts across a second variable
+
+#### Question 12: Did the race mix change between the two survey cycles?
+
+Count the people by race and show the survey cycle (`SurveyYr`) with side-by-side bars. Which race changed the most?
+
+```{r}
+#| label: q12
+#| eval: false
+nhanes |>
+  ggplot(aes(x =  fct_infreq(Race1), 
+             fill = SurveyYr)) +
+  geom_bar(position =  "fill")  +
+  geom_hline(yintercept = .5, linetype = "dashed", color = "blue")
+
+```
+
+**Your finding:**
+
+#### Question 13: One panel per survey cycle
+
+Draw the sorted race counts in one panel for each survey cycle with `facet_wrap()`. Compare the dodge graph with the panels.
+
+```{r}
+#| label: q13
+#| eval: false
+nhanes |>
+
+```
+
+**Your finding:**
+
+### 3.6 Many parts of a whole: the treemap
+
+#### Question 14: What did Latvia export in 1998 to 2000?
+
+The first digit of the product code is the broad sector. Sum the export value by sector for Latvia (`lva`) and draw a treemap. Which sector has the largest area?
+
+```{r}
+#| label: q14
+#| eval: false
+world_exports |>
+  filter(country == "lva") |> 
+  # First digit of the product code (^ anchors to the start, \\d takes one digit)
+  mutate(product_group = str_extract(product, "^\\d")) |>
+  group_by(product_group) |> 
+  summarise(value = sum(value, na.rm = TRUE)) |> 
+  arrange(desc(value)) |> 
+  ggplot(aes(area = value, 
+             fill = product_group, 
+             label = product_group)) +
+  geom_treemap() +
+  geom_treemap_text(colour = "white", reflow = TRUE) +
+  theme(legend.position = "none")
+
+```
+
+```{r}
+world_exports |>
+  filter(country == "lva") |> 
+  # First digit of the product code (^ anchors to the start, \\d takes one digit)
+  mutate(product_group = str_extract(product, "^\\d")) |>
+  group_by(product_group) |> 
+  summarise(value = sum(value, na.rm = TRUE)) |> 
+  arrange(desc(value)) |> 
+  ggplot(aes(x = value, 
+             fill = product_group, 
+             label = product_group)) +
+  geom_bar() +
+  # geom_treemap_text(colour = "white", reflow = TRUE) +
+  theme(legend.position = "none")
+```
+
+**Your finding:**
+
+#### Question 15: Treemap or bars?
+
+Draw the same sector values as sorted bars. Which graph ranks the sectors better, and which shows the whole better?
+
+```{r}
+#| label: q15
+#| eval: false
+world_exports |>
+
+```
+
+**Your finding:**
+
+### 3.7 Bars from a calculation: geom_col()
+
+#### Question 16: Why does geom_bar() fail on a table of counts?
+
+Count the companies by `type` in a table. Draw the table with `geom_bar()` and `y = n`. Read the error, then fix the plot.
+
+```{r}
+#| label: q16
+#| eval: false
+companies_lv |>
+
+```
+
+**Your finding:**
+
+#### Question 17: What share of the companies has each legal form?
+
+Calculate the share of each legal form, keep the three largest and draw them as bars with the percent written on each bar.
+
+```{r}
+#| label: q17
+#| eval: false
+companies_lv |>
+
+```
+
+**Your finding:**
+
+#### Question 18: Where do people live?
+
+Sum the population of the 142 countries by continent in 2007 and draw the totals as bars. Which continent has the largest total?
+
+```{r}
+#| label: q18
+#| eval: false
+rosling |>
+
+```
+
+**Your finding:**
