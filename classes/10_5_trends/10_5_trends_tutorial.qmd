@@ -1,0 +1,640 @@
+---
+title: "How do things change over time? (self-learning tutorial)"
+subtitle: "[SZF_184 Data Visualisation and Storytelling](https://estudijas.rsu.lv/course/view.php?id=83740)"
+author: "Sergio Uribe"
+format:
+  html:
+    toc: true
+    code-fold: false
+---
+
+## 0. How to use this tutorial
+
+The last tutorial compared groups. This tutorial follows **one number over time**: life expectancy in each country, year after year. The graph for this question is the line.
+
+Work through the steps in order. Every step has the same parts:
+
+1. **Question.** Read it.
+2. **Predict.** Write your guess in one line before you run any code.
+3. **Your code.** Write the code in the empty chunk, remove `#| eval: false` and run it.
+4. **Your finding.** Write what you see in one sentence with a number.
+5. **Solution.** Open the grey box and compare. The box is closed on purpose: try first.
+
+## 1. Packages
+
+```{r}
+#| label: install-pacman
+if (!requireNamespace("pacman", quietly = TRUE)) install.packages("pacman")
+```
+
+```{r}
+#| label: packages
+pacman::p_load(tidyverse, here, ggrepel)
+```
+
+## 2. Datasets
+
+Each dataset loads once into a named object.
+
+### 2.1 life_wide (file in the course repository)
+
+Life expectancy at birth, in years, for 194 countries. Each year from 1800 to 2100 is one column. Years after 2023 are projections.
+
+```{r}
+#| label: data-life
+life_wide <- read_csv(
+  "https://raw.githubusercontent.com/sergiouribe/Data_Visualization_Course_RSU/main/data/gapminder_life_expectancy_wide.csv",
+  show_col_types = FALSE
+)
+life_wide |> select(1:6) |> head()
+```
+
+### 2.2 continents (file in the course repository)
+
+The continent and the region of each country, with three-letter country codes.
+
+```{r}
+#| label: data-continents
+continents <- read_csv(
+  "https://raw.githubusercontent.com/sergiouribe/Data_Visualization_Course_RSU/main/data/countries_continents_codes.csv",
+  show_col_types = FALSE
+)
+continents |> select(country, `alpha-3`, region, `intermediate-region`) |> head()
+```
+
+### 2.3 rosling (file in the course repository)
+
+Life expectancy, income per person and population of 142 countries every 5 years from 1952 to 2007. The last part of the tutorial uses it.
+
+```{r}
+#| label: data-rosling
+rosling <- read_csv(
+  "https://raw.githubusercontent.com/sergiouribe/Data_Visualization_Course_RSU/main/data/rosling_tidy.csv",
+  show_col_types = FALSE
+)
+rosling |> head()
+```
+
+## 3. Prepare the table
+
+A line graph needs one row per country and year. `life_wide` has one column per year, so we reshape it. Run this chunk once. It builds the table `life_long`, and every later step starts from it. This is the only extra table in the tutorial.
+
+```{r}
+#| label: prepare
+life_long <- life_wide |>
+  pivot_longer(-c(geo, name), names_to = "year", values_to = "life_exp") |>   # years in columns become rows
+  mutate(year = as.integer(year)) |>                                          # the year is text after pivoting, make it a number
+  filter(year <= 2023) |>                                                     # drop the projections after 2023
+  left_join(
+    continents |>
+      transmute(
+        geo = str_to_lower(`alpha-3`),       # the codes in life_wide are in lower case
+        continent = region,
+        subregion = `intermediate-region`    # has the value "South America" for 12 countries
+      ),
+    by = "geo"
+  )
+
+life_long |> head()
+```
+
+## 4. Why a line needs a group
+
+### Step 1: Points for three countries
+
+**Question.** How did life expectancy change in Estonia, Latvia and Lithuania from 1900 to 1960?
+
+Use `filter()` to keep the three countries (`name %in% c("Estonia", "Latvia", "Lithuania")`) and the years from 1900 to 1960. Put `year` on `x` and `life_exp` on `y`. Draw `geom_point()`.
+
+**Predict.** Can you tell the countries apart?
+
+```{r}
+#| label: t1
+#| eval: false
+life_long |>
+```
+
+**Your finding:**
+
+::: {.callout-tip collapse="true" title="Solution"}
+```{r}
+#| label: t1-solution
+life_long |>
+  filter(name %in% c("Estonia", "Latvia", "Lithuania"), year >= 1900, year <= 1960) |>
+  ggplot(aes(x = year, y = life_exp)) +
+  geom_point()
+```
+
+Each year has three points on one vertical line, and nothing says which point belongs to which country. The picture is a mess.
+:::
+
+### Step 2: Join the points with a line
+
+**Question.** Does a line help?
+
+Replace `geom_point()` with `geom_line()`. A line joins the points from left to right.
+
+**Predict.** How many lines will you see?
+
+```{r}
+#| label: t2
+#| eval: false
+life_long |>
+```
+
+**Your finding:**
+
+::: {.callout-tip collapse="true" title="Solution"}
+```{r}
+#| label: t2-solution
+life_long |>
+  filter(name %in% c("Estonia", "Latvia", "Lithuania"), year >= 1900, year <= 1960) |>
+  ggplot(aes(x = year, y = life_exp)) +
+  geom_line()
+```
+
+You see one zigzag line. ggplot joins all three countries in one line and jumps up and down between them. The picture is also a mess.
+:::
+
+### Step 3: Tell ggplot which points belong together
+
+**Question.** How do we get one line per country?
+
+Add `group = name` inside `aes()`. The argument `group` tells ggplot: "draw one line for each value of this column".
+
+**Predict.** How many lines will you see now?
+
+```{r}
+#| label: t3
+#| eval: false
+life_long |>
+```
+
+**Your finding:**
+
+::: {.callout-tip collapse="true" title="Solution"}
+```{r}
+#| label: t3-solution
+life_long |>
+  filter(name %in% c("Estonia", "Latvia", "Lithuania"), year >= 1900, year <= 1960) |>
+  ggplot(aes(x = year, y = life_exp, group = name)) +
+  geom_line()
+```
+
+Three lines. All three fall in 1915 to 1918, rise in the 1920s and fall again in the 1940s. In 1941 Lithuania drops from 51.8 to 12.2 years, in 1944 Latvia reaches 26.8 years and Estonia 35.2 years.
+:::
+
+### Step 4: Name the lines with colour
+
+**Question.** How do we know which line is which country?
+
+Add `color = name` inside `aes()`. A colour also separates the groups, so `group` is no longer needed. `color` separates the lines and also creates a legend.
+
+**Predict.** Do you still need `group = name`?
+
+```{r}
+#| label: t4
+#| eval: false
+life_long |>
+```
+
+**Your finding:**
+
+::: {.callout-tip collapse="true" title="Solution"}
+```{r}
+#| label: t4-solution
+life_long |>
+  filter(name %in% c("Estonia", "Latvia", "Lithuania"), year >= 1900, year <= 1960) |>
+  ggplot(aes(x = year, y = life_exp, color = name)) +
+  geom_line()
+```
+
+No. One colour per country already gives one line per country. Lithuania has the lowest line before 1940 (45.7 years in 1910, against 51.0 in Estonia and 53.8 in Latvia).
+:::
+
+### Check 1
+
+What does `group = name` do in `aes()`?
+
+::: {.callout-tip collapse="true" title="Answer"}
+It tells ggplot to draw one line for each value of `name`. Without it, `geom_line()` joins all points in one line.
+:::
+
+## 5. All of Europe, with the Baltic states highlighted
+
+### Step 5a: Mark the Baltics in a new column
+
+**Question.** How do we show the three Baltic states against the other European countries?
+
+First create a column that says which countries are Baltic. Use `mutate()` with `case_when()`. The function `case_when()` reads the rows from top to bottom and uses the first one that fits. `TRUE ~ "Other"` always fits, so it means "in all other cases, write Other". Keep the 43 European countries (`continent == "Europe"`) from 1900 to 1950. Then draw one line per country (`group = name`) and colour by the new column (`color = baltic`).
+
+**Predict.** Will the 40 other countries get one colour or forty?
+
+```{r}
+#| label: t5a
+#| eval: false
+life_long |>
+```
+
+**Your finding:**
+
+::: {.callout-tip collapse="true" title="Solution"}
+```{r}
+#| label: t5a-solution
+life_long |>
+  filter(continent == "Europe", year >= 1900, year <= 1950) |>
+  mutate(baltic = case_when(
+    name %in% c("Estonia", "Latvia", "Lithuania") ~ "Baltic",   # these 3 countries
+    TRUE ~ "Other"                                               # all other cases
+  )) |>
+  ggplot(aes(x = year, y = life_exp, group = name, color = baltic)) +
+  geom_line()
+```
+
+R draws a warning that some rows were removed. Four European countries have no values in the early years, and ggplot drops the missing rows. The 40 other countries share one colour, so the Baltic lines are hard to find.
+:::
+
+### Step 5b: Turn "Other" gray
+
+**Question.** How do we make the other countries fade into the background?
+
+Add `scale_color_manual()`. It lets you choose the colour of each value. In `values = c(...)`, the value in the data is on the left and the colour on the right: `c(Baltic = "#d95f02", Other = "grey80")`. The words on the left must match the column exactly, including capital letters.
+
+**Predict.** Will all three Baltic lines be fully visible?
+
+```{r}
+#| label: t5b
+#| eval: false
+life_long |>
+```
+
+**Your finding:**
+
+::: {.callout-tip collapse="true" title="Solution"}
+```{r}
+#| label: t5b-solution
+life_long |>
+  filter(continent == "Europe", year >= 1900, year <= 1950) |>
+  mutate(baltic = case_when(
+    name %in% c("Estonia", "Latvia", "Lithuania") ~ "Baltic",
+    TRUE ~ "Other"
+  )) |>
+  ggplot(aes(x = year, y = life_exp, group = name, color = baltic)) +
+  geom_line() +
+  scale_color_manual(values = c(Baltic = "#d95f02", Other = "grey80"))   # Baltic in orange, others in gray
+```
+
+The Baltic lines stand out. Parts of two lines sit behind gray lines, because ggplot draws the countries in alphabetical order and later countries cover earlier ones.
+:::
+
+### Step 5c: Draw the Baltics last
+
+**Question.** How do we put the Baltic lines on top?
+
+Inside `mutate()`, reorder `name` with `fct_relevel()`. The function `fct_relevel()` moves named values to a new place in the order, and `after = Inf` means "to the very end". ggplot draws the groups in this order, so the lines at the end sit on top.
+
+**Predict.** Will the gray lines still cover the Baltic lines?
+
+```{r}
+#| label: t5c
+#| eval: false
+life_long |>
+```
+
+**Your finding:**
+
+::: {.callout-tip collapse="true" title="Solution"}
+```{r}
+#| label: t5c-solution
+life_long |>
+  filter(continent == "Europe", year >= 1900, year <= 1950) |>
+  mutate(
+    baltic = case_when(
+      name %in% c("Estonia", "Latvia", "Lithuania") ~ "Baltic",
+      TRUE ~ "Other"
+    ),
+    name = fct_relevel(name, "Estonia", "Latvia", "Lithuania", after = Inf)   # these 3 go to the end of the order
+  ) |>
+  ggplot(aes(x = year, y = life_exp, group = name, color = baltic)) +
+  geom_line() +
+  scale_color_manual(values = c(Baltic = "#d95f02", Other = "grey80"))
+```
+
+The three Baltic lines are complete and on top.
+:::
+
+### Step 5d: Mark the war years and write the title
+
+**Question.** Where do the falls line up with the wars?
+
+Add `geom_vline(xintercept = c(1914, 1918, 1939, 1945), linetype = "dashed")`. The function `geom_vline()` draws a vertical line at each value of `xintercept`, and `linetype = "dashed"` makes the line dashed. Then add `labs()` with a title that states the finding, `x = NULL`, `y = "Life expectancy (years)"` and `color = NULL` (this removes the legend title).
+
+**Predict.** Do the falls start at the dashed lines?
+
+```{r}
+#| label: t5d
+#| eval: false
+life_long |>
+```
+
+**Your finding:**
+
+::: {.callout-tip collapse="true" title="Solution"}
+```{r}
+#| label: t5d-solution
+life_long |>
+  filter(continent == "Europe", year >= 1900, year <= 1950) |>
+  mutate(
+    baltic = case_when(
+      name %in% c("Estonia", "Latvia", "Lithuania") ~ "Baltic",
+      TRUE ~ "Other"
+    ),
+    name = fct_relevel(name, "Estonia", "Latvia", "Lithuania", after = Inf)
+  ) |>
+  ggplot(aes(x = year, y = life_exp, group = name, color = baltic)) +
+  geom_line() +
+  geom_vline(xintercept = c(1914, 1918, 1939, 1945), linetype = "dashed") +   # war years
+  scale_color_manual(values = c(Baltic = "#d95f02", Other = "grey80")) +
+  labs(
+    title = "Life expectancy in the Baltic states fell in 1915, 1918, 1941 and 1944",
+    x = NULL,
+    y = "Life expectancy (years)",
+    color = NULL
+  )
+```
+
+Largest single-year falls in Europe between 1900 and 1950: Lithuania in 1941 (39.6 years), Belarus in 1941 (33.5), Ukraine in 1933 (29.3) and Moldova in 1947 (28.3). Croatia and Greece each lose more than 20 years in 1918. The title names the years and not the cause: 1918 is also the year of the influenza pandemic, so a line shows when life expectancy fell, not why.
+:::
+
+## 6. The same question in other continents
+
+### Step 6: South America
+
+**Question.** Do the 12 South American countries show the same falls between 1900 and 1950?
+
+Keep `subregion == "South America"`. Draw one gray line per country with `geom_line(color = "grey60")`. This is the same chart as in Step 3, without colour by country.
+
+**Predict.** Will you see a fall in 1941 to 1944?
+
+```{r}
+#| label: t6
+#| eval: false
+life_long |>
+```
+
+**Your finding:**
+
+::: {.callout-tip collapse="true" title="Solution"}
+```{r}
+#| label: t6-solution
+life_long |>
+  filter(subregion == "South America", year >= 1900, year <= 1950) |>
+  ggplot(aes(x = year, y = life_exp, group = name)) +
+  geom_line(color = "grey60") +
+  geom_vline(xintercept = c(1914, 1918, 1939, 1945), linetype = "dashed")
+```
+
+The falls of 1941 to 1944 are absent: no country loses more than 2 years in those 4 years. All 12 lines dip in 1918, and Argentina drops by 6.1 years.
+:::
+
+### Step 7: Asia, with two countries highlighted
+
+**Question.** How does Asia look, and what happened in China and Cambodia?
+
+Use the same steps as in Step 5c: keep `continent == "Asia"` and the years 1900 to 2000, create the column `highlight` with `case_when()` (the value "China or Cambodia" for those two countries and `TRUE ~ "Other"` for the rest), move the two countries to the end with `fct_relevel()` and colour with `scale_color_manual()`. Practise the code from Step 5.
+
+**Predict.** In which decade does each country fall?
+
+```{r}
+#| label: t7
+#| eval: false
+life_long |>
+```
+
+**Your finding:**
+
+::: {.callout-tip collapse="true" title="Solution"}
+```{r}
+#| label: t7-solution
+life_long |>
+  filter(continent == "Asia", year >= 1900, year <= 2000) |>
+  mutate(
+    highlight = case_when(
+      name %in% c("China", "Cambodia") ~ "China or Cambodia",
+      TRUE ~ "Other"
+    ),
+    name = fct_relevel(name, "China", "Cambodia", after = Inf)
+  ) |>
+  ggplot(aes(x = year, y = life_exp, group = name, color = highlight)) +
+  geom_line() +
+  scale_color_manual(values = c("China or Cambodia" = "#d95f02", Other = "grey80")) +
+  labs(x = NULL, y = "Life expectancy (years)", color = NULL)
+```
+
+China falls to 26.4 years in 1960 and Cambodia to 26.4 years in 1977. Both also fall in 1918 (24.8 and 23.9 years). The largest single-year falls in Asia are Afghanistan in 1918 (31.0 years) and Pakistan in 1947 (29.3 years).
+:::
+
+## 7. One line per continent
+
+### Step 8: Average life expectancy per continent
+
+**Question.** What is the mean life expectancy of the countries in each continent, year by year?
+
+Use `group_by(continent, year)` to make one group for each continent and year, then `summarize(life_exp = mean(life_exp, na.rm = TRUE), .groups = "drop")`. The function `mean()` calculates the average, `na.rm = TRUE` ignores missing values, and `.groups = "drop"` removes the grouping afterwards so R prints no message. Show the table for 1938 and 1944 with `filter(year %in% c(1938, 1944))`.
+
+**Predict.** Which continent changes most between 1938 and 1944?
+
+```{r}
+#| label: t8
+#| eval: false
+life_long |>
+```
+
+**Your finding:**
+
+::: {.callout-tip collapse="true" title="Solution"}
+```{r}
+#| label: t8-solution
+life_long |>
+  group_by(continent, year) |>                                          # one group per continent and year
+  summarize(life_exp = mean(life_exp, na.rm = TRUE), .groups = "drop") |>   # mean of the countries, missing values ignored
+  filter(year %in% c(1938, 1944)) |>
+  pivot_wider(names_from = year, values_from = life_exp)                # one column per year, easy to compare
+```
+
+Europe falls from 56.0 to 44.4 years between 1938 and 1944. The Americas rise from 44.1 to 49.3 years. Each value is the simple mean of the countries, so a small country counts as much as a large one.
+:::
+
+### Step 9: Plot the five continents
+
+**Question.** How do the five continents compare from 1900 to 2023?
+
+Use the same code as in Step 8 without the filter on the year, then pipe into `ggplot()` with `color = continent`. Add a title that states the finding.
+
+**Predict.** Which continent has the lowest line in 1918?
+
+```{r}
+#| label: t9
+#| eval: false
+life_long |>
+```
+
+**Your finding:**
+
+::: {.callout-tip collapse="true" title="Solution"}
+```{r}
+#| label: t9-solution
+life_long |>
+  filter(year >= 1900) |>
+  group_by(continent, year) |>
+  summarize(life_exp = mean(life_exp, na.rm = TRUE), .groups = "drop") |>
+  ggplot(aes(x = year, y = life_exp, color = continent)) +             # no group needed, colour separates the lines
+  geom_line() +
+  labs(
+    title = "Life expectancy rose on every continent after the drop of 1918",
+    x = NULL,
+    y = "Mean life expectancy (years)",
+    color = NULL
+  )
+```
+
+In 1918 every continent drops: Africa reaches 15.4 years, Asia 21.7 and Europe 33.3. In 2020 the means are 79.0 in Europe, 64.2 in Africa and 74.1 in Asia.
+:::
+
+### Check 2
+
+Why do we write `na.rm = TRUE` inside `mean()` in Step 8?
+
+::: {.callout-tip collapse="true" title="Answer"}
+Some countries have missing values in the early years. Without `na.rm = TRUE`, one missing value makes the mean of that continent and year `NA`.
+:::
+
+## 8. The Rosling graph without animation
+
+### Step 10: Draw the path of a country
+
+**Question.** How did China, India, the United States, Rwanda and Botswana move across income and life expectancy between 1952 and 2007?
+
+A line joins points in the order of `x` (left to right). `geom_path()` joins points in the order of the rows, which is the order of the years. Use `geom_path()` with `income` on `x`, `life_exp` on `y` and `color = country`. Add `scale_x_log10()`, because income differs by a factor of 100 between countries. Keep the five countries with `filter(country %in% c(...))`.
+
+**Predict.** Which country will move backwards at some point?
+
+```{r}
+#| label: t10
+#| eval: false
+rosling |>
+```
+
+**Your finding:**
+
+::: {.callout-tip collapse="true" title="Solution"}
+```{r}
+#| label: t10-solution
+rosling |>
+  filter(country %in% c("China", "India", "United States", "Rwanda", "Botswana")) |>
+  ggplot(aes(x = income, y = life_exp, color = country)) +
+  geom_path() +                      # join the points in the order of the years
+  scale_x_log10()
+```
+
+Each path is the trail of one country across the years. Rwanda moves down to 23.6 years in 1992 and returns to 46.2 years in 2007. Botswana reaches 62.7 years in 1992 and falls to 50.7 years in 2007.
+:::
+
+### Step 11: Add the size and the years
+
+**Question.** Can we show the size of each country and the first and last year, as in the animation?
+
+Add `size = population` inside `aes()` of `geom_point()`. Then label only the years 1952 and 2007. Create the label column with `mutate()` and `case_when()`: the year when `year %in% c(1952, 2007)` and `TRUE ~ ""` in all other cases. Draw the labels with `geom_text_repel(aes(label = label))`, which moves labels apart so they do not overlap.
+
+**Predict.** How far does China move between 1952 and 2007?
+
+```{r}
+#| label: t11
+#| eval: false
+rosling |>
+```
+
+**Your finding:**
+
+::: {.callout-tip collapse="true" title="Solution"}
+```{r}
+#| label: t11-solution
+rosling |>
+  filter(country %in% c("China", "India", "United States", "Rwanda", "Botswana")) |>
+  mutate(label = case_when(
+    year %in% c(1952, 2007) ~ as.character(year),   # label only the first and last year
+    TRUE ~ ""                                        # all other cases: no label
+  )) |>
+  ggplot(aes(x = income, y = life_exp, color = country)) +
+  geom_path() +
+  geom_point(aes(size = population)) +
+  geom_text_repel(aes(label = label), show.legend = FALSE) +
+  scale_x_log10() +
+  labs(x = "Income per person (log scale)", y = "Life expectancy (years)", size = "Population", color = NULL)
+```
+
+China moves from an income of 400 and 44.0 years in 1952 to an income of 4,959 and 73.0 years in 2007. India moves from 547 and 37.4 years to 2,452 and 64.7 years. The United States starts at 13,990 and 68.4 years and ends at 42,952 and 78.2 years.
+:::
+
+### Check 3
+
+When do you choose `geom_path()` over `geom_line()`?
+
+::: {.callout-tip collapse="true" title="Answer"}
+Choose `geom_path()` when the order of the rows (here, time) matters and `x` is not time. `geom_line()` joins the points from left to right along `x`, so a path that moves back to lower `x` values would appear in the wrong order.
+:::
+
+## 9. Final challenge
+
+**Question.** Choose one country in `life_long` and tell its story from 1900 to 2023 in one graph.
+
+Draw the country in colour on top of gray lines for the other countries of its continent, as in Step 5c. Write one sentence with the lowest value and the year, and one sentence with a number that describes the change after that year. The title states the finding.
+
+```{r}
+#| label: challenge
+#| eval: false
+life_long |>
+```
+
+**Your finding:**
+
+::: {.callout-tip collapse="true" title="One possible answer (Latvia)"}
+```{r}
+#| label: challenge-solution
+life_long |>
+  filter(continent == "Europe", year >= 1900) |>
+  mutate(
+    highlight = case_when(
+      name == "Latvia" ~ "Latvia",
+      TRUE ~ "Other European countries"
+    ),
+    name = fct_relevel(name, "Latvia", after = Inf)
+  ) |>
+  ggplot(aes(x = year, y = life_exp, group = name, color = highlight)) +
+  geom_line() +
+  scale_color_manual(values = c(Latvia = "#d95f02", "Other European countries" = "grey80")) +
+  labs(
+    title = "Latvia fell to 26.8 years in 1944 and stayed between 67 and 71 years from 1960 to 2000",
+    x = NULL,
+    y = "Life expectancy (years)",
+    color = NULL
+  )
+```
+
+Latvia reached its lowest value in 1944 (26.8 years). From 1960 to 2000 life expectancy stayed between 67.1 and 71.4 years. In 2020 it reached 75.8 years.
+:::
+
+## 10. Summary
+
+| Question | Code | Why |
+|---|---|---|
+| One number over time, several groups | `geom_line(aes(group = ...))` or `aes(color = ...)` | Without a group, one line joins all points. |
+| Highlight a few groups | new column with `case_when()`, `scale_color_manual()`, `fct_relevel()` | Gray for the context, colour for the message. |
+| Mean per group and year | `group_by()`, `summarize()` | One line per continent. |
+| Path through two variables over time | `geom_path()` | The order of the rows sets the path. |
+
+A line shows when a value changes. The cause needs other evidence.
+
+---
+
+*These tutorials were generated by Prof. Sergio Uribe by prompting his teaching materials, with prompts written for this class and its educational objectives. Course: [SZF_184 Data Visualisation and Storytelling](https://estudijas.rsu.lv/course/view.php?id=83740).*
