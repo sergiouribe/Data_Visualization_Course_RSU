@@ -1,0 +1,135 @@
+---
+title: "[Title that states the finding]"
+author: "[your name]"
+format:
+  html:
+    embed-resources: true
+    toc: true
+execute:
+  echo: true
+  warning: false
+  message: false
+---
+
+## 1. Packages
+
+```{r}
+#| label: packages
+# pacman::p_load() installs a package if it is missing, then loads it
+pacman::p_load(tidyverse, here, janitor)
+```
+
+## 2. Question and data
+
+**Question:** [One question that names a group, a measure and a period.]
+
+**Expected message:** [One sentence.]
+
+**Source:** see `data/raw/SOURCE.md`.
+
+```{r}
+#| label: data
+#| eval: false
+# Load the original file once into a named object, then start every later chunk from it.
+# here() builds the path from the project folder, so it works on any computer.
+# read_csv() reads a csv file. clean_names() makes column names lowercase with underscores.
+my_data <- here("data", "raw", "my_data.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  clean_names()
+
+# head() prints the first 6 rows
+my_data |>
+  head()
+```
+
+## 3. Exploration
+
+Write one line under each result that says what you learned.
+
+```{r}
+#| label: explore-structure
+#| eval: false
+# glimpse() lists each column with its type, so you see numbers, text and dates at once
+my_data |>
+  glimpse()
+```
+
+```{r}
+#| label: explore-missing
+#| eval: false
+# summarise(across(...)) counts the missing values in every column
+my_data |>
+  summarise(across(everything(), \(x) sum(is.na(x)))) |>
+  pivot_longer(everything(), names_to = "column", values_to = "n_missing")
+```
+
+```{r}
+#| label: explore-distribution
+#| eval: false
+# One variable: histogram (replace x with your variable)
+my_data |>
+  ggplot(aes(x = variable)) +
+  geom_histogram()
+```
+
+## 4. Wrangling
+
+Use at least 5 different verbs (for example `filter()`, `mutate()`, `case_when()`, `group_by()`, `summarise()`, `pivot_longer()`, `left_join()`). Add a comment above each one that says why you use it.
+
+```{r}
+#| label: wrangle
+#| eval: false
+my_data |>
+  filter() |>      # keep only the rows needed for the question
+  mutate() |>      # create or change a column
+  group_by() |>    # run the next step once per group
+  summarise()      # one row per group
+```
+
+## 5. Graphs
+
+At least 4 graphs. Each one answers one question about the data. Write the question above the chunk and the finding below it.
+
+### Graph 1: [question]
+
+```{r}
+#| label: graph-1
+#| eval: false
+my_data |>
+  ggplot(aes()) +
+  geom_point()
+```
+
+Finding: [one sentence with a number]
+
+### Graph 2: [question]
+
+### Graph 3: [question]
+
+### Graph 4: [question]
+
+## 6. Final graph
+
+Refine one graph: title that states the finding, axis labels with units, ordered categories, one highlight color, no clutter.
+
+```{r}
+#| label: final-graph
+#| eval: false
+my_data |>
+  ggplot(aes()) +
+  geom_col() +
+  labs(
+    title = "[the finding as a sentence]",
+    x = NULL,
+    y = "[measure and unit]",
+    caption = "Source: [data source]"
+  ) +
+  theme_minimal()
+
+# ggsave() saves the last graph as an image for story.md
+ggsave(here("figures", "final_graph.png"), width = 8, height = 4.5, dpi = 300)
+```
+
+## 7. Limits
+
+[Two or three things the data cannot tell.]
