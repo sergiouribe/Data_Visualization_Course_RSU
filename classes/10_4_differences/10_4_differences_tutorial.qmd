@@ -1,0 +1,472 @@
+---
+title: "How do groups differ? (self-learning tutorial)"
+format:
+  html:
+    toc: true
+    code-fold: false
+---
+
+## 0. How to use this tutorial
+
+The last class compared two continuous variables with scatter plots. This tutorial compares **one continuous variable across the groups of one categorical variable**: weight by species, life expectancy by continent, days of ill health by self-rated health.
+
+Work through the steps in order. Every step has the same parts:
+
+1. **Question.** Read it.
+2. **Predict.** Write your guess in one line before you run any code.
+3. **Your code.** Write the code in the empty chunk, remove `#| eval: false` and run it.
+4. **Your finding.** Write what you see in one sentence with a number.
+5. **Solution.** Open the grey box and compare. The box is closed on purpose: try first.
+
+Two quick checks and one final challenge close the tutorial.
+
+## 1. Packages
+
+```{r}
+#| label: install-pacman
+if (!requireNamespace("pacman", quietly = TRUE)) install.packages("pacman")
+```
+
+```{r}
+#| label: packages
+pacman::p_load(tidyverse, here, palmerpenguins, NHANES)
+```
+
+## 2. Datasets
+
+Each dataset loads once into a named object. Every step starts from one of these objects.
+
+### 2.1 rosling (file in the course repository)
+
+Life expectancy (`life_exp`), income per person (`income`) and population (`population`) of 142 countries every 5 years from 1952 to 2007. One row per country and year. The step below uses only 2007.
+
+```{r}
+#| label: data-rosling
+rosling <- read_csv(
+  "https://raw.githubusercontent.com/sergiouribe/Data_Visualization_Course_RSU/main/data/rosling_tidy.csv",
+  show_col_types = FALSE
+)
+rosling |> head()
+```
+
+### 2.2 penguins (package `palmerpenguins`)
+
+344 penguins of three species. The data come with the package, so no loading step is needed.
+
+```{r}
+#| label: data-penguins
+penguins |> head()
+```
+
+### 2.3 nhanes (package `NHANES`)
+
+10,000 people from two US survey cycles.
+
+```{r}
+#| label: data-nhanes
+nhanes <- NHANES
+nhanes |> head()
+```
+
+## 3. From bars to the full distribution
+
+### Step 1: Bars of the mean
+
+**Question.** Does life expectancy in 2007 differ by continent? Draw one bar per continent.
+
+Use `filter(year == 2007)` to keep one year, so each country appears once. In `ggplot()`, put the continent on `x` and `life_exp` on `y`. Then add `stat_summary(fun = mean, geom = "col")`. The function `stat_summary()` calculates a summary inside the plot, here the mean (`fun = mean`), and draws it as a bar (`geom = "col"`).
+
+**Predict.** Which continent has the highest bar? Which has the lowest?
+
+```{r}
+#| label: t1
+#| eval: false
+rosling |>
+```
+
+**Your finding:**
+
+::: {.callout-tip collapse="true" title="Solution"}
+```{r}
+#| label: t1-solution
+rosling |>
+  filter(year == 2007) |>                                        # one row per country
+  ggplot(aes(x = continent, y = life_exp)) +
+  stat_summary(fun = mean, geom = "col")                         # one bar = the mean of the continent
+```
+
+Africa has the lowest mean (54.8 years) and Oceania the highest (80.7 years). The bars look simple and clear. The next steps show what they hide.
+:::
+
+### Step 2: Add error bars
+
+**Question.** Do error bars fix the problem? Add them to the bars from Step 1.
+
+Add a second `stat_summary()` with `fun.data = mean_se` and `geom = "errorbar"`. The function `mean_se` returns the mean plus and minus one standard error. The argument `width = 0.2` makes the bar caps narrow.
+
+**Predict.** Will the error bars show how far the countries sit from each other inside one continent?
+
+```{r}
+#| label: t2
+#| eval: false
+rosling |>
+```
+
+**Your finding:**
+
+::: {.callout-tip collapse="true" title="Solution"}
+```{r}
+#| label: t2-solution
+rosling |>
+  filter(year == 2007) |>
+  ggplot(aes(x = continent, y = life_exp)) +
+  stat_summary(fun = mean, geom = "col") +
+  stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.2)   # mean +/- 1 standard error
+```
+
+The error bar shows the uncertainty of the mean. It does not show the spread of the countries. Africa has 52 countries with life expectancy from 39.6 to 76.4 years, and the bar shows none of that. Oceania has 2 countries, and its bar looks as solid as the others.
+:::
+
+### Step 3: The box plot
+
+**Question.** Show the median and the spread in each continent.
+
+Replace the bars with `geom_boxplot()`. The box covers the middle half of the countries (from the 25th to the 75th percentile). The line inside the box is the median. The whiskers reach the lowest and highest values that are not far outliers. Points beyond the whiskers are outliers.
+
+**Predict.** Which continent has the widest box?
+
+```{r}
+#| label: t3
+#| eval: false
+rosling |>
+```
+
+**Your finding:**
+
+::: {.callout-tip collapse="true" title="Solution"}
+```{r}
+#| label: t3-solution
+rosling |>
+  filter(year == 2007) |>
+  ggplot(aes(x = continent, y = life_exp)) +
+  geom_boxplot()
+```
+
+Africa has the widest box: the middle half of the countries ranges from 47.8 to 59.4 years (median 52.9). Europe has a narrow box, from 75.0 to 79.8 years (median 78.6).
+:::
+
+### Step 4: The violin plot
+
+**Question.** A box plot shows five numbers. What is the full shape of the data?
+
+Use `geom_violin()`. It draws the density of the data as a shape that is wide where many countries sit and narrow where few do. Think of a histogram turned on its side and mirrored.
+
+**Predict.** Will Asia have one hump or two?
+
+```{r}
+#| label: t4
+#| eval: false
+rosling |>
+```
+
+**Your finding:**
+
+::: {.callout-tip collapse="true" title="Solution"}
+```{r}
+#| label: t4-solution
+rosling |>
+  filter(year == 2007) |>
+  ggplot(aes(x = continent, y = life_exp)) +
+  geom_violin()
+```
+
+Asia has a long tail down to Afghanistan (43.8 years), while most Asian countries sit near 72 years. The violin shows this tail. The Oceania violin has 2 countries behind it, so its shape means little.
+:::
+
+### Step 5: Draw every country
+
+**Question.** With few data points, show each one.
+
+Use `geom_point()`. Each country becomes one point.
+
+**Predict.** Will the points of one continent overlap?
+
+```{r}
+#| label: t5
+#| eval: false
+rosling |>
+```
+
+**Your finding:**
+
+::: {.callout-tip collapse="true" title="Solution"}
+```{r}
+#| label: t5-solution
+rosling |>
+  filter(year == 2007) |>
+  ggplot(aes(x = continent, y = life_exp)) +
+  geom_point()
+```
+
+All points of one continent fall on one vertical line, and countries with similar values hide each other. You see the 2 points of Oceania (Australia 81.2 and New Zealand 80.2 years), which is the honest picture for 2 countries.
+:::
+
+### Step 6: Spread the points with jitter
+
+**Question.** How do we separate overlapping points?
+
+Replace `geom_point()` with `geom_jitter()`. It moves each point a random small distance. Two arguments control it. `width` sets the horizontal spread. `height = 0` forbids vertical movement, because a vertical move would change the life expectancy shown. Try `width = 0.1`, then `width = 0.3`.
+
+**Predict.** What happens when the width grows?
+
+```{r}
+#| label: t6
+#| eval: false
+rosling |>
+```
+
+**Your finding:**
+
+::: {.callout-tip collapse="true" title="Solution"}
+```{r}
+#| label: t6-solution
+rosling |>
+  filter(year == 2007) |>
+  ggplot(aes(x = continent, y = life_exp)) +
+  geom_jitter(width = 0.1, height = 0)      # small horizontal spread, no vertical change
+```
+
+```{r}
+#| label: t6-solution-wide
+rosling |>
+  filter(year == 2007) |>
+  ggplot(aes(x = continent, y = life_exp)) +
+  geom_jitter(width = 0.3, height = 0)      # wider spread, points separate more
+```
+
+With `width = 0.1` the points still touch. With `width = 0.3` each country is visible and the Africa cloud shows its range. A width above 0.4 starts to mix the continents.
+:::
+
+### Step 7: Combine the layers
+
+**Question.** Can one graph show the shape, the summary and every country?
+
+ggplot draws layers in order, one on top of another. Add `geom_violin()` first, then `geom_boxplot()` with `width = 0.15` (a narrow box that fits inside the violin) and `outlier.shape = NA` (the points already appear from the jitter layer, so the box does not draw them twice). Finish with `geom_jitter(width = 0.08, height = 0, alpha = 0.5)`. The argument `alpha` makes the points half transparent.
+
+**Predict.** Which layer should come last so you can see it?
+
+```{r}
+#| label: t7
+#| eval: false
+rosling |>
+```
+
+**Your finding:**
+
+::: {.callout-tip collapse="true" title="Solution"}
+```{r}
+#| label: t7-solution
+rosling |>
+  filter(year == 2007) |>
+  ggplot(aes(x = continent, y = life_exp)) +
+  geom_violin(fill = "grey90") +                             # shape of the distribution
+  geom_boxplot(width = 0.15, outlier.shape = NA) +           # median and quartiles, no duplicate outliers
+  geom_jitter(width = 0.08, height = 0, alpha = 0.5)         # every country, drawn last so it stays visible
+```
+
+The point layer goes last, so the violin and box do not cover it. One graph now shows the shape, the median and each country.
+:::
+
+### Step 8: Sort the groups and flip the axes
+
+**Question.** Order the continents by median life expectancy and make the labels easy to read.
+
+Replace `continent` on `x` with `fct_reorder(continent, life_exp, .fun = median)`. The function `fct_reorder()` sorts the groups by a summary of another column, here the median of `life_exp`. Add `coord_flip()` to swap the axes.
+
+**Predict.** Which continent will sit at the top after the flip?
+
+```{r}
+#| label: t8
+#| eval: false
+rosling |>
+```
+
+**Your finding:**
+
+::: {.callout-tip collapse="true" title="Solution"}
+```{r}
+#| label: t8-solution
+rosling |>
+  filter(year == 2007) |>
+  ggplot(aes(x = fct_reorder(continent, life_exp, .fun = median), y = life_exp)) +   # sort by median
+  geom_violin(fill = "grey90") +
+  geom_boxplot(width = 0.15, outlier.shape = NA) +
+  geom_jitter(width = 0.08, height = 0, alpha = 0.5) +
+  coord_flip() +                                                                      # swap axes
+  labs(x = NULL, y = "Life expectancy in 2007 (years)")
+```
+
+Oceania sits at the top (median 80.7 years) and Africa at the bottom (median 52.9 years).
+:::
+
+### Check 1
+
+Which function controls how far `geom_jitter()` spreads the points to the left and right?
+
+::: {.callout-tip collapse="true" title="Answer"}
+The argument `width`. Set `height = 0` so the points do not move up or down.
+:::
+
+## 4. When the bar hides two groups
+
+### Step 9: Penguins by species
+
+**Question.** Does body mass differ among the three penguin species?
+
+Draw the mean body mass (`body_mass_g`) as bars by `species`, as in Step 1. Then draw `geom_violin()` with `geom_jitter()` for the same data. The `penguins` data have missing values, so add `drop_na(body_mass_g)` first. The function `drop_na()` removes rows with a missing value in the column you name.
+
+**Predict.** Will Adelie and Chinstrap look the same in the bars?
+
+```{r}
+#| label: t9
+#| eval: false
+penguins |>
+```
+
+**Your finding:**
+
+::: {.callout-tip collapse="true" title="Solution"}
+```{r}
+#| label: t9-solution-bars
+penguins |>
+  drop_na(body_mass_g) |>                                       # remove rows without a weight
+  ggplot(aes(x = species, y = body_mass_g)) +
+  stat_summary(fun = mean, geom = "col")
+```
+
+```{r}
+#| label: t9-solution-violin
+penguins |>
+  drop_na(body_mass_g) |>
+  ggplot(aes(x = species, y = body_mass_g)) +
+  geom_violin(fill = "grey90") +
+  geom_jitter(width = 0.08, height = 0, alpha = 0.5)
+```
+
+The Adelie mean is 3,701 g and the Chinstrap mean is 3,733 g, so the bars look the same. Gentoo is heavier (5,076 g). The violins show that Adelie and Chinstrap are wide and may hold two groups.
+:::
+
+### Step 10: Split by a second variable
+
+**Question.** What explains the width of the Adelie and Chinstrap violins?
+
+Colour the points by `sex` with `aes(color = sex)` inside `geom_jitter()`. Add `drop_na(sex)` to remove penguins without a recorded sex. Use `position = position_jitterdodge(jitter.width = 0.1, jitter.height = 0)` so the two sexes separate inside each species.
+
+**Predict.** Will males and females overlap?
+
+```{r}
+#| label: t10
+#| eval: false
+penguins |>
+```
+
+**Your finding:**
+
+::: {.callout-tip collapse="true" title="Solution"}
+```{r}
+#| label: t10-solution
+penguins |>
+  drop_na(body_mass_g, sex) |>
+  ggplot(aes(x = species, y = body_mass_g, color = sex)) +
+  geom_jitter(position = position_jitterdodge(jitter.width = 0.1, jitter.height = 0), alpha = 0.6)
+```
+
+Males are heavier in every species. The mean for Adelie females is 3,369 g and for Adelie males 4,043 g. The wide violin in Step 9 came from two groups mixed together. This is the same idea as Simpson's paradox: look at the groups before you trust the average.
+:::
+
+## 5. Many people, skewed values
+
+### Step 11: Days of poor physical health
+
+**Question.** How many days of the last 30 did people feel physically unwell, by self-rated general health?
+
+`DaysPhysHlthBad` counts the days (0 to 30). `HealthGen` is the self-rated health with five levels. Draw bars of the mean, then `geom_violin()` of the same data. Use `drop_na(HealthGen, DaysPhysHlthBad)` first. With thousands of people, `geom_jitter()` would cover the page, so use the violin alone. Add `scale = "width"` inside `geom_violin()`: it gives every violin the same maximum width, so small groups such as Poor (183 people) stay visible.
+
+**Predict.** For people who rate their health as Poor, will most answers sit near the mean?
+
+```{r}
+#| label: t11
+#| eval: false
+nhanes |>
+```
+
+**Your finding:**
+
+::: {.callout-tip collapse="true" title="Solution"}
+```{r}
+#| label: t11-solution-bars
+nhanes |>
+  drop_na(HealthGen, DaysPhysHlthBad) |>
+  ggplot(aes(x = HealthGen, y = DaysPhysHlthBad)) +
+  stat_summary(fun = mean, geom = "col")
+```
+
+```{r}
+#| label: t11-solution-violin
+nhanes |>
+  drop_na(HealthGen, DaysPhysHlthBad) |>
+  ggplot(aes(x = HealthGen, y = DaysPhysHlthBad)) +
+  geom_violin(fill = "grey90", scale = "width")   # same maximum width for every group, so small groups stay visible
+```
+
+In the Poor group the mean is 20 days, but 9.3% of people report 0 days and 49.2% report 30 days. The distribution has two humps, one at each end, and the mean of 20 describes almost nobody. In the Excellent group 81.3% report 0 days.
+:::
+
+### Check 2
+
+You have 3 groups with 10 data points each. Which layers do you choose and why?
+
+::: {.callout-tip collapse="true" title="Answer"}
+`geom_jitter()` for every point, with `geom_boxplot()` behind it for the median. With 10 points, a violin would invent a shape that the data do not support.
+:::
+
+## 6. Final challenge
+
+**Question.** Does body mass index (`BMI`) differ by education level (`Education`) in adults (age 20 or older)?
+
+Choose the layers yourself. Use `filter(Age >= 20)` to keep adults and `drop_na(BMI, Education)` to remove missing values. Write one sentence on why you chose these layers and one sentence with the finding and a number.
+
+```{r}
+#| label: challenge
+#| eval: false
+nhanes |>
+```
+
+**Why these layers:**
+
+**Your finding:**
+
+::: {.callout-tip collapse="true" title="One possible answer"}
+```{r}
+#| label: challenge-solution
+nhanes |>
+  filter(Age >= 20) |>                              # adults only
+  drop_na(BMI, Education) |>                        # remove rows with missing values
+  ggplot(aes(x = Education, y = BMI)) +
+  geom_violin(fill = "grey90") +                    # shape: thousands of people, so no jitter
+  geom_boxplot(width = 0.15, outlier.shape = NA)    # median and quartiles
+```
+
+There are thousands of people per group, so a violin with a box fits and jitter would hide the shape. The median BMI is 26.5 for College Grad and between 28.0 and 28.6 for the other four groups. All groups have a long tail above 50.
+:::
+
+## 7. Summary
+
+| Points per group | Layers | Why |
+|---|---|---|
+| Fewer than 20 | `geom_jitter()` with a box behind it | A violin would invent a shape. |
+| 20 to 200 | `geom_violin()`, `geom_boxplot()` and `geom_jitter()` together | Shape, summary and every point stay visible. |
+| More than 200 | `geom_violin()` with `geom_boxplot()` | Points would cover the page. |
+| Any number | Check a second variable (sex, year) | A mixed group hides two distributions. |
+
+A bar of the mean, with or without error bars, answers only one question: where is the average? Use it when the average is the only thing the reader needs.
