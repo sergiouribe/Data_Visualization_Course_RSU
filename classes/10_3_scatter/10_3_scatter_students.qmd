@@ -73,6 +73,12 @@ Draw each country in 2007 as a point: income on the horizontal axis, life expect
 #| label: q1
 #| eval: false
 rosling |>
+  # filter(income < 60000) |> 
+  #mutate(income = log10(income)) |> 
+  ggplot(aes(x = income, 
+             y = life_exp)) +
+  geom_point()  +
+  scale_x_log10()
 
 ```
 
@@ -117,6 +123,14 @@ Color the points by `continent` with `scale_color_viridis_d()`. Then calculate r
 #| label: q3
 #| eval: false
 rosling |>
+  ggplot(aes(x = income, 
+             y = life_exp, 
+             color = continent)) +
+  scale_x_log10() +
+  geom_point() +
+  facet_wrap( ~ continent) +
+  theme(legend.position = "none") +
+  theme_minimal()
 
 ```
 
@@ -141,6 +155,10 @@ Draw `bill_length_mm` against `bill_depth_mm` for all penguins and add one line 
 #| label: q4a
 #| eval: false
 penguins |>
+  ggplot(aes(x = bill_length_mm, 
+             y = bill_depth_mm)) +
+  geom_point() +
+  geom_smooth(method = "lm")
 
 ```
 
@@ -148,6 +166,12 @@ penguins |>
 #| label: q4a-species
 #| eval: false
 penguins |>
+
+  ggplot(aes(x = bill_length_mm, 
+             y = bill_depth_mm, 
+             color = species)) +
+  geom_point()  +
+  geom_smooth(method = "lm")
 
 ```
 

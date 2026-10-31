@@ -301,7 +301,9 @@ rosling |>
   scale_size(range = c(1, 12), guide = "none") +
   scale_color_viridis_d() +
   labs(title = "Year: {round(frame_time)}",
-       x = "Income per person (log scale)", y = "Life expectancy (years)", color = "Continent") +
+       x = "Income per person (log scale)", 
+       y = "Life expectancy (years)", 
+       color = "Continent") +
   transition_time(year)   # one frame per year, R fills the steps between
 ```
 
