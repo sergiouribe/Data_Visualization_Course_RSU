@@ -90,6 +90,8 @@ penguins |>
 
 So, beware, the boxplot could hide the data, and different data could show the same boxplot
 
+![](boxplot.png)
+
 ### Your turn 2
 
 Draw the flipper length boxplot with the jittered points.
@@ -135,7 +137,18 @@ Answer: the violin of \[YOUR ANSWER HERE\] sits highest.
 
 ## 4. All together
 
-ggplot draws the layers in the order we add them, so the violin goes first. `width = 0.1` makes the box narrow. `alpha = 0.3` makes the points see-through.
+ggplot draws the layers in the order we add them, so the violin goes first.
+
+```{r}
+penguins |>
+  filter(!is.na(body_mass_g)) |>
+  ggplot(aes(x = species, y = body_mass_g)) +
+  geom_violin() +
+  geom_boxplot() +
+  geom_jitter()
+```
+
+But is a mess, so we can adjust the `width = 0.1` to make the box narrow and `alpha = 0.3` makes the points see-through. You can play with different values
 
 ```{r}
 #| label: together
@@ -143,8 +156,8 @@ penguins |>
   filter(!is.na(body_mass_g)) |>
   ggplot(aes(x = species, y = body_mass_g)) +
   geom_violin() +
-  geom_boxplot(width = 0.1) +
-  geom_jitter(width = 0.1, alpha = 0.3)
+  geom_boxplot(width = 0.1, alpha = 0.5) +
+  geom_jitter(width = 0.1, alpha = 0.1)
 ```
 
 ### Your turn 4
@@ -173,8 +186,9 @@ A grey group appears. `filter(!is.na(sex))` removes it.
 ```{r}
 #| label: sex-na
 penguins |>
-  filter(!is.na(body_mass_g)) |>
-  ggplot(aes(x = species, y = body_mass_g)) +
+  filter(!is.na(body_mass_g)) |> # we romved the NA values
+  ggplot(aes(x = species, 
+             y = body_mass_g)) +
   geom_violin() +
   geom_jitter(aes(color = sex), width = 0.1)
 ```
@@ -215,11 +229,14 @@ Run the chunk and read the error: `stat_count() must only have an x or y aesthet
 #| error: true
 penguins |>
   filter(!is.na(body_mass_g)) |>
-  ggplot(aes(x = species, y = body_mass_g)) +
+  ggplot(aes(x = species, 
+             y = body_mass_g)) +
   geom_bar()
 ```
 
-In class 09 we computed means with `summarize()`. `stat_summary()` computes them inside the plot. `fun = mean` applies the mean to each species and `geom = "bar"` draws it as a bar. Heights: Adelie 3,701 g, Chinstrap 3,733 g, Gentoo 5,076 g.
+During the class, we computed means with `summarize()`.
+
+`stat_summary()` computes them inside the plot. `fun = mean` applies the mean to each species and `geom = "bar"` draws it as a bar. Heights: Adelie 3,701 g, Chinstrap 3,733 g, Gentoo 5,076 g.
 
 ```{r}
 #| label: mean-bar
@@ -238,6 +255,36 @@ penguins |>
   ggplot(aes(x = species, y = body_mass_g)) +
   stat_summary(fun = mean, geom = "bar") +
   stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.2)
+```
+
+We can also shorten the y axis CAREFULLY
+
+```{r}
+#| label: error-bar
+penguins |>
+  filter(!is.na(body_mass_g)) |>
+  ggplot(aes(x = species, y = body_mass_g)) +
+  stat_summary(fun = mean, geom = "bar") +
+  stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.2) + 
+  ylim(3000, 6000)
+```
+
+But we will lost all the bar!
+
+We can fix it adding BREAKS instead of limits, but the scale_break is in the package ggbreak
+
+```{r}
+pacman::p_load(ggbreak)
+```
+
+```{r}
+#| label: error-bar
+penguins |>
+  filter(!is.na(body_mass_g)) |>
+  ggplot(aes(x = species, y = body_mass_g)) +
+  stat_summary(fun = mean, geom = "bar") +
+  stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.2) + 
+  ggbreak::scale_y_break(c(750, 3500), symbol = "slash")
 ```
 
 The bar shows only the mean and the error bar. The jittered points keep the real penguins visible.
