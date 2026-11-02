@@ -16,9 +16,11 @@ pacman::p_load(here, tidyverse, palmerpenguins)
 
 Are there differences? One continuous variable, such as the weight, across groups, such as the species.
 
-## 1. The boxplot
+First, a brief stat recap: The **mean** and the **median** are both measures of central tendency used to summarize a dataset with a single value. **The Mean** is the mathematical average, calculated by adding all numbers together and dividing by the total count. **The Median** is the exact middle value when all numbers are lined up in order from smallest to largest.
 
-`Removed 2 rows`: 2 penguins have no body mass. `filter(!is.na(body_mass_g))` removes them.
+> According to the Central Statistical Bureau of Latvia, the country's mean (average) gross monthly salary reaches €1,886, while the gross median salary stands lower at €1,527, demonstrating how a few high-earning individuals pull the average upward.
+
+## 1. The boxplot
 
 ```{r}
 #| label: box-default
@@ -29,6 +31,8 @@ penguins |>
   geom_boxplot()
 ```
 
+About the warning: `Removed 2 rows` 2 penguins have no body mass. If you want the warning out, and is safe to remove those data points, then `filter(!is.na(body_mass_g))` removes them.
+
 The line in the box is the median. The box holds the middle half of the penguins. The whiskers reach the rest, and a dot marks a value far from the box. Medians: Adelie 3,700 g, Chinstrap 3,700 g, Gentoo 5,000 g.
 
 ```{r}
@@ -38,6 +42,10 @@ penguins |>
   ggplot(aes(x = species, y = body_mass_g)) +
   geom_boxplot()
 ```
+
+Here is the interpretation of the boxplot components
+
+![](https://numiqo.com/assets/tutorial/Boxplot_quartiles.png)
 
 ### Your turn 1
 
@@ -52,7 +60,7 @@ penguins |>
   geom_boxplot()
 ```
 
-Answer: the median flipper length of Gentoo is [YOUR ANSWER HERE] mm.
+Answer: the median flipper length of Gentoo is \[YOUR ANSWER HERE\] mm.
 
 ## 2. The box hides the shape
 
@@ -80,6 +88,8 @@ penguins |>
   geom_jitter(width = 0.2)
 ```
 
+So, beware, the boxplot could hide the data, and different data could show the same boxplot
+
 ### Your turn 2
 
 Draw the flipper length boxplot with the jittered points.
@@ -94,7 +104,7 @@ penguins |>
   geom_jitter(width = ___)
 ```
 
-Answer: the species with the fewest points is [YOUR ANSWER HERE].
+Answer: the species with the fewest points is \[YOUR ANSWER HERE\].
 
 ## 3. The violin
 
@@ -121,7 +131,7 @@ penguins |>
   geom_violin()
 ```
 
-Answer: the violin of [YOUR ANSWER HERE] sits highest.
+Answer: the violin of \[YOUR ANSWER HERE\] sits highest.
 
 ## 4. All together
 
@@ -152,7 +162,7 @@ penguins |>
   geom_jitter(width = 0.1, alpha = ___)
 ```
 
-Answer: the box covers [YOUR ANSWER HERE] of the penguins of each species.
+Answer: the box covers \[YOUR ANSWER HERE\] of the penguins of each species.
 
 ## 5. Why two bumps? (optional)
 
@@ -194,7 +204,7 @@ penguins |>
   geom_jitter(aes(color = ___), width = 0.1)
 ```
 
-Answer: within each species, [YOUR ANSWER HERE] have the longer flippers.
+Answer: within each species, \[YOUR ANSWER HERE\] have the longer flippers.
 
 ## 6. Bars with the mean and its error bar
 
@@ -255,7 +265,7 @@ penguins |>
   stat_summary(fun = ___, geom = "bar")
 ```
 
-Answer: the mean flipper length of Gentoo is [YOUR ANSWER HERE] mm.
+Answer: the mean flipper length of Gentoo is \[YOUR ANSWER HERE\] mm.
 
 ### Your turn 7
 
@@ -271,5 +281,4 @@ penguins |>
   stat_summary(fun.data = ___, geom = "errorbar", width = 0.2)
 ```
 
-Answer: the error bars of the three species [YOUR ANSWER HERE] overlap.
-
+Answer: the error bars of the three species \[YOUR ANSWER HERE\] overlap.
