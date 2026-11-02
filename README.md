@@ -23,16 +23,17 @@ Every table passes the [five-check data quality checklist](capstone/data_quality
 
 Viridis is the default palette of the course (`scale_color_viridis_d()` for categories, `scale_color_viridis_c()` for numbers). It stays readable with color blindness and in black and white. Gray plus one color highlights one group (class 11).
 
-## Data type decides the chart
+## The question decides the chart
 
-| Variables | Chart |
-|---|---|
-| 1 number | histogram |
-| 2 numbers | scatter plot |
-| 1 category | bar of counts (`geom_bar()`; `geom_col()` for precomputed values) |
-| number by category | box plot |
-| time | line |
-| more variables | color, shape, size, facet (no 3D) |
+| Question | Variables | Preferred chart |
+|---|---|---|
+| Distribution | 1 continuous | `geom_histogram()` |
+| Count | 1 categorical | `geom_bar()` or `geom_col()` |
+| Relationship | 2 continuous | `geom_point()` |
+| Differences | 1 continuous against 1 categorical | `geom_boxplot()`, `geom_jitter()`, `geom_violin()` |
+| Trend | 1 continuous or a count across time | `geom_line()` |
+
+More variables: add color, shape, size or facets (no 3D).
 
 ## Schedule
 
