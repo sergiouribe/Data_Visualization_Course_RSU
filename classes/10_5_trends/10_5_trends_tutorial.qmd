@@ -14,11 +14,11 @@ The last tutorial compared groups. This tutorial follows **one number over time*
 
 Work through the steps in order. Every step has the same parts:
 
-1. **Question.** Read it.
-2. **Predict.** Write your guess in one line before you run any code.
-3. **Your code.** Write the code in the empty chunk, remove `#| eval: false` and run it.
-4. **Your finding.** Write what you see in one sentence with a number.
-5. **Solution.** Open the grey box and compare. The box is closed on purpose: try first.
+1.  **Question.** Read it.
+2.  **Predict.** Write your guess in one line before you run any code.
+3.  **Your code.** Write the code in the empty chunk, remove `#| eval: false` and run it.
+4.  **Your finding.** Write what you see in one sentence with a number.
+5.  **Solution.** Open the grey box and compare. The box is closed on purpose: try first.
 
 ## 1. Packages
 
@@ -29,7 +29,8 @@ if (!requireNamespace("pacman", quietly = TRUE)) install.packages("pacman")
 
 ```{r}
 #| label: packages
-pacman::p_load(tidyverse, here, ggrepel)
+pacman::p_load(tidyverse, here, 
+               ggrepel) # this is to avoid the crowding of the points
 ```
 
 ## 2. Datasets
@@ -46,8 +47,12 @@ life_wide <- read_csv(
   "https://raw.githubusercontent.com/sergiouribe/Data_Visualization_Course_RSU/main/data/gapminder_life_expectancy_wide.csv",
   show_col_types = FALSE
 )
-life_wide |> select(1:6) |> head()
+life_wide |> 
+  select(1:6) |> 
+  head()
 ```
+
+the `show_col_types = FALSE` is handy since `read_csv()` guesses the type of each column (text, number or date) from the first 1,000 rows. After reading, it prints a message that lists the column types it guessed. The argument `show_col_types = FALSE` hides this message. The data stay the same, and R still guesses the types.
 
 ### 2.2 continents (file in the course repository)
 
@@ -121,7 +126,8 @@ life_long |>
 #| label: t1-solution
 life_long |>
   filter(name %in% c("Estonia", "Latvia", "Lithuania"), year >= 1900, year <= 1960) |>
-  ggplot(aes(x = year, y = life_exp)) +
+  ggplot(aes(x = year, 
+             y = life_exp)) +
   geom_point()
 ```
 
@@ -149,7 +155,8 @@ life_long |>
 #| label: t2-solution
 life_long |>
   filter(name %in% c("Estonia", "Latvia", "Lithuania"), year >= 1900, year <= 1960) |>
-  ggplot(aes(x = year, y = life_exp)) +
+  ggplot(aes(x = year, 
+             y = life_exp)) +
   geom_line()
 ```
 
@@ -176,8 +183,11 @@ life_long |>
 ```{r}
 #| label: t3-solution
 life_long |>
-  filter(name %in% c("Estonia", "Latvia", "Lithuania"), year >= 1900, year <= 1960) |>
-  ggplot(aes(x = year, y = life_exp, group = name)) +
+  filter(name %in% c("Estonia", "Latvia", "Lithuania"), 
+         year >= 1900, year <= 1960) |>
+  ggplot(aes(x = year, 
+             y = life_exp, 
+             group = name)) +
   geom_line()
 ```
 
@@ -205,7 +215,9 @@ life_long |>
 #| label: t4-solution
 life_long |>
   filter(name %in% c("Estonia", "Latvia", "Lithuania"), year >= 1900, year <= 1960) |>
-  ggplot(aes(x = year, y = life_exp, color = name)) +
+  ggplot(aes(x = year, 
+             y = life_exp, 
+             color = name)) +
   geom_line()
 ```
 
@@ -247,7 +259,10 @@ life_long |>
     name %in% c("Estonia", "Latvia", "Lithuania") ~ "Baltic",   # these 3 countries
     TRUE ~ "Other"                                               # all other cases
   )) |>
-  ggplot(aes(x = year, y = life_exp, group = name, color = baltic)) +
+  ggplot(aes(x = year, 
+             y = life_exp, 
+             group = name, 
+             color = baltic)) +
   geom_line()
 ```
 
@@ -565,7 +580,9 @@ rosling |>
     year %in% c(1952, 2007) ~ as.character(year),   # label only the first and last year
     TRUE ~ ""                                        # all other cases: no label
   )) |>
-  ggplot(aes(x = income, y = life_exp, color = country)) +
+  ggplot(aes(x = income, 
+             y = life_exp, 
+             color = country)) +
   geom_path() +
   geom_point(aes(size = population)) +
   geom_text_repel(aes(label = label), show.legend = FALSE) +
@@ -610,7 +627,10 @@ life_long |>
     ),
     name = fct_relevel(name, "Latvia", after = Inf)
   ) |>
-  ggplot(aes(x = year, y = life_exp, group = name, color = highlight)) +
+  ggplot(aes(x = year, 
+             y = life_exp, 
+             group = name, 
+             color = highlight)) +
   geom_line() +
   scale_color_manual(values = c(Latvia = "#d95f02", "Other European countries" = "grey80")) +
   labs(
@@ -627,7 +647,7 @@ Latvia reached its lowest value in 1944 (26.8 years). From 1960 to 2000 life exp
 ## 10. Summary
 
 | Question | Code | Why |
-|---|---|---|
+|------------------------|------------------------|------------------------|
 | One number over time, several groups | `geom_line(aes(group = ...))` or `aes(color = ...)` | Without a group, one line joins all points. |
 | Highlight a few groups | new column with `case_when()`, `scale_color_manual()`, `fct_relevel()` | Gray for the context, colour for the message. |
 | Mean per group and year | `group_by()`, `summarize()` | One line per continent. |
@@ -635,6 +655,13 @@ Latvia reached its lowest value in 1944 (26.8 years). From 1960 to 2000 life exp
 
 A line shows when a value changes. The cause needs other evidence.
 
----
+------------------------------------------------------------------------
 
-*These tutorials were generated by Prof. Sergio Uribe by prompting his teaching materials, with prompts written for this class and its educational objectives. Course: [SZF_184 Data Visualisation and Storytelling](https://estudijas.rsu.lv/course/view.php?id=83740).*
+## How these tutorials were made
+
+Prof. Sergio Uribe wrote the notes and teaching material, adapted them for this class with an AI model, and checked all the results manually.
+
+* **Model:** Claude Sonnet 5.5 (`claude-sonnet-5-5`), Anthropic. .
+* **Basic prompt:** "Build a self-learning tutorial for [topic] for first-time R users using these notes from my course and slides. Always consider that each question leads the design. Use R and tidyverse, the native pipe `|>` and `case_when()`. Explain why each function is used."
+
+Course: [SZF_184 Data Visualisation and Storytelling](https://estudijas.rsu.lv/course/view.php?id=83740)
