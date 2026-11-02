@@ -1,6 +1,6 @@
 # Data visualization and storytelling (SZF_184)
 
-Rīgas Stradiņa universitāte, autumn 2026. 5 ECTS, 40 contact hours, 20 in-person classes of 90 minutes.
+Rīgas Stradiņa universitāte, autumn 2026. 5 ECTS, 40 contact hours, in-person classes of 90 minutes.
 Lecturer: Sergio Uribe.
 
 Students learn to turn a question into a clear graph in R. The course ends with each student recreating Hans Rosling's chart from [The best stats you've ever seen](https://www.youtube.com/watch?v=hVimVzgtD6w) and presenting a graph from their own data.
@@ -36,6 +36,8 @@ Viridis is the default palette of the course (`scale_color_viridis_d()` for cate
 
 ## Schedule
 
+### Classes 1 to 8
+
 | # | Date | Topic | Data |
 |---|---|---|---|
 | 1 | Sat 10 Oct, 13:45 | [Why storytelling matters](classes/01_why_storytelling) (no coding) | Examples |
@@ -46,35 +48,51 @@ Viridis is the default palette of the course (`scale_color_viridis_d()` for cate
 | 6 | Sat 24 Oct, 09:00 | [dplyr recap: `select()` and `filter()`](classes/06_dplyr_recap) | Flights |
 | 7 | Sat 24 Oct, 09:00 | [Pivoting: `pivot_longer()` and `pivot_wider()`](classes/07_pivot) | Gapminder wide, `table2` |
 | 8 | Sat 24 Oct, 10:45 | [Joins: left, inner, full and anti](classes/08_joins) | `band_members`, `band_instruments` |
-| 9 | Sat 24 Oct, 09:00 | [Joins](classes/old_classes/09_joins) | Gapminder wide |
-| 10 | Sat 24 Oct, 10:45 | [Rosling chart, 2007 (log axis, size, color, viridis)](classes/old_classes/10_rosling_assembly) | Gapminder |
-| 11 | Sat 24 Oct, 12:30 | [Cut, Focus and themes](classes/old_classes/11_cut_focus_themes) | Gapminder |
-| 12 | Sat 24 Oct, 14:15 | [Tell: message, annotation, export](classes/old_classes/12_tell) | Gapminder |
-| 13 | Thu 29 Oct, 18:00 | [Small multiples and narrative arc](classes/old_classes/13_narrative_arc) | Gapminder, Rosling's talk |
-| 14 | Thu 29 Oct, 19:45 | [Quarto reports, animation demo, capstone questions](classes/old_classes/14_animation_and_questions) | Own ideas |
-| 15 | Fri 30 Oct, 19:45 | [Capstone M1: Ask](classes/old_classes/15_capstone_ask) | Own data |
-| 16 | Sat 7 Nov, 16:00 | [Capstone M2: Wrangle](classes/old_classes/16_capstone_wrangle) | Own data |
-| 17 | Thu 19 Nov, 13:45 | [Capstone M3: Draft](classes/old_classes/17_capstone_draft) | Own data |
-| 18 | Thu 19 Nov, 15:30 | [Capstone M4: Refine](classes/old_classes/18_capstone_refine) | Own data |
-| 19 | Fri 20 Nov, 18:00 | [Presentations 1](classes/old_classes/19_presentations_1) | Own data |
-| 20 | Fri 20 Nov, 19:45 | [Presentations 2](classes/old_classes/20_presentations_2) | Own data |
 
-Classes 1 to 8 are built. Rows 9 to 20 follow the earlier plan and link to their drafts in [`classes/old_classes`](classes/old_classes). Each class folder is rebuilt before its class. Split, apply, combine is not yet rebuilt: its drafts are in `old_classes/06_split_apply_combine` and `old_classes/07_split_apply_combine`.
+### Classes 9 and 10: from a question to a graph
 
-Capstone files: [template](capstone/capstone_template.qmd), [rubric](capstone/rubric.md), and [peer scoring sheet](capstone/peer_scoring_sheet.md).
+Each class starts from a question. The question decides the graph.
 
-**Moodle checkpoint:** Fri 13 Nov 2026, 23:59. Students submit a short script that loads the clean data and runs `glimpse()` and `nrow()` (see [class 16](classes/old_classes/16_capstone_wrangle)).
+| Folder | Question | Data | Files |
+|---|---|---|---|
+| [`09_split_apply_combine`](classes/09_split_apply_combine) | How do we calculate a number for each group? | Penguins | worksheet, solutions, slides |
+| [`10_1_distribution`](classes/10_1_distribution) | How is the data distributed? Histogram | Penguins | worksheet, solutions, slides |
+| [`10_2_counts`](classes/10_2_counts) | How many? Pie against bars, order, `geom_col()`, treemap, Likert data | Whickham, NHANES, Latvian companies, world exports, flights, Rosling | students, complete, slides |
+| [`10_3_scatter`](classes/10_3_scatter) | Do two numbers go together? Rosling data, Simpson's paradox | Rosling, penguins, NHANES | students, complete, slides |
+| [`10_4_differences`](classes/10_4_differences) | How do groups differ? Bars, box plot, violin, jitter | Rosling, penguins, NHANES | self-learning tutorial (the worksheet, solutions and slides in the folder follow the earlier order) |
+| [`10_5_trends`](classes/10_5_trends) | How do things change over time? `geom_line()`, groups, `geom_path()` | Gapminder life expectancy 1800 to 2023, Rosling | self-learning tutorial |
+
+The self-learning tutorials have a predict line, an empty chunk and a closed solution box for each step.
+
+### Remaining sessions
+
+| Date | Content |
+|---|---|
+| Sat 7 Nov, 16:00 to 17:30 | Finish `geom_line()`, animation with `gganimate`, instructions for the graded final project |
+| Thu 19 Nov, 13:45 to 15:15 and 15:30 to 17:00 | Work on the final project |
+| Fri 20 Nov, 18:00 to 19:30 and 19:45 to 21:15 | Presentations |
+
+Self-study homework replaces the classes on focus and design: colour with viridis, axes, labels and the `scales` package. These tutorials are planned. Their sources are the drafts in [`classes/old_classes`](classes/old_classes) (`11_cut_focus_themes`, `12_tell`, `14_animation_and_questions`). The other drafts in that folder follow the earlier 20-class plan and are not part of the current schedule.
+
+### Final project
+
+- [`capstone/project_template`](capstone/project_template): one RStudio project with the original data, a prompt log, the Quarto file and a one-page story.
+- [Rubric](capstone/rubric.md), [data quality checklist](capstone/data_quality_checklist.md), [peer scoring sheet](capstone/peer_scoring_sheet.md) and the older [template](capstone/capstone_template.qmd).
+- **Due date:** the zipped project is due on Fri 20 Nov 2026, 23:59.
+- **Moodle checkpoint:** Fri 13 Nov 2026, 23:59. Students submit a short script that loads the clean data and runs `glimpse()` and `nrow()`.
 
 ## Assessment
 
 | Part | Share of grade | What counts |
 |---|---|---|
-| Capstone project (the exam) | 60% | One visualization project that joins analysis, visualization and storytelling, presented in 3 minutes. Scored with the [rubric](capstone/rubric.md). |
+| Final project (the exam) | 60% | One visualization project that joins analysis, visualization and storytelling, presented in the last sessions. Scored with the [rubric](capstone/rubric.md). |
 | Participation | 40% | The deliverable of each class (see the Deliverable section of each class), the individual readings, and the Moodle checkpoint on 13 Nov. |
 
-Projects are individual. Each student works alone. Students may use any dataset for the capstone.
+Projects are individual. Each student works alone. Students may use any dataset and any large language model for the final project. They include the full prompts in the prompt log.
 
 ## Coverage of the official theme plan
+
+Class numbers in this table and in the readings table follow the earlier 20-class plan. They will map to the current folders as the classes are rebuilt.
 
 | Official theme (course description) | Classes |
 |---|---|
@@ -95,19 +113,21 @@ Projects are individual. Each student works alone. Students may use any dataset 
 2. Open the `.qmd` file of the class.
 3. Run each chunk with Ctrl+Shift+Enter (Cmd+Shift+Enter on Mac).
 
-Packages load with `pacman::p_load()`. Core set: `tidyverse`, `here`, `janitor`, `gtsummary`. Class packages: `palmerpenguins`, `countrycode`, `NHANES`, `gapminder`, `ggrepel`, `gganimate`, `gifski`.
+Packages load with `pacman::p_load()`. Core set: `tidyverse`, `here`, `janitor`, `gtsummary`. Class packages: `palmerpenguins`, `mosaicData`, `NHANES`, `nycflights13`, `treemapify`, `ggrepel`, `gganimate`, `gifski`.
 
 ## Data
 
 - `palmerpenguins`, `NHANES`, `gapminder`: R packages. `band_members` and `band_instruments` (dplyr) and `table2` (tidyr) come with the tidyverse.
 - `data/life_expectancy_wide.csv`, `data/income_wide.csv`, `data/population_wide.csv`: Gapminder in wide format, made by `data-raw/make_wide.R`. Students reshape and join them in later classes.
-- `data/gapminder_life_expectancy_wide.csv`: life expectancy from the Gapminder Foundation (194 countries, one column per year, 1800 to 2100; years after 2023 are projections). Columns `geo` (ISO3 code) and `name`; no continent. Used in the pivot exercises of class 5 and in class 7. The continent homework is in `classes/old_classes/08_pivoting`.
+- `data/gapminder_life_expectancy_wide.csv`: life expectancy from the Gapminder Foundation (194 countries, one column per year, 1800 to 2100; years after 2023 are projections). Columns `geo` (ISO3 code) and `name`; no continent. Used in the pivot exercises of class 5, in class 7 and in the trends tutorial (10_5), which joins the continents.
 - `data/countries_continents_codes.csv`: 273 rows with ISO codes (`alpha-2`, `alpha-3`), `region` (the continent) and `sub-region`. Join it to the 194-country Gapminder file with `geo` (uppercased) and `alpha-3` to add continents. Some rows have empty codes, so check the join with `anti_join()`.
 - `data/lfs_2025_example.csv`, `data/lfs_codebook.md`: 7-row sample of the Latvian Labour Force Survey 2025 (Central Statistical Bureau of Latvia, [data.gov.lv](https://data.gov.lv/dati/lv/dataset/darbspeka-apsekojums)) and an English codebook of the variables used. Replace the sample with the full file under the same name. Used in the dplyr exercise of class 4.
 - `data/flights.csv`: all 336,776 flights from New York in 2013 (`nycflights13::flights`, saved with `write_csv()`). Used in class 6. The file is large and the repository does not store it, so students download it separately.
-- `data/rosling_tidy.csv`: the three Gapminder tables joined into one. Use it if a student falls behind.
+- `data/rosling_tidy.csv`: the three Gapminder tables joined into one (1,704 rows: `country`, `continent`, `year`, `life_exp`, `income`, `population`). Used in classes 10_3 to 10_5.
+- `data/companies_lv_smaller_2020_2025.csv`: Latvian companies with a `type` (legal form) and a `place` column. Used in class 10_2.
+- `data/world_exports_1998_2000.csv`: export value by country and product. Used in the treemap of class 10_2.
 
-Gapminder covers 142 countries from 1952 to 2007 in steps of 5 years. It does not include Latvia, Estonia, or Lithuania.
+`rosling_tidy.csv` covers 142 countries from 1952 to 2007 in steps of 5 years. It does not include Latvia, Estonia or Lithuania. The long life expectancy file includes all three, from 1800.
 
 ## Readings
 
