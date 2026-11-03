@@ -47,7 +47,24 @@ rosling |>
   head()
 ```
 
-`rosling` has life expectancy, income and population of 142 countries every 5 years from 1952 to 2007.
+`rosling` has life expectancy, income and population of 142 countries every 5 years from 1952 to 2007. It does not contain Latvia.
+
+The second dataset has life expectancy for 194 countries, including Latvia, for each year from 1800 to 2100. Each year is one column. The chunk below reads the file, turns the year columns into rows with `pivot_longer()` and keeps the years from 1952 to 2023 (the years after 2023 are projections).
+
+```{r}
+#| label: data-life
+life_long <- read_csv(
+  "https://raw.githubusercontent.com/sergiouribe/Data_Visualization_Course_RSU/main/data/gapminder_life_expectancy_wide.csv",
+  show_col_types = FALSE
+) |> 
+  pivot_longer(-c(geo, name),                        # keep the country code and name, stack the year columns
+               names_to = "year",
+               values_to = "life_exp") |> 
+  mutate(year = as.integer(year)) |>                 # the year is text after pivoting, make it a number
+  filter(year >= 1952, year <= 2023)                 # the years of the Rosling data until 2023
+life_long |> 
+  head()
+```
 
 ## 3. The basics
 
@@ -185,19 +202,24 @@ The aesthetic `text` sets the content. The argument `tooltip` chooses which part
 
 ## 4. Lines and animation
 
-### Step 5: Interactive lines
+### Step 5: Interactive lines, with Latvia
 
-**Question.** How do life expectancy lines read when the mouse follows them?
+**Question.** How does the life expectancy of Latvia move, compared with six other countries?
 
-Draw the life expectancy of six countries over time: Poland and Sweden (Europe, where this course takes place), Chile and the United States (the Americas), Nigeria (the country with most people in Africa) and China (the country with most people in Asia). Keep the six countries with `filter(country %in% c(...))`, put `year` on `x`, `life_exp` on `y`, use `color = country` and `geom_line()`. Add `text = paste0(country, ", ", year, ": ", round(life_exp, 1), " years")` and `tooltip = "text"`. For lines, add `group = country` as well, so that the hover box has one line for each country.
+Use `life_long`, which includes Latvia. Poland and Sweden are European neighbours. Chile and the USA represent the Americas. Nigeria is the country with most people in Africa and China is the country with most people in Asia. In `life_long` the United States has the name "USA".
 
-**Predict.** Which line has a point at 36.3 years?
+1.  Keep the seven countries with `filter(name %in% c(...))`.
+2.  Use `case_when()` to make a column `highlight` with the values "Latvia" and "Other". Then move Latvia to the end of the order with `fct_relevel("Latvia", after = Inf)`. The function `fct_relevel()` changes the order of the groups, and `after = Inf` puts Latvia last, so the Latvia line is drawn on top of the grey lines.
+3.  Put `year` on `x`, `life_exp` on `y`, `color = highlight` and `group = name`. Use `scale_color_manual(values = c(Latvia = "firebrick", Other = "grey70"))` to colour Latvia red and the other countries grey.
+4.  Add `text = paste0(name, ", ", year, ": ", round(life_exp, 1), " years")` and `tooltip = "text"`. The grey lines have no label, so the hover box tells the reader which country each line is.
+
+**Predict.** In which decade does the Latvian line fall?
 
 ```{r}
 #| label: i5
 #| eval: false
 ggplotly(
-  rosling |>
+  life_long |>
 ```
 
 **Your finding:**
@@ -206,20 +228,25 @@ ggplotly(
 ```{r}
 #| label: i5-solution
 ggplotly(
-  rosling |>
-    filter(country %in% c("Poland", "Sweden", "Chile", "United States", "Nigeria", "China")) |>
+  life_long |>
+    filter(name %in% c("Latvia", "Poland", "Sweden", "Chile", "USA", "Nigeria", "China")) |>
+    mutate(highlight = case_when(name == "Latvia" ~ "Latvia",
+                                 TRUE ~ "Other") |> 
+             fct_relevel("Latvia", after = Inf)) |>                 # Latvia is drawn last
     ggplot(aes(x = year, 
                y = life_exp, 
-               color = country, 
-               group = country,
-               text = paste0(country, ", ", year, ": ", round(life_exp, 1), " years"))) +
+               color = highlight, 
+               group = name,
+               text = paste0(name, ", ", year, ": ", round(life_exp, 1), " years"))) +
     geom_line() +
-    geom_point(),                          # points give the hover box something to touch
+    geom_point() +                          # points give the hover box something to touch
+    scale_color_manual(values = c(Latvia = "firebrick",
+                                  Other = "grey70")),
   tooltip = "text"
 )
 ```
 
-Nigeria is the lowest line: "Nigeria, 1952: 36.3 years". Hover over China in 1962 to see the fall to 44.5 years. Hover boxes appear only on the points, so the graph keeps `geom_point()` next to `geom_line()`.
+The Latvian line falls in the 1990s: from 70.9 years in 1987 to 67.1 years in 1994, and returns to 70.3 years in 2000. Hover over the point at 1994 to read "Latvia, 1994: 67.1 years". In 2023 Latvia has 75.8 years, Poland 78.6 and Sweden 83.3. The Nigerian line stays lowest in 2023 (64.5 years). Hover boxes appear only on the points, so the graph keeps `geom_point()` next to `geom_line()`.
 :::
 
 ### Step 6: Add a slider and a play button
