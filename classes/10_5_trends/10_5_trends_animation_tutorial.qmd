@@ -283,19 +283,106 @@ rosling |>
 The tail shows the direction and the speed of each country. Long tails mark fast movement, such as China.
 :::
 
-## 6. Control and save the animation
+### Step 6: One panel for each continent
 
-### Step 6: Frames, speed and size
+**Question.** How does each continent move, when we separate them?
 
-**Question.** How do we make the animation shorter or larger?
+Add `facet_wrap(~ continent)` to the graph of Step 4. The function `facet_wrap()` draws one small panel for each value of `continent`, and the animation runs in all panels at the same time. The colour now repeats the panel name, so hide it with `scale_color_viridis_d(guide = "none")`. Use `scale_size(range = c(1, 8), guide = "none")` to keep the points small in small panels.
 
-Put the whole plot inside `animate()`. The function `animate()` takes the plot as the first argument and settings after it: `nframes` (number of frames), `fps` (frames per second) and `width` and `height` (size in pixels). 50 frames at 10 frames per second last 5 seconds. Use the plot of Step 4.
-
-**Predict.** What happens with 20 frames?
+**Predict.** In which panel do the points move furthest to the right?
 
 ```{r}
 #| label: a6
 #| eval: false
+rosling |>
+```
+
+**Your finding:**
+
+::: {.callout-tip collapse="true" title="Solution"}
+```{r}
+#| label: a6-solution
+rosling |>
+  ggplot(aes(x = income, 
+             y = life_exp, 
+             color = continent, 
+             size = population)) +
+  geom_point(alpha = 0.7) +
+  scale_x_log10() +
+  scale_size(range = c(1, 8), guide = "none") +
+  scale_color_viridis_d(guide = "none") +              # the panel title already names the continent
+  facet_wrap(~ continent) +                            # one panel for each continent
+  labs(title = "Year: {round(frame_time)}",
+       x = "Income per person (log scale)",
+       y = "Life expectancy (years)") +
+  transition_time(year)
+```
+
+The median income in Europe rises from 5,142 in 1952 to 28,054 in 2007, in Asia from 1,207 to 4,471 and in Africa from 987 to 1,452. Africa has the widest cloud in life expectancy and Oceania has 2 countries, so the Oceania panel shows only 2 points.
+:::
+
+### Step 7: Label a country while it moves
+
+**Question.** How do we follow one country in the animation?
+
+Create a `label` column with `mutate()` and `case_when()`: the country name for China and Rwanda, and `TRUE ~ ""` for all others. Draw the labels with `geom_text(aes(label = label))`. The label moves with its point in every frame. Move `size = population` from `ggplot(aes(...))` into `geom_point(aes(size = population))`. Otherwise the text size would also follow the population.
+
+**Predict.** What does the Rwanda label do around 1992?
+
+```{r}
+#| label: a7
+#| eval: false
+rosling |>
+```
+
+**Your finding:**
+
+::: {.callout-tip collapse="true" title="Solution"}
+```{r}
+#| label: a7-solution
+rosling |>
+  mutate(label = case_when(
+    country %in% c("China", "Rwanda") ~ country,      # label two countries
+    TRUE ~ ""                                          # no label for all others
+  )) |>
+  ggplot(aes(x = income, 
+             y = life_exp, 
+             color = continent)) +
+  geom_point(aes(size = population), alpha = 0.7) +   # the size applies to the points only
+  geom_text(aes(label = label), 
+            color = "black",                           # one colour for all labels
+            vjust = -1,                                # place the text above the point
+            show.legend = FALSE) +
+  scale_x_log10() +
+  scale_size(range = c(1, 12), guide = "none") +
+  scale_color_viridis_d() +
+  labs(title = "Year: {round(frame_time)}",
+       x = "Income per person (log scale)",
+       y = "Life expectancy (years)",
+       color = "Continent") +
+  transition_time(year)
+```
+
+The Rwanda point falls to 23.6 years in 1992 and returns to 46.2 years in 2007. China moves from 44.0 years and an income of 400 to 73.0 years and an income of 4,959. The Latvian data are not in this file, so Latvia cannot get a label here.
+:::
+
+## 6. Control and save the animation
+
+### Step 8: Frames, speed and size
+
+**Question.** How do we make the animation shorter or larger?
+
+Put the whole plot inside `animate()`. The function `animate()` takes the plot as the first argument and settings after it: `nframes` (number of frames) and `fps` (frames per second). 50 frames at 10 frames per second last 5 seconds. Use the plot of Step 4.
+
+The size of the animation comes from two chunk options at the top of the chunk: `#| fig-width: 8` and `#| fig-height: 5` (inches). Do not set `width` and `height` inside `animate()` in a Quarto file. Quarto reads these numbers as inches, so `width = 700` asks for a 700-inch image and R stops with the error `unable to start device 'png'`.
+
+**Predict.** What happens with 20 frames?
+
+```{r}
+#| label: a8
+#| eval: false
+#| fig-width: 8
+#| fig-height: 5
 animate(
   rosling |>
     ggplot(
@@ -305,7 +392,9 @@ animate(
 
 ::: {.callout-tip collapse="true" title="Solution"}
 ```{r}
-#| label: a6-solution
+#| label: a8-solution
+#| fig-width: 8
+#| fig-height: 5
 animate(
   rosling |>
     ggplot(aes(x = income, 
@@ -322,23 +411,21 @@ animate(
          color = "Continent") +
     transition_time(year),
   nframes = 50,       # number of frames
-  fps = 10,           # frames per second: 50 frames last 5 seconds
-  width = 700,        # width in pixels
-  height = 450        # height in pixels
+  fps = 10            # frames per second: 50 frames last 5 seconds
 )
 ```
 
 With few frames the animation is short and jumps between years. With many frames it is smooth and slow.
 :::
 
-### Step 7: Save the file
+### Step 9: Save the file
 
 **Question.** How do we keep the animation as a file for a slide or a web page?
 
 After you have shown an animation, `anim_save("rosling.gif")` saves the last animation to a gif file in your project folder. The function needs the name of the file with the ending `.gif`. This chunk runs only on your computer, so it keeps `#| eval: false`.
 
 ```{r}
-#| label: a7
+#| label: a9
 #| eval: false
 anim_save("rosling.gif")   # saves the last animation in the project folder
 ```
@@ -405,7 +492,10 @@ The animation shows the order of events: the fall in 1944 appears after the rise
 | Points that move | `transition_time(year)` | One frame for each year. |
 | A tail behind the points | `shadow_wake()` | Shows direction and speed. |
 | Title with the year | `labs(title = "Year: {round(frame_time)}")` | `frame_time` for `transition_time()`, `frame_along` for `transition_reveal()`. |
-| Frames, speed, size | `animate(plot, nframes, fps, width, height)` | Controls length and size. |
+| Frames and speed | `animate(plot, nframes, fps)` | Controls the length. |
+| Size in Quarto | chunk options `fig-width` and `fig-height` | Controls the size in inches. |
+| One panel per group | `facet_wrap(~ continent)` | Separates the groups and moves all panels together. |
+| Label a country that moves | new column with `case_when()`, `geom_text()` | The label follows the point. |
 | Save the file | `anim_save("name.gif")` | Gives a gif for slides and web pages. |
 
 Use animation to tell a sequence in a talk. Use a static graph when the reader must compare values.
