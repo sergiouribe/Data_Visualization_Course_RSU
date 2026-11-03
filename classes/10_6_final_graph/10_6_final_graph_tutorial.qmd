@@ -1,0 +1,509 @@
+---
+title: "From a default chart to a final chart (self-learning tutorial)"
+subtitle: "[SZF_184 Data Visualisation and Storytelling](https://estudijas.rsu.lv/course/view.php?id=83740)"
+author: "Sergio Uribe"
+format:
+  html:
+    toc: true
+    code-fold: false
+---
+
+## 0. How to use this tutorial
+
+The first draft of a chart shows the data. The final chart makes **one point** and the reader sees it in 5 seconds. This tutorial takes the Rosling chart (life expectancy against income in 2007) from a default draft to a final chart. The point of the chart is about **Europe**, where this course takes place.
+
+Two rules guide every step:
+
+-   **Cut.** Remove every mark that carries no data: grey background, minor grid lines, border boxes, repeated labels.
+-   **Focus.** Use viridis colours when the reader compares many groups. Use grey plus one colour when the message is about one group.
+
+Work through the steps in order. Every step has the same parts:
+
+1.  **Question.** Read it.
+2.  **Predict.** Write your guess in one line before you run any code.
+3.  **Your code.** Write the code in the empty chunk, remove `#| eval: false` and run it.
+4.  **Your finding.** Write what you see in one sentence.
+5.  **Solution.** Open the grey box and compare. The box is closed on purpose: try first.
+
+## 1. Packages
+
+```{r}
+#| label: install-pacman
+if (!requireNamespace("pacman", quietly = TRUE)) install.packages("pacman")
+```
+
+```{r}
+#| label: packages
+pacman::p_load(tidyverse, here, 
+               ggrepel,   # labels that do not overlap
+               scales)    # formats numbers on axes: $1,000 instead of 1000
+
+# bbplot lives on GitHub, not on CRAN, so we use p_load_gh()
+pacman::p_load_gh("bbc/bbplot")   # the BBC News chart style
+```
+
+## 2. Dataset
+
+```{r}
+#| label: data-rosling
+rosling <- read_csv(
+  "https://raw.githubusercontent.com/sergiouribe/Data_Visualization_Course_RSU/main/data/rosling_tidy.csv",
+  show_col_types = FALSE
+)
+rosling |> 
+  head()
+```
+
+`rosling` has life expectancy (years), income per person (dollars) and population of 142 countries every 5 years from 1952 to 2007. This tutorial uses the year 2007.
+
+## 3. Refine the chart step by step
+
+### Step 1: The default draft
+
+**Question.** What does the default chart tell you after 5 seconds?
+
+Run the chart below. Look at it for 5 seconds, close your eyes, and say what you remember.
+
+**Predict.** Which message will you remember?
+
+```{r}
+#| label: s1
+rosling |>
+  filter(year == 2007) |>
+  ggplot(aes(x = income,
+             y = life_exp,
+             size = population,
+             color = continent)) +
+  geom_point(alpha = 0.7) +
+  scale_x_log10()
+```
+
+**Your finding:**
+
+### Step 2: Choose a theme
+
+**Question.** Which theme removes the most marks that carry no data?
+
+A **theme** controls everything that is not data: background, grid lines, borders and text size. The default theme is `theme_gray()`. Replace it with `theme_minimal()`, `theme_classic()` or `theme_bw()` and compare. The argument `base_size = 14` makes all text larger, which helps on a slide.
+
+Rebuild the chart of Step 1 and add `theme_minimal(base_size = 14)` as the last layer. Then change the word `minimal` to `classic` and to `bw`.
+
+**Predict.** Which of the four themes removes the grey panel and the grid?
+
+```{r}
+#| label: s2
+#| eval: false
+rosling |>
+```
+
+**Your finding:**
+
+::: {.callout-tip collapse="true" title="Solution"}
+```{r}
+#| label: s2-solution
+rosling |>
+  filter(year == 2007) |>
+  ggplot(aes(x = income,
+             y = life_exp,
+             size = population,
+             color = continent)) +
+  geom_point(alpha = 0.7) +
+  scale_x_log10() +
+  theme_minimal(base_size = 14)   # white background, light grid, larger text
+```
+
+`theme_minimal()` removes the grey panel and the border. `theme_classic()` removes the grid as well and keeps the two axis lines. `theme_bw()` keeps a border box. For a slide, `theme_minimal()` is a good start because the light grid still helps the eye read values.
+:::
+
+### Step 3: Cut the marks that stay
+
+**Question.** Which marks remain after the theme that you can still remove?
+
+`theme()` changes single elements. Two changes help here:
+
+-   `panel.grid.minor = element_blank()` removes the thin lines between the main grid lines. The function `element_blank()` means "draw nothing".
+-   `legend.position = "bottom"` moves the legend under the chart and gives the plot more width.
+
+Add both inside `theme()` after `theme_minimal(base_size = 14)`. Also remove the size legend with `scale_size(range = c(1, 12), guide = "none")`. The argument `range` sets the smallest and largest bubble. The argument `guide = "none"` hides the legend for size, because the reader does not need exact populations.
+
+**Predict.** How many legends remain?
+
+```{r}
+#| label: s3
+#| eval: false
+rosling |>
+```
+
+**Your finding:**
+
+::: {.callout-tip collapse="true" title="Solution"}
+```{r}
+#| label: s3-solution
+rosling |>
+  filter(year == 2007) |>
+  ggplot(aes(x = income,
+             y = life_exp,
+             size = population,
+             color = continent)) +
+  geom_point(alpha = 0.7) +
+  scale_x_log10() +
+  scale_size(range = c(1, 12), guide = "none") +   # bubble sizes, no size legend
+  theme_minimal(base_size = 14) +
+  theme(panel.grid.minor = element_blank(),        # cut the thin grid lines
+        legend.position = "bottom")                # legend below the chart
+```
+
+One legend remains (continent). The chart has fewer marks and the reader sees the points first.
+:::
+
+### Step 4: Choose colours for many groups
+
+**Question.** Which colours let the reader tell five continents apart, including readers with colour blindness?
+
+**Viridis** is a colour scale designed so that colours differ in lightness and stay distinct for most types of colour blindness. For a categorical variable such as `continent`, use `scale_color_viridis_d()`. The letter `d` means *discrete* (separate groups). The argument `end = 0.9` stops the scale before its last colour, a pale yellow that is hard to see on a white background.
+
+Add `scale_color_viridis_d(end = 0.9)` to the chart of Step 3.
+
+**Predict.** Which continent will get the first colour of the scale (dark purple)?
+
+```{r}
+#| label: s4
+#| eval: false
+rosling |>
+```
+
+**Your finding:**
+
+::: {.callout-tip collapse="true" title="Solution"}
+```{r}
+#| label: s4-solution
+rosling |>
+  filter(year == 2007) |>
+  ggplot(aes(x = income,
+             y = life_exp,
+             size = population,
+             color = continent)) +
+  geom_point(alpha = 0.7) +
+  scale_x_log10() +
+  scale_size(range = c(1, 12), guide = "none") +
+  scale_color_viridis_d(end = 0.9) +    # viridis, without the pale yellow end
+  theme_minimal(base_size = 14) +
+  theme(panel.grid.minor = element_blank(),
+        legend.position = "bottom")
+```
+
+Colours follow the alphabetical order of the groups, so Africa gets dark purple and Oceania gets yellow-green. Viridis suits the question "How do the five continents compare?". It does not suit the question "Where does Europe stand?", because five colours compete for attention. Step 6 changes this.
+:::
+
+### Step 5: Axes and labels
+
+**Question.** Can a reader who sees the chart for the first time read the axes?
+
+Three changes:
+
+-   `scale_x_log10(labels = scales::label_dollar(accuracy = 1))` writes the income axis as `$1,000` instead of `1e+03`. The function `label_dollar()` comes from the package `scales`, which formats numbers on axes. The prefix `scales::` tells R where the function lives.
+-   `breaks = c(500, 2000, 8000, 32000)` chooses where the axis shows values. On a log axis, each step doubles twice, so these values are evenly spaced.
+-   `labs()` writes the text of the chart: `title` states the finding, `subtitle` says what the axes show, `x` and `y` name the axes, and `caption` gives the source.
+
+**Predict.** Which title would you write? Use a number from the data.
+
+```{r}
+#| label: s5
+#| eval: false
+rosling |>
+```
+
+**Your finding:**
+
+::: {.callout-tip collapse="true" title="Solution"}
+```{r}
+#| label: s5-solution
+rosling |>
+  filter(year == 2007) |>
+  ggplot(aes(x = income,
+             y = life_exp,
+             size = population,
+             color = continent)) +
+  geom_point(alpha = 0.7) +
+  scale_x_log10(breaks = c(500, 2000, 8000, 32000),
+                labels = scales::label_dollar(accuracy = 1)) +     # $2,000 instead of 2e+03
+  scale_size(range = c(1, 12), guide = "none") +
+  scale_color_viridis_d(end = 0.9) +
+  labs(title = "Richer countries live longer, 2007",
+       subtitle = "Median life expectancy: 53.5 years below $2,000 and 79.8 years above $32,000",
+       x = "Income per person (dollars, log scale)",
+       y = "Life expectancy (years)",
+       color = NULL,                                   # no legend title
+       caption = "Source: Gapminder") +
+  theme_minimal(base_size = 14) +
+  theme(panel.grid.minor = element_blank(),
+        legend.position = "bottom")
+```
+
+The title now states a finding. `color = NULL` removes the legend title, because the continent names explain themselves.
+:::
+
+### Check 1
+
+Which two rules of this tutorial did Steps 2 and 3 apply, and which step applied the second rule of the tutorial introduction (Focus)?
+
+::: {.callout-tip collapse="true" title="Answer"}
+Steps 2 and 3 applied **Cut** (a theme without a grey panel, no minor grid lines, one legend). **Focus** starts in Step 6: the next steps replace the five colours with grey plus one colour.
+:::
+
+### Step 6: Focus with grey plus one colour
+
+**Question.** Where does Europe stand in 2007?
+
+The chart in Step 5 answers "How do the continents compare?". For the new question, only Europe needs a colour. Make three changes:
+
+1.  Add a column with `mutate()` and `case_when()`: `group = case_when(continent == "Europe" ~ "Europe", TRUE ~ "Other")`. The line `TRUE ~ "Other"` catches every row that is not in Europe.
+2.  Draw Europe last, so grey points do not cover it: `arrange(group == "Europe")`. The function `arrange()` sorts the rows. `FALSE` sorts before `TRUE`, so the Europe rows come last, and ggplot draws the last rows on top.
+3.  Use `color = group` and `scale_color_manual(values = c(Europe = "firebrick", Other = "grey80"))`. The function `scale_color_manual()` sets each colour by hand.
+
+**Predict.** How many European countries sit below 72 years?
+
+```{r}
+#| label: s6
+#| eval: false
+rosling |>
+```
+
+**Your finding:**
+
+::: {.callout-tip collapse="true" title="Solution"}
+```{r}
+#| label: s6-solution
+rosling |>
+  filter(year == 2007) |>
+  mutate(group = case_when(continent == "Europe" ~ "Europe",
+                           TRUE ~ "Other")) |>              # new column with two values
+  arrange(group == "Europe") |>                             # draw Europe last
+  ggplot(aes(x = income,
+             y = life_exp,
+             size = population,
+             color = group)) +
+  geom_point(alpha = 0.7) +
+  scale_x_log10(breaks = c(500, 2000, 8000, 32000),
+                labels = scales::label_dollar(accuracy = 1)) +
+  scale_size(range = c(1, 12), guide = "none") +
+  scale_color_manual(values = c(Europe = "firebrick",
+                                Other = "grey80")) +
+  labs(title = "Europe has the highest life expectancy, 2007",
+       subtitle = "All 30 European countries reach 71.8 years or more; 43 of 112 others do",
+       x = "Income per person (dollars, log scale)",
+       y = "Life expectancy (years)",
+       color = NULL,
+       caption = "Source: Gapminder") +
+  theme_minimal(base_size = 14) +
+  theme(panel.grid.minor = element_blank(),
+        legend.position = "bottom")
+```
+
+All 30 European countries are at 71.8 years or more (Turkey is the lowest). Outside Europe, 43 of 112 countries reach that level. The red points now carry the message, and the grey points give the comparison.
+:::
+
+### Step 7: Label the points that matter
+
+**Question.** Which countries does the reader need to see by name?
+
+Label six countries that cover the regions of the world. Two are in Europe: Poland (close to Latvia) and Sweden (across the Baltic Sea). Chile and the United States represent the Americas. Nigeria is the country with most people in Africa. China is the country with most people in Asia.
+
+1.  Add a column `label` with `case_when()`: the country name for these three, and an empty text `""` for all others.
+2.  Add `geom_text_repel(aes(label = label), color = "black", max.overlaps = Inf)`. The function `geom_text_repel()` comes from `ggrepel` and moves labels so they do not overlap. The argument `max.overlaps = Inf` keeps every label, even in a crowded area.
+3.  Move `size = population` from the main `aes()` into `geom_point(aes(size = population))`. Otherwise the text would take the population as its size.
+
+**Predict.** Which of the six countries has the highest life expectancy?
+
+```{r}
+#| label: s7
+#| eval: false
+rosling |>
+```
+
+**Your finding:**
+
+::: {.callout-tip collapse="true" title="Solution"}
+```{r}
+#| label: s7-solution
+rosling |>
+  filter(year == 2007) |>
+  mutate(group = case_when(continent == "Europe" ~ "Europe",
+                           TRUE ~ "Other"),
+         label = case_when(country %in% c("Poland", "Sweden", "Chile", "United States", "Nigeria", "China") ~ country,
+                           TRUE ~ "")) |>                   # empty text for the other countries
+  arrange(group == "Europe") |>
+  ggplot(aes(x = income,
+             y = life_exp,
+             color = group)) +
+  geom_point(aes(size = population),                        # size only for the points
+             alpha = 0.7) +
+  geom_text_repel(aes(label = label),
+                  color = "black",
+                  max.overlaps = Inf,                       # keep every label
+                  show.legend = FALSE) +
+  scale_x_log10(breaks = c(500, 2000, 8000, 32000),
+                labels = scales::label_dollar(accuracy = 1)) +
+  scale_size(range = c(1, 12), guide = "none") +
+  scale_color_manual(values = c(Europe = "firebrick",
+                                Other = "grey80")) +
+  labs(title = "Europe has the highest life expectancy, 2007",
+       subtitle = "All 30 European countries reach 71.8 years or more; 43 of 112 others do",
+       x = "Income per person (dollars, log scale)",
+       y = "Life expectancy (years)",
+       color = NULL,
+       caption = "Source: Gapminder") +
+  theme_minimal(base_size = 14) +
+  theme(panel.grid.minor = element_blank(),
+        legend.position = "bottom")
+```
+
+Sweden has the highest life expectancy of the six (80.9 years). Chile has a higher life expectancy (78.6 years) than Poland (75.6 years) with a lower income ($13,172 against $15,390). Nigeria (46.9 years) is 34.0 years below Sweden.
+:::
+
+### Step 8: The BBC News style
+
+**Question.** Can one line give the chart a professional look?
+
+The BBC News data team published the package `bbplot`. It has two functions:
+
+-   `bbc_style()` is a complete theme: large bold title, no axis titles, no ticks, only horizontal grid lines, legend on top. It replaces `theme_minimal()` and `theme()`.
+-   `finalise_plot()` adds the source line at the bottom, a bar, and saves the chart as a png of a chosen size.
+
+`bbc_style()` removes the axis titles. Because of this, the subtitle must say what the axes show. Replace the last two layers of Step 7 (`theme_minimal()` and `theme()`) with `bbc_style()`, remove `x` and `y` from `labs()`, and put the units in the subtitle.
+
+Then send the chart to `finalise_plot()`. The function `finalise_plot()` needs the whole plot as its first argument, so put the plot in parentheses and pipe it in. Arguments: `source_name` (text at the bottom), `save_filepath` (file name), `width_pixels` and `height_pixels` (size).
+
+**Predict.** Will the 28 pt title fit on one line in a chart of 640 pixels?
+
+```{r}
+#| label: s8
+#| eval: false
+(rosling |>
+```
+
+**Your finding:**
+
+::: {.callout-tip collapse="true" title="Solution"}
+```{r}
+#| label: s8-solution
+#| fig-width: 8
+#| fig-height: 6
+(rosling |>
+  filter(year == 2007) |>
+  mutate(group = case_when(continent == "Europe" ~ "Europe",
+                           TRUE ~ "Other"),
+         label = case_when(country %in% c("Poland", "Sweden", "Chile", "United States", "Nigeria", "China") ~ country,
+                           TRUE ~ "")) |>
+  arrange(group == "Europe") |>
+  ggplot(aes(x = income,
+             y = life_exp,
+             color = group)) +
+  geom_point(aes(size = population),
+             alpha = 0.7) +
+  geom_text_repel(aes(label = label),
+                  color = "black",
+                  max.overlaps = Inf,                       # keep every label
+                  size = 6,
+                  show.legend = FALSE) +
+  scale_x_log10(breaks = c(500, 2000, 8000, 32000),
+                labels = scales::label_dollar(accuracy = 1)) +
+  scale_size(range = c(1, 12), guide = "none") +
+  scale_color_manual(values = c(Europe = "firebrick",
+                                Other = "grey80")) +
+  labs(title = "Europe leads in life expectancy",
+       subtitle = "Life expectancy (years) against income per person (dollars, log scale), 2007") +
+  bbc_style()                                           # the complete BBC theme
+) |>
+  finalise_plot(source_name = "Source: Gapminder",
+                save_filepath = "rosling_bbc.png",
+                width_pixels = 900,
+                height_pixels = 650)
+```
+
+The file `rosling_bbc.png` is in your project folder. `bbc_style()` uses 28 pt for the title, so keep the title short. Compare Step 5 and Step 8: the same data, three decisions (what to cut, what to colour, what to label) change the message.
+:::
+
+## 4. Final challenge
+
+**Question.** How wide was the gap between European countries in 1952, compared with 2007?
+
+Build the final chart for the year 1952, with the steps of this tutorial:
+
+1.  Year 1952. Colour Europe in `"firebrick"` and all other continents in `"grey80"`, with Europe drawn last.
+2.  Label the same six countries as in Step 7.
+3.  Use `theme_minimal(base_size = 14)`, no minor grid lines, legend at the bottom.
+4.  Write a title with a number from the data. Use `summarise()` to find the minimum and maximum life expectancy in Europe in 1952.
+
+Use `scale_x_log10(breaks = c(500, 2000, 8000, 32000), labels = scales::label_dollar(accuracy = 1))` as before.
+
+**Predict.** Will the gap be larger in 1952 or in 2007?
+
+```{r}
+#| label: challenge
+#| eval: false
+rosling |>
+```
+
+**Your finding:**
+
+::: {.callout-tip collapse="true" title="One possible answer"}
+```{r}
+#| label: challenge-solution
+rosling |>
+  filter(year == 1952) |>
+  mutate(group = case_when(continent == "Europe" ~ "Europe",
+                           TRUE ~ "Other"),
+         label = case_when(country %in% c("Poland", "Sweden", "Chile", "United States", "Nigeria", "China") ~ country,
+                           TRUE ~ "")) |>
+  arrange(group == "Europe") |>
+  ggplot(aes(x = income,
+             y = life_exp,
+             color = group)) +
+  geom_point(aes(size = population),
+             alpha = 0.7) +
+  geom_text_repel(aes(label = label),
+                  color = "black",
+                  max.overlaps = Inf,                       # keep every label
+                  show.legend = FALSE) +
+  scale_x_log10(breaks = c(500, 2000, 8000, 32000),
+                labels = scales::label_dollar(accuracy = 1)) +
+  scale_size(range = c(1, 12), guide = "none") +
+  scale_color_manual(values = c(Europe = "firebrick",
+                                Other = "grey80")) +
+  labs(title = "In 1952, European life expectancy ranged from 43.6 to 72.7 years",
+       subtitle = "The range in 2007 is 71.8 to 81.8 years",
+       x = "Income per person (dollars, log scale)",
+       y = "Life expectancy (years)",
+       color = NULL,
+       caption = "Source: Gapminder") +
+  theme_minimal(base_size = 14) +
+  theme(panel.grid.minor = element_blank(),
+        legend.position = "bottom")
+```
+
+The gap between the European countries was 29.1 years in 1952 (43.6 to 72.7) and 10.0 years in 2007 (71.8 to 81.8). The countries with the lowest values in 1952 gained the most.
+:::
+
+## 5. Summary
+
+| Question | Code | Rule |
+|---|---|---|
+| Remove the grey panel and border | `theme_minimal(base_size = 14)` | Cut |
+| Remove thin grid lines, move the legend | `theme(panel.grid.minor = element_blank(), legend.position = "bottom")` | Cut |
+| Compare many groups | `scale_color_viridis_d(end = 0.9)` | Focus |
+| Read the axes | `scales::label_dollar()`, `breaks`, `labs()` | Clarity |
+| Highlight one group | `case_when()`, `arrange()`, `scale_color_manual()` | Focus |
+| Name the key points | `geom_text_repel()` | Focus |
+| Apply a complete style and save | `bbc_style()`, `finalise_plot()` | Cut |
+
+------------------------------------------------------------------------
+
+## How these tutorials were made
+
+Prof. Sergio Uribe wrote the notes and teaching material, adapted them for this class with an AI model, and checked all the results manually.
+
+* **Model:** Claude Sonnet 5.5 (`claude-sonnet-5-5`), Anthropic. Date: 3 Nov 2026.
+* **Basic prompt:** "Build a self-learning tutorial for [topic] for first-time R users using these notes from my course and slides. Always consider that each question leads the design. Use R and tidyverse, the native pipe `|>` and `case_when()`. Explain why each function is used."
+
+Course: [SZF_184 Data Visualisation and Storytelling](https://estudijas.rsu.lv/course/view.php?id=83740)

@@ -172,9 +172,9 @@ What is the difference between `transition_reveal(year)` and `transition_time(ye
 
 ### Step 3: The animated trail
 
-**Question.** In the trends tutorial you drew the paths of China, India, the United States, Rwanda and Botswana. How do they move year by year?
+**Question.** How do six countries move year by year? Poland and Sweden represent Europe, where this course takes place. Chile and the United States represent the Americas. Nigeria is the country with most people in Africa and China is the country with most people in Asia.
 
-Take the same five countries (`rosling`, `income` on `x` on a log scale, `life_exp` on `y`, `color = country`) and draw `geom_point(size = 3)`. Add `transition_time(year)`: each frame shows the rows of one year, so the points move. The year is stored in `frame_time`, so write `labs(title = "Year: {round(frame_time)}")`. Then add `shadow_mark(past = TRUE, alpha = 0.4, size = 1.5)`. The function `shadow_mark()` keeps the positions of the earlier frames on the graph. `past = TRUE` keeps the past, `alpha = 0.4` makes the old points transparent and `size = 1.5` makes them small. The old points form the trail.
+Take the six countries (`rosling`, `income` on `x` on a log scale, `life_exp` on `y`, `color = country`) and draw `geom_point(size = 3)`. Add `transition_time(year)`: each frame shows the rows of one year, so the points move. The year is stored in `frame_time`, so write `labs(title = "Year: {round(frame_time)}")`. Then add `shadow_mark(past = TRUE, alpha = 0.4, size = 1.5)`. The function `shadow_mark()` keeps the positions of the earlier frames on the graph. `past = TRUE` keeps the past, `alpha = 0.4` makes the old points transparent and `size = 1.5` makes them small. The old points form the trail.
 
 **Predict.** Which country moves backwards at some point?
 
@@ -190,7 +190,7 @@ rosling |>
 ```{r}
 #| label: a3-solution
 rosling |>
-  filter(country %in% c("China", "India", "United States", "Rwanda", "Botswana")) |>
+  filter(country %in% c("Poland", "Sweden", "Chile", "United States", "Nigeria", "China")) |>
   ggplot(aes(x = income, 
              y = life_exp, 
              color = country)) +
@@ -204,7 +204,7 @@ rosling |>
   shadow_mark(past = TRUE, alpha = 0.4, size = 1.5)        # the old positions stay as a trail
 ```
 
-Rwanda moves down to 23.6 years in 1992 and returns to 46.2 years in 2007. Botswana reaches 62.7 years in 1992 and falls to 50.7 years in 2007. The United States stays on the right side of the graph for the whole period.
+China moves backwards in 1962: life expectancy falls from 50.5 to 44.5 years. Nigeria rises from 36.3 to 46.9 years in 55 years. Sweden starts at 71.9 years and ends at 80.9 years, a gain of 9.0 years, while Poland gains 14.3 years (61.3 to 75.6). Sweden and the United States start on the right side of the graph and stay there for the whole period.
 :::
 
 ### Step 4: Make all the countries move
@@ -326,9 +326,9 @@ The median income in Europe rises from 5,142 in 1952 to 28,054 in 2007, in Asia 
 
 **Question.** How do we follow one country in the animation?
 
-Create a `label` column with `mutate()` and `case_when()`: the country name for China and Rwanda, and `TRUE ~ ""` for all others. Draw the labels with `geom_text(aes(label = label))`. The label moves with its point in every frame. Move `size = population` from `ggplot(aes(...))` into `geom_point(aes(size = population))`. Otherwise the text size would also follow the population.
+Create a `label` column with `mutate()` and `case_when()`: the country name for six countries (the same six as in Step 3), and `TRUE ~ ""` for all others. Draw the labels with `geom_text(aes(label = label))`. The label moves with its point in every frame. Move `size = population` from `ggplot(aes(...))` into `geom_point(aes(size = population))`. Otherwise the text size would also follow the population.
 
-**Predict.** What does the Rwanda label do around 1992?
+**Predict.** What does the China label do around 1962?
 
 ```{r}
 #| label: a7
@@ -343,7 +343,7 @@ rosling |>
 #| label: a7-solution
 rosling |>
   mutate(label = case_when(
-    country %in% c("China", "Rwanda") ~ country,      # label two countries
+    country %in% c("Poland", "Sweden", "Chile", "United States", "Nigeria", "China") ~ country,   # label six countries
     TRUE ~ ""                                          # no label for all others
   )) |>
   ggplot(aes(x = income, 
@@ -364,7 +364,7 @@ rosling |>
   transition_time(year)
 ```
 
-The Rwanda point falls to 23.6 years in 1992 and returns to 46.2 years in 2007. China moves from 44.0 years and an income of 400 to 73.0 years and an income of 4,959. The Latvian data are not in this file, so Latvia cannot get a label here.
+The China point falls to 44.5 years in 1962 and then climbs to 73.0 years in 2007, with the income rising from 400 to 4,959. Nigeria stays below 48 years in all 12 years. The Latvian data are not in this file, so Latvia cannot get a label here.
 :::
 
 ## 6. Control and save the animation

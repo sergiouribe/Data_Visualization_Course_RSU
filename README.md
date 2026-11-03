@@ -62,6 +62,7 @@ Each class starts from a question. The question decides the graph.
 | [`10_3_scatter`](classes/10_3_scatter) | Do two numbers go together? Rosling data, Simpson's paradox | Rosling, penguins, NHANES | students, complete, slides |
 | [`10_4_differences`](classes/10_4_differences) | How do groups differ? Bars, box plot, violin, jitter | Rosling, penguins, NHANES | self-learning tutorial (the worksheet, solutions and slides in the folder follow the earlier order) |
 | [`10_5_trends`](classes/10_5_trends) | How do things change over time? `geom_line()`, groups, `geom_path()` | Gapminder life expectancy 1800 to 2023, Rosling | self-learning tutorial |
+| [`10_6_final_graph`](classes/10_6_final_graph) | From a default chart to a final chart: themes, viridis, axes and labels, grey plus one colour, `bbplot` | Rosling | self-learning tutorial |
 
 The self-learning tutorials have a predict line, an empty chunk and a closed solution box for each step.
 
@@ -124,7 +125,7 @@ Packages load with `pacman::p_load()`. Core set: `tidyverse`, `here`, `janitor`,
 - `data/countries_continents_codes.csv`: 273 rows with ISO codes (`alpha-2`, `alpha-3`), `region` (the continent) and `sub-region`. Join it to the 194-country Gapminder file with `geo` (uppercased) and `alpha-3` to add continents. Some rows have empty codes, so check the join with `anti_join()`.
 - `data/lfs_2025_example.csv`, `data/lfs_codebook.md`: 7-row sample of the Latvian Labour Force Survey 2025 (Central Statistical Bureau of Latvia, [data.gov.lv](https://data.gov.lv/dati/lv/dataset/darbspeka-apsekojums)) and an English codebook of the variables used. Replace the sample with the full file under the same name. Used in the dplyr exercise of class 4.
 - `data/flights.csv`: all 336,776 flights from New York in 2013 (`nycflights13::flights`, saved with `write_csv()`). Used in class 6. The file is large and the repository does not store it, so students download it separately.
-- `data/rosling_tidy.csv`: the three Gapminder tables joined into one (1,704 rows: `country`, `continent`, `year`, `life_exp`, `income`, `population`). Used in classes 10_3 to 10_5.
+- `data/rosling_tidy.csv`: the three Gapminder tables joined into one (1,704 rows: `country`, `continent`, `year`, `life_exp`, `income`, `population`). Used in classes 10_3 to 10_6.
 - `data/companies_lv_smaller_2020_2025.csv`: Latvian companies with a `type` (legal form) and a `place` column. Used in class 10_2.
 - `data/world_exports_1998_2000.csv`: export value by country and product. Used in the treemap of class 10_2.
 

@@ -189,9 +189,9 @@ The aesthetic `text` sets the content. The argument `tooltip` chooses which part
 
 **Question.** How do life expectancy lines read when the mouse follows them?
 
-Draw the life expectancy of China, India, the United States, Rwanda and Botswana over time. Keep the five countries with `filter(country %in% c(...))`, put `year` on `x`, `life_exp` on `y`, use `color = country` and `geom_line()`. Add `text = paste0(country, ", ", year, ": ", round(life_exp, 1), " years")` and `tooltip = "text"`. For lines, add `group = country` as well, so that the hover box has one line for each country.
+Draw the life expectancy of six countries over time: Poland and Sweden (Europe, where this course takes place), Chile and the United States (the Americas), Nigeria (the country with most people in Africa) and China (the country with most people in Asia). Keep the six countries with `filter(country %in% c(...))`, put `year` on `x`, `life_exp` on `y`, use `color = country` and `geom_line()`. Add `text = paste0(country, ", ", year, ": ", round(life_exp, 1), " years")` and `tooltip = "text"`. For lines, add `group = country` as well, so that the hover box has one line for each country.
 
-**Predict.** Which line has a point at 23.6?
+**Predict.** Which line has a point at 36.3 years?
 
 ```{r}
 #| label: i5
@@ -207,7 +207,7 @@ ggplotly(
 #| label: i5-solution
 ggplotly(
   rosling |>
-    filter(country %in% c("China", "India", "United States", "Rwanda", "Botswana")) |>
+    filter(country %in% c("Poland", "Sweden", "Chile", "United States", "Nigeria", "China")) |>
     ggplot(aes(x = year, 
                y = life_exp, 
                color = country, 
@@ -219,7 +219,7 @@ ggplotly(
 )
 ```
 
-Rwanda is the line that falls: "Rwanda, 1992: 23.6 years". Hover boxes appear only on the points, so the graph keeps `geom_point()` next to `geom_line()`.
+Nigeria is the lowest line: "Nigeria, 1952: 36.3 years". Hover over China in 1962 to see the fall to 44.5 years. Hover boxes appear only on the points, so the graph keeps `geom_point()` next to `geom_line()`.
 :::
 
 ### Step 6: Add a slider and a play button
@@ -273,9 +273,9 @@ No. A PDF is static, so the hover boxes and the slider are lost. Use a static gr
 
 ## 6. Final challenge
 
-**Question.** In 1952, which country had the lowest life expectancy?
+**Question.** In 1952, which European country had the lowest life expectancy?
 
-Draw an interactive scatter for the year 1952 (`income` on a log `x` axis, `life_exp` on `y`, `color = continent`). Write a hover text with the country, the life expectancy and the population (use `paste0()`). Find the lowest point by hovering. Then write one sentence on whether the interactive graph or a static graph with one label is better for a report that readers will print.
+Draw an interactive scatter for the year 1952 and the European countries, with `filter(year == 1952, continent == "Europe")`. Put `income` on a log `x` axis and `life_exp` on `y`. Write a hover text with the country, the life expectancy and the population (use `paste0()`). Find the lowest point by hovering. Then write one sentence on whether the interactive graph or a static graph with one label is better for a report that readers will print.
 
 ```{r}
 #| label: challenge
@@ -291,10 +291,9 @@ ggplotly(
 #| label: challenge-solution
 ggplotly(
   rosling |>
-    filter(year == 1952) |>
+    filter(year == 1952, continent == "Europe") |>
     ggplot(aes(x = income, 
                y = life_exp, 
-               color = continent, 
                text = paste0(country, ": ", round(life_exp, 1), " years, population ", population))) +
     geom_point() +
     scale_x_log10(),
@@ -302,7 +301,7 @@ ggplotly(
 )
 ```
 
-The lowest point in 1952 is Afghanistan, with 28.8 years. For a printed report, a static graph with one label on Afghanistan is better, because the hover box does not exist on paper.
+The lowest point in 1952 is Turkey, with 43.6 years. For a printed report, a static graph with one label on Turkey is better, because the hover box does not exist on paper.
 :::
 
 ## 7. Summary
