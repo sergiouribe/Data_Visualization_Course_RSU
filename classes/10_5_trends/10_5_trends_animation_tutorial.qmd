@@ -1,0 +1,422 @@
+---
+title: "How do things change over time? Part 2: animation (self-learning tutorial)"
+subtitle: "[SZF_184 Data Visualisation and Storytelling](https://estudijas.rsu.lv/course/view.php?id=83740)"
+author: "Sergio Uribe"
+format:
+  html:
+    toc: true
+    code-fold: false
+---
+
+## 0. How to use this tutorial
+
+Part 1 drew life expectancy over time with lines and paths. This part makes the graph move: one frame for each year. We use the package `gganimate`, which adds an animation to a `ggplot` graph.
+
+Work through the steps in order. Every step has the same parts:
+
+1.  **Question.** Read it.
+2.  **Predict.** Write your guess in one line before you run any code.
+3.  **Your code.** Write the code in the empty chunk, remove `#| eval: false` and run it.
+4.  **Your finding.** Write what you see in one sentence.
+5.  **Solution.** Open the grey box and compare. The box is closed on purpose: try first.
+
+An animation takes a few seconds to render. Wait for it to finish.
+
+## 1. Packages
+
+```{r}
+#| label: install-pacman
+if (!requireNamespace("pacman", quietly = TRUE)) install.packages("pacman")
+```
+
+```{r}
+#| label: packages
+pacman::p_load(tidyverse, here, 
+               ggrepel,      # labels that do not overlap
+               gganimate,    # adds animation to a ggplot graph
+               gifski)       # builds the animation file (a gif)
+```
+
+## 2. Datasets
+
+Each dataset loads once into a named object.
+
+```{r}
+#| label: data
+life_wide <- read_csv(
+  "https://raw.githubusercontent.com/sergiouribe/Data_Visualization_Course_RSU/main/data/gapminder_life_expectancy_wide.csv",
+  show_col_types = FALSE
+)
+
+continents <- read_csv(
+  "https://raw.githubusercontent.com/sergiouribe/Data_Visualization_Course_RSU/main/data/countries_continents_codes.csv",
+  show_col_types = FALSE
+)
+
+rosling <- read_csv(
+  "https://raw.githubusercontent.com/sergiouribe/Data_Visualization_Course_RSU/main/data/rosling_tidy.csv",
+  show_col_types = FALSE
+)
+```
+
+`life_wide` has one column per year for 194 countries. `continents` has the continent of each country. `rosling` has life expectancy, income and population of 142 countries every 5 years from 1952 to 2007.
+
+## 3. Prepare the table
+
+Run this chunk once. It builds the table `life_long` with one row per country and year, as in part 1.
+
+```{r}
+#| label: prepare
+life_long <- life_wide |>
+  pivot_longer(-c(geo, name), 
+               names_to = "year", 
+               values_to = "life_exp") |>                 # years in columns become rows
+  mutate(year = as.integer(year)) |>                      # the year is text after pivoting, make it a number
+  filter(year <= 2023) |>                                 # drop the projections after 2023
+  left_join(
+    continents |>
+      transmute(geo = str_to_lower(`alpha-3`),            # the codes in life_wide are in lower case
+                continent = region),
+    by = "geo"
+  )
+
+life_long |> 
+  head()
+```
+
+## 4. Animate a line
+
+### Step 1: A line that grows
+
+**Question.** Can the line of each Baltic country draw itself year by year?
+
+Start from the static graph of part 1: filter Estonia, Latvia and Lithuania from 1900 to 1960, put `year` on `x`, `life_exp` on `y` and `color = name`, and draw `geom_line()`. Then add `transition_reveal(year)`. The function `transition_reveal()` shows the line up to the current year and extends it frame by frame. Add `labs(title = "Year: {round(frame_along)}")` to print the year. The text in `{ }` is replaced in each frame, and `frame_along` is the year of the current frame.
+
+**Predict.** Which line will fall first?
+
+```{r}
+#| label: a1
+#| eval: false
+life_long |>
+```
+
+**Your finding:**
+
+::: {.callout-tip collapse="true" title="Solution"}
+```{r}
+#| label: a1-solution
+life_long |>
+  filter(name %in% c("Estonia", "Latvia", "Lithuania"), 
+         year >= 1900, year <= 1960) |>
+  ggplot(aes(x = year, 
+             y = life_exp, 
+             color = name)) +
+  geom_line() +
+  labs(title = "Year: {round(frame_along)}",
+       x = NULL,
+       y = "Life expectancy (years)",
+       color = NULL) +
+  transition_reveal(year)       # the line grows from left to right, one frame for each step
+```
+
+The three lines rise together until 1914 and fall in 1915 to 1918. In 1941 the Lithuanian line drops to 12.2 years, and in 1944 Latvia reaches 26.8 years and Estonia 35.2 years.
+:::
+
+### Step 2: Add a moving point at the tip
+
+**Question.** How do we show where the line is now?
+
+Add `geom_point()` to the chart of Step 1. During `transition_reveal()`, a point is drawn only for the current frame, so it moves along the tip of each line.
+
+**Predict.** Does the point show a value that the line already passed?
+
+```{r}
+#| label: a2
+#| eval: false
+life_long |>
+```
+
+**Your finding:**
+
+::: {.callout-tip collapse="true" title="Solution"}
+```{r}
+#| label: a2-solution
+life_long |>
+  filter(name %in% c("Estonia", "Latvia", "Lithuania"), 
+         year >= 1900, year <= 1960) |>
+  ggplot(aes(x = year, 
+             y = life_exp, 
+             color = name)) +
+  geom_line() +
+  geom_point(size = 3) +          # one point at the tip of each line
+  labs(title = "Year: {round(frame_along)}",
+       x = NULL,
+       y = "Life expectancy (years)",
+       color = NULL) +
+  transition_reveal(year)
+```
+
+The point sits at the current year. It shows the value of that frame, and the line behind it shows the past.
+:::
+
+### Check 1
+
+What is the difference between `transition_reveal(year)` and `transition_time(year)`?
+
+::: {.callout-tip collapse="true" title="Answer"}
+`transition_reveal(year)` keeps all earlier values on the graph and extends the line, so it fits lines and paths. `transition_time(year)` shows only the rows of the current year, so the points move and nothing stays behind unless you add `shadow_mark()`. Steps 3 to 5 use it.
+:::
+
+## 5. Animate the trail of the Rosling graph
+
+### Step 3: The animated trail
+
+**Question.** In the trends tutorial you drew the paths of China, India, the United States, Rwanda and Botswana. How do they move year by year?
+
+Take the same five countries (`rosling`, `income` on `x` on a log scale, `life_exp` on `y`, `color = country`) and draw `geom_point(size = 3)`. Add `transition_time(year)`: each frame shows the rows of one year, so the points move. The year is stored in `frame_time`, so write `labs(title = "Year: {round(frame_time)}")`. Then add `shadow_mark(past = TRUE, alpha = 0.4, size = 1.5)`. The function `shadow_mark()` keeps the positions of the earlier frames on the graph. `past = TRUE` keeps the past, `alpha = 0.4` makes the old points transparent and `size = 1.5` makes them small. The old points form the trail.
+
+**Predict.** Which country moves backwards at some point?
+
+```{r}
+#| label: a3
+#| eval: false
+rosling |>
+```
+
+**Your finding:**
+
+::: {.callout-tip collapse="true" title="Solution"}
+```{r}
+#| label: a3-solution
+rosling |>
+  filter(country %in% c("China", "India", "United States", "Rwanda", "Botswana")) |>
+  ggplot(aes(x = income, 
+             y = life_exp, 
+             color = country)) +
+  geom_point(size = 3) +                                   # the current position
+  scale_x_log10() +
+  labs(title = "Year: {round(frame_time)}",
+       x = "Income per person (log scale)",
+       y = "Life expectancy (years)",
+       color = NULL) +
+  transition_time(year) +                                  # one frame for each year
+  shadow_mark(past = TRUE, alpha = 0.4, size = 1.5)        # the old positions stay as a trail
+```
+
+Rwanda moves down to 23.6 years in 1992 and returns to 46.2 years in 2007. Botswana reaches 62.7 years in 1992 and falls to 50.7 years in 2007. The United States stays on the right side of the graph for the whole period.
+:::
+
+### Step 4: Make all the countries move
+
+**Question.** What does the animation show when we draw every country?
+
+Use `transition_time(year)` as in Step 3: each frame shows the countries of one year. Use all 142 countries, `size = population`, `color = continent` and `geom_point(alpha = 0.7)`. Add `scale_size(range = c(1, 12), guide = "none")` to set the size of the points and hide the size legend, `scale_color_viridis_d()` for the colours, and `labs(title = "Year: {round(frame_time)}")`. With `transition_time()` the year is stored in `frame_time`.
+
+**Predict.** Which continent moves furthest to the right?
+
+```{r}
+#| label: a4
+#| eval: false
+rosling |>
+```
+
+**Your finding:**
+
+::: {.callout-tip collapse="true" title="Solution"}
+```{r}
+#| label: a4-solution
+rosling |>
+  ggplot(aes(x = income, 
+             y = life_exp, 
+             color = continent, 
+             size = population)) +
+  geom_point(alpha = 0.7) +
+  scale_x_log10() +
+  scale_size(range = c(1, 12), guide = "none") +      # point sizes from 1 to 12, no size legend
+  scale_color_viridis_d() +
+  labs(title = "Year: {round(frame_time)}",
+       x = "Income per person (log scale)",
+       y = "Life expectancy (years)",
+       color = "Continent") +
+  transition_time(year)                                # one frame for each year, R fills the steps in between
+```
+
+All continents move up and to the right between 1952 and 2007. Europe starts at a median income of 5,142 and ends at 28,054. Africa starts at 987 and ends at 1,452.
+:::
+
+### Step 5: Leave a trail behind the points
+
+**Question.** How do we see the path that each country took?
+
+Add `shadow_wake(wake_length = 0.1)` after `transition_time(year)`. The function `shadow_wake()` draws copies of the points from the last frames, which fade out. `wake_length = 0.1` sets the tail to 10% of the animation.
+
+**Predict.** Does a short or a long tail show the movement better?
+
+```{r}
+#| label: a5
+#| eval: false
+rosling |>
+```
+
+**Your finding:**
+
+::: {.callout-tip collapse="true" title="Solution"}
+```{r}
+#| label: a5-solution
+rosling |>
+  ggplot(aes(x = income, 
+             y = life_exp, 
+             color = continent, 
+             size = population)) +
+  geom_point(alpha = 0.7) +
+  scale_x_log10() +
+  scale_size(range = c(1, 12), guide = "none") +
+  scale_color_viridis_d() +
+  labs(title = "Year: {round(frame_time)}",
+       x = "Income per person (log scale)",
+       y = "Life expectancy (years)",
+       color = "Continent") +
+  transition_time(year) +
+  shadow_wake(wake_length = 0.1)                       # a fading tail behind each point
+```
+
+The tail shows the direction and the speed of each country. Long tails mark fast movement, such as China.
+:::
+
+## 6. Control and save the animation
+
+### Step 6: Frames, speed and size
+
+**Question.** How do we make the animation shorter or larger?
+
+Put the whole plot inside `animate()`. The function `animate()` takes the plot as the first argument and settings after it: `nframes` (number of frames), `fps` (frames per second) and `width` and `height` (size in pixels). 50 frames at 10 frames per second last 5 seconds. Use the plot of Step 4.
+
+**Predict.** What happens with 20 frames?
+
+```{r}
+#| label: a6
+#| eval: false
+animate(
+  rosling |>
+    ggplot(
+```
+
+**Your finding:**
+
+::: {.callout-tip collapse="true" title="Solution"}
+```{r}
+#| label: a6-solution
+animate(
+  rosling |>
+    ggplot(aes(x = income, 
+               y = life_exp, 
+               color = continent, 
+               size = population)) +
+    geom_point(alpha = 0.7) +
+    scale_x_log10() +
+    scale_size(range = c(1, 12), guide = "none") +
+    scale_color_viridis_d() +
+    labs(title = "Year: {round(frame_time)}",
+         x = "Income per person (log scale)",
+         y = "Life expectancy (years)",
+         color = "Continent") +
+    transition_time(year),
+  nframes = 50,       # number of frames
+  fps = 10,           # frames per second: 50 frames last 5 seconds
+  width = 700,        # width in pixels
+  height = 450        # height in pixels
+)
+```
+
+With few frames the animation is short and jumps between years. With many frames it is smooth and slow.
+:::
+
+### Step 7: Save the file
+
+**Question.** How do we keep the animation as a file for a slide or a web page?
+
+After you have shown an animation, `anim_save("rosling.gif")` saves the last animation to a gif file in your project folder. The function needs the name of the file with the ending `.gif`. This chunk runs only on your computer, so it keeps `#| eval: false`.
+
+```{r}
+#| label: a7
+#| eval: false
+anim_save("rosling.gif")   # saves the last animation in the project folder
+```
+
+**Your finding:** where is the file, and how big is it?
+
+### Check 2
+
+A reader of your report wants to compare life expectancy of Estonia and Latvia in 1944. Which graph is better, the animation or the static line? Why?
+
+::: {.callout-tip collapse="true" title="Answer"}
+The static line. In an animation the reader must remember values from an earlier frame. A static graph shows all years at once and allows a comparison at any year. An animation works best for the sequence ("first this, then that") and for a talk. A report needs the static version.
+:::
+
+## 7. Final challenge
+
+**Question.** Animate the life expectancy of Latvia compared with the other European countries from 1900 to 2023, and decide whether the animation adds information over the static line.
+
+Use `transition_reveal(year)`, a gray line for the other European countries and one colour for Latvia, as in the trends tutorial (Step 5c). Write one sentence about what the animation shows and one sentence about what you lose compared with a static graph.
+
+```{r}
+#| label: challenge
+#| eval: false
+life_long |>
+```
+
+**What the animation adds:**
+
+**What the static graph shows better:**
+
+::: {.callout-tip collapse="true" title="One possible answer"}
+```{r}
+#| label: challenge-solution
+life_long |>
+  filter(continent == "Europe", year >= 1900) |>
+  mutate(
+    highlight = case_when(
+      name == "Latvia" ~ "Latvia",
+      TRUE ~ "Other European countries"
+    ),
+    name = fct_relevel(name, "Latvia", after = Inf)
+  ) |>
+  ggplot(aes(x = year, 
+             y = life_exp, 
+             group = name, 
+             color = highlight)) +
+  geom_line() +
+  scale_color_manual(values = c(Latvia = "#d95f02", "Other European countries" = "grey80")) +
+  labs(title = "Year: {round(frame_along)}",
+       x = NULL,
+       y = "Life expectancy (years)",
+       color = NULL) +
+  transition_reveal(year)
+```
+
+The animation shows the order of events: the fall in 1944 appears after the rise in the 1920s and 1930s, and the viewer waits for it. The static graph shows the value of 26.8 years in 1944 and the level of 67.1 to 71.4 years from 1960 to 2000 at the same time, so the viewer compares both without waiting.
+:::
+
+## 8. Summary
+
+| Question | Code | Why |
+|---|---|---|
+| A line that draws itself | `transition_reveal(year)` | Keeps the past, extends the line. |
+| Points that move | `transition_time(year)` | One frame for each year. |
+| A tail behind the points | `shadow_wake()` | Shows direction and speed. |
+| Title with the year | `labs(title = "Year: {round(frame_time)}")` | `frame_time` for `transition_time()`, `frame_along` for `transition_reveal()`. |
+| Frames, speed, size | `animate(plot, nframes, fps, width, height)` | Controls length and size. |
+| Save the file | `anim_save("name.gif")` | Gives a gif for slides and web pages. |
+
+Use animation to tell a sequence in a talk. Use a static graph when the reader must compare values.
+
+------------------------------------------------------------------------
+
+## How these tutorials were made
+
+Prof. Sergio Uribe wrote the notes and teaching material, adapted them for this class with an AI model, and checked all the results manually.
+
+* **Model:** Claude Sonnet 5.5 (`claude-sonnet-5-5`), Anthropic. Date: 3 Nov 2026.
+* **Basic prompt:** "Build a self-learning tutorial for [topic] for first-time R users using these notes from my course and slides. Always consider that each question leads the design. Use R and tidyverse, the native pipe `|>` and `case_when()`. Explain why each function is used."
+
+Course: [SZF_184 Data Visualisation and Storytelling](https://estudijas.rsu.lv/course/view.php?id=83740)
