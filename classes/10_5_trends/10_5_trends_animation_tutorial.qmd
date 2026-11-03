@@ -34,7 +34,8 @@ if (!requireNamespace("pacman", quietly = TRUE)) install.packages("pacman")
 pacman::p_load(tidyverse, here, 
                ggrepel,      # labels that do not overlap
                gganimate,    # adds animation to a ggplot graph
-               gifski)       # builds the animation file (a gif)
+               gifski,       # builds the animation file (a gif)
+               plotly)       # interactive graphs for HTML, used in Step 10
 ```
 
 ## 2. Datasets
@@ -432,6 +433,45 @@ anim_save("rosling.gif")   # saves the last animation in the project folder
 
 **Your finding:** where is the file, and how big is it?
 
+### Step 10: An interactive animation (HTML only)
+
+**Question.** Can the reader play the animation, stop it at one year and read the data of a country?
+
+The package `plotly` makes graphs that react to the mouse. The function `ggplotly()` turns a ggplot into an interactive graph. Add `frame = year` and `text = country` inside `aes()`. The aesthetic `frame` tells `plotly` to build one frame for each year, with a play button and a slider. The aesthetic `text` sets the name that appears when the mouse is over a point. Wrap the whole plot in `ggplotly(..., tooltip = c("text", "x", "y"))`: `tooltip` lists what the hover box shows.
+
+**Predict.** Do the points glide between the years, as in `gganimate`?
+
+```{r}
+#| label: a10
+#| eval: false
+ggplotly(
+  rosling |>
+```
+
+**Your finding:**
+
+::: {.callout-tip collapse="true" title="Solution"}
+```{r}
+#| label: a10-solution
+ggplotly(
+  rosling |>
+    ggplot(aes(x = income, 
+               y = life_exp, 
+               color = continent, 
+               size = population, 
+               text = country,         # shown when the mouse is over a point
+               frame = year)) +        # one frame for each year, with a slider and a play button
+    geom_point(alpha = 0.7) +
+    scale_x_log10() +
+    scale_size(range = c(1, 12), guide = "none") +
+    scale_color_viridis_d(),
+  tooltip = c("text", "x", "y")         # what the hover box shows
+)
+```
+
+The points jump from one year to the next, without the steps in between. The reader can stop the slider at any year and read the country, income and life expectancy of each point. This works in an HTML report and not in a PDF. The next tutorial covers `plotly` from the beginning.
+:::
+
 ### Check 2
 
 A reader of your report wants to compare life expectancy of Estonia and Latvia in 1944. Which graph is better, the animation or the static line? Why?
@@ -497,6 +537,7 @@ The animation shows the order of events: the fall in 1944 appears after the rise
 | One panel per group | `facet_wrap(~ continent)` | Separates the groups and moves all panels together. |
 | Label a country that moves | new column with `case_when()`, `geom_text()` | The label follows the point. |
 | Save the file | `anim_save("name.gif")` | Gives a gif for slides and web pages. |
+| Play and hover in a web page | `ggplotly()` with `frame = year` | Interactive version, HTML only. |
 
 Use animation to tell a sequence in a talk. Use a static graph when the reader must compare values.
 
