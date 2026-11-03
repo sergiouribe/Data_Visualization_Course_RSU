@@ -1,0 +1,355 @@
+---
+title: "Graphs that react to the mouse (self-learning tutorial)"
+subtitle: "[SZF_184 Data Visualisation and Storytelling](https://estudijas.rsu.lv/course/view.php?id=83740)"
+author: "Sergio Uribe"
+format:
+  html:
+    toc: true
+    code-fold: false
+---
+
+## 0. How to use this tutorial
+
+An interactive graph reacts to the mouse. When you place the mouse over a point, a box shows its data. You can zoom, hide a group and play an animation. The package `plotly` adds this to a ggplot graph with one function: `ggplotly()`.
+
+Interactive graphs work in an **HTML** file (a Quarto report rendered to html, or the RStudio Viewer). A PDF or a printed page cannot hold them. Use them to explore data and for web reports.
+
+Work through the steps in order. Every step has the same parts:
+
+1.  **Question.** Read it.
+2.  **Predict.** Write your guess in one line before you run any code.
+3.  **Your code.** Write the code in the empty chunk, remove `#| eval: false` and run it. Then move the mouse over the graph.
+4.  **Your finding.** Write what you see in one sentence.
+5.  **Solution.** Open the grey box and compare. The box is closed on purpose: try first.
+
+## 1. Packages
+
+```{r}
+#| label: install-pacman
+if (!requireNamespace("pacman", quietly = TRUE)) install.packages("pacman")
+```
+
+```{r}
+#| label: packages
+pacman::p_load(tidyverse, here, 
+               plotly)       # turns a ggplot into an interactive graph
+```
+
+## 2. Datasets
+
+```{r}
+#| label: data-rosling
+rosling <- read_csv(
+  "https://raw.githubusercontent.com/sergiouribe/Data_Visualization_Course_RSU/main/data/rosling_tidy.csv",
+  show_col_types = FALSE
+)
+rosling |> 
+  head()
+```
+
+`rosling` has life expectancy, income and population of 142 countries every 5 years from 1952 to 2007. It does not contain Latvia.
+
+The second dataset has life expectancy for 194 countries, including Latvia, for each year from 1800 to 2100. Each year is one column. The chunk below reads the file, turns the year columns into rows with `pivot_longer()` and keeps the years from 1952 to 2023 (the years after 2023 are projections).
+
+```{r}
+#| label: data-life
+life_long <- read_csv(
+  "https://raw.githubusercontent.com/sergiouribe/Data_Visualization_Course_RSU/main/data/gapminder_life_expectancy_wide.csv",
+  show_col_types = FALSE
+) |> 
+  pivot_longer(-c(geo, name),                        # keep the country code and name, stack the year columns
+               names_to = "year",
+               values_to = "life_exp") |> 
+  mutate(year = as.integer(year)) |>                 # the year is text after pivoting, make it a number
+  filter(year >= 1952, year <= 2023)                 # the years of the Rosling data until 2023
+life_long |> 
+  head()
+```
+
+## 3. The basics
+
+### Step 1: Make a graph interactive
+
+**Question.** Which country is the point at the top right?
+
+Draw the static graph for the year 2007: `income` on `x` (log scale with `scale_x_log10()`), `life_exp` on `y`, `color = continent` and `geom_point()`. Then put the whole graph inside `ggplotly()`. The function `ggplotly()` takes a ggplot and returns the same graph with hover boxes, zoom and a toolbar.
+
+**Predict.** Will the hover box show the name of the country?
+
+```{r}
+#| label: i1
+#| eval: false
+ggplotly(
+  rosling |>
+```
+
+**Your finding:**
+
+::: {.callout-tip collapse="true" title="Solution"}
+```{r}
+#| label: i1-solution
+ggplotly(
+  rosling |>
+    filter(year == 2007) |>
+    ggplot(aes(x = income, 
+               y = life_exp, 
+               color = continent)) +
+    geom_point() +
+    scale_x_log10()
+)
+```
+
+The hover box shows `income`, `life_exp` and `continent`, and no country name: the name is not in the graph. Step 2 adds it.
+:::
+
+### Step 2: Choose what the hover box shows
+
+**Question.** How do we show the country name in the box?
+
+Add `text = country` inside `aes()`. The aesthetic `text` has no effect in a normal ggplot. `ggplotly()` uses it as the content of the hover box. Then add the argument `tooltip = c("text", "x", "y")` to `ggplotly()`. The argument `tooltip` lists what the box shows: `text`, the `x` value and the `y` value.
+
+**Predict.** Which values will the box contain?
+
+```{r}
+#| label: i2
+#| eval: false
+ggplotly(
+  rosling |>
+```
+
+**Your finding:**
+
+::: {.callout-tip collapse="true" title="Solution"}
+```{r}
+#| label: i2-solution
+ggplotly(
+  rosling |>
+    filter(year == 2007) |>
+    ggplot(aes(x = income, 
+               y = life_exp, 
+               color = continent, 
+               text = country)) +           # the content of the hover box
+    geom_point() +
+    scale_x_log10(),
+  tooltip = c("text", "x", "y")             # show the text, x and y only
+)
+```
+
+Move the mouse over the point at the top right: it is Norway, with an income of 49,357 and a life expectancy of 80.2 years.
+:::
+
+### Step 3: Write your own hover text
+
+**Question.** How do we show a short sentence, such as "Norway: 80.2 years"?
+
+Build the text with `paste0()`, which joins pieces of text and values into one string: `text = paste0(country, ": ", round(life_exp, 1), " years")`. The function `round(life_exp, 1)` keeps one decimal. In `ggplotly()`, set `tooltip = "text"` so the box shows only this sentence.
+
+**Predict.** Does the box still show the income?
+
+```{r}
+#| label: i3
+#| eval: false
+ggplotly(
+  rosling |>
+```
+
+**Your finding:**
+
+::: {.callout-tip collapse="true" title="Solution"}
+```{r}
+#| label: i3-solution
+ggplotly(
+  rosling |>
+    filter(year == 2007) |>
+    ggplot(aes(x = income, 
+               y = life_exp, 
+               color = continent, 
+               text = paste0(country, ": ", round(life_exp, 1), " years"))) +   # your own sentence
+    geom_point() +
+    scale_x_log10(),
+  tooltip = "text"                                                              # only the sentence
+)
+```
+
+The box shows the sentence and nothing else. The lowest point in 2007 reads "Swaziland: 39.6 years".
+:::
+
+### Step 4: Use the toolbar
+
+**Question.** What can the reader do with the graph, besides hover?
+
+No code is needed. Use the graph of Step 3 and try each action:
+
+- Drag a rectangle on the plot to **zoom** in. Double-click to return to the full view.
+- Click a continent in the **legend** to hide it. Double-click a continent to show only that one.
+- Use the **toolbar** at the top right of the graph (zoom, pan, reset, and a camera that saves a png).
+
+**Predict.** What happens when you double-click "Africa" in the legend?
+
+**Your finding:**
+
+::: {.callout-tip collapse="true" title="Answer"}
+Only the African countries remain on the graph. Double-click again to show all continents. This works as a highlight: the reader isolates one group without any new code.
+:::
+
+### Check 1
+
+Which aesthetic decides the content of the hover box, and which argument of `ggplotly()` decides which parts the box shows?
+
+::: {.callout-tip collapse="true" title="Answer"}
+The aesthetic `text` sets the content. The argument `tooltip` chooses which parts appear (`"text"`, `"x"`, `"y"` and others).
+:::
+
+## 4. Lines and animation
+
+### Step 5: Interactive lines, with Latvia
+
+**Question.** How does the life expectancy of Latvia move, compared with six other countries?
+
+Use `life_long`, which includes Latvia. Poland and Sweden are European neighbours. Chile and the USA represent the Americas. Nigeria is the country with most people in Africa and China is the country with most people in Asia. In `life_long` the United States has the name "USA".
+
+1.  Keep the seven countries with `filter(name %in% c(...))`.
+2.  Use `case_when()` to make a column `highlight` with the values "Latvia" and "Other". Then move Latvia to the end of the order with `fct_relevel("Latvia", after = Inf)`. The function `fct_relevel()` changes the order of the groups, and `after = Inf` puts Latvia last, so the Latvia line is drawn on top of the grey lines.
+3.  Put `year` on `x`, `life_exp` on `y`, `color = highlight` and `group = name`. Use `scale_color_manual(values = c(Latvia = "firebrick", Other = "grey70"))` to colour Latvia red and the other countries grey.
+4.  Add `text = paste0(name, ", ", year, ": ", round(life_exp, 1), " years")` and `tooltip = "text"`. The grey lines have no label, so the hover box tells the reader which country each line is.
+
+**Predict.** In which decade does the Latvian line fall?
+
+```{r}
+#| label: i5
+#| eval: false
+ggplotly(
+  life_long |>
+```
+
+**Your finding:**
+
+::: {.callout-tip collapse="true" title="Solution"}
+```{r}
+#| label: i5-solution
+ggplotly(
+  life_long |>
+    filter(name %in% c("Latvia", "Poland", "Sweden", "Chile", "USA", "Nigeria", "China")) |>
+    mutate(highlight = case_when(name == "Latvia" ~ "Latvia",
+                                 TRUE ~ "Other") |> 
+             fct_relevel("Latvia", after = Inf)) |>                 # Latvia is drawn last
+    ggplot(aes(x = year, 
+               y = life_exp, 
+               color = highlight, 
+               group = name,
+               text = paste0(name, ", ", year, ": ", round(life_exp, 1), " years"))) +
+    geom_line() +
+    geom_point() +                          # points give the hover box something to touch
+    scale_color_manual(values = c(Latvia = "firebrick",
+                                  Other = "grey70")),
+  tooltip = "text"
+)
+```
+
+The Latvian line falls in the 1990s: from 70.9 years in 1987 to 67.1 years in 1994, and returns to 70.3 years in 2000. Hover over the point at 1994 to read "Latvia, 1994: 67.1 years". In 2023 Latvia has 75.8 years, Poland 78.6 and Sweden 83.3. The Nigerian line stays lowest in 2023 (64.5 years). Hover boxes appear only on the points, so the graph keeps `geom_point()` next to `geom_line()`.
+:::
+
+### Step 6: Add a slider and a play button
+
+**Question.** Can the reader move through the years?
+
+Go back to the scatter of Step 2 and use all years, not only 2007. Add `frame = year` inside `aes()` and remove the `filter(year == 2007)`. The aesthetic `frame` builds one frame for each year, with a slider and a play button. Add `size = population` and `scale_size(range = c(1, 12), guide = "none")`.
+
+**Predict.** Do the points glide between the years?
+
+```{r}
+#| label: i6
+#| eval: false
+ggplotly(
+  rosling |>
+```
+
+**Your finding:**
+
+::: {.callout-tip collapse="true" title="Solution"}
+```{r}
+#| label: i6-solution
+ggplotly(
+  rosling |>
+    ggplot(aes(x = income, 
+               y = life_exp, 
+               color = continent, 
+               size = population,
+               text = country,
+               frame = year)) +            # one frame for each year, with a slider
+    geom_point(alpha = 0.7) +
+    scale_x_log10() +
+    scale_size(range = c(1, 12), guide = "none") +
+    scale_color_viridis_d(),
+  tooltip = c("text", "x", "y")
+)
+```
+
+The graph has 12 frames, one for each year from 1952 to 2007. The points jump from one year to the next. In `gganimate` the steps between the years are filled in. The reader can stop the slider at any year and hover over any point.
+:::
+
+## 5. When to use interactive graphs
+
+### Check 2
+
+You write a report that you will send as a PDF. Do you use `ggplotly()`?
+
+::: {.callout-tip collapse="true" title="Answer"}
+No. A PDF is static, so the hover boxes and the slider are lost. Use a static graph with labels on the points that matter. Use `ggplotly()` for an HTML report or a web page, where the reader explores the data.
+:::
+
+## 6. Final challenge
+
+**Question.** In 1952, which European country had the lowest life expectancy?
+
+Draw an interactive scatter for the year 1952 and the European countries, with `filter(year == 1952, continent == "Europe")`. Put `income` on a log `x` axis and `life_exp` on `y`. Write a hover text with the country, the life expectancy and the population (use `paste0()`). Find the lowest point by hovering. Then write one sentence on whether the interactive graph or a static graph with one label is better for a report that readers will print.
+
+```{r}
+#| label: challenge
+#| eval: false
+ggplotly(
+  rosling |>
+```
+
+**Your finding:**
+
+::: {.callout-tip collapse="true" title="One possible answer"}
+```{r}
+#| label: challenge-solution
+ggplotly(
+  rosling |>
+    filter(year == 1952, continent == "Europe") |>
+    ggplot(aes(x = income, 
+               y = life_exp, 
+               text = paste0(country, ": ", round(life_exp, 1), " years, population ", population))) +
+    geom_point() +
+    scale_x_log10(),
+  tooltip = "text"
+)
+```
+
+The lowest point in 1952 is Turkey, with 43.6 years. For a printed report, a static graph with one label on Turkey is better, because the hover box does not exist on paper.
+:::
+
+## 7. Summary
+
+| Question | Code | Why |
+|---|---|---|
+| Make a graph interactive | `ggplotly(plot)` | Hover, zoom and a toolbar. |
+| Show a name in the hover box | `aes(text = country)` and `tooltip = c("text", "x", "y")` | `text` sets the content, `tooltip` chooses the parts. |
+| Write your own hover sentence | `aes(text = paste0(...))` and `tooltip = "text"` | One short sentence. |
+| Add a slider and a play button | `aes(frame = year)` | One frame for each year. |
+| Hide or isolate a group | click or double-click the legend | No code. |
+
+Interactive graphs work in HTML only. For a PDF or a printed page, use a static graph.
+
+------------------------------------------------------------------------
+
+## How these tutorials were made
+
+Prof. Sergio Uribe wrote the notes and teaching material, adapted them for this class with an AI model, and checked all the results manually.
+
+* **Model:** Claude Sonnet 5.5 (`claude-sonnet-5-5`), Anthropic. Date: 3 Nov 2026.
+* **Basic prompt:** "Build a self-learning tutorial for [topic] for first-time R users using these notes from my course and slides. Always consider that each question leads the design. Use R and tidyverse, the native pipe `|>` and `case_when()`. Explain why each function is used."
+
+Course: [SZF_184 Data Visualisation and Storytelling](https://estudijas.rsu.lv/course/view.php?id=83740)
