@@ -61,8 +61,8 @@ Each class starts from a question. The question decides the graph.
 | [`10_2_counts`](classes/10_2_counts) | How many? Pie against bars, order, `geom_col()`, treemap, Likert data | Whickham, NHANES, Latvian companies, world exports, flights, Rosling | students, complete, slides |
 | [`10_3_scatter`](classes/10_3_scatter) | Do two numbers go together? Rosling data, Simpson's paradox | Rosling, penguins, NHANES | students, complete, slides |
 | [`10_4_differences`](classes/10_4_differences) | How do groups differ? Bars, box plot, violin, jitter | Rosling, penguins, NHANES | self-learning tutorial (the worksheet, solutions and slides in the folder follow the earlier order) |
-| [`10_5_trends`](classes/10_5_trends) | How do things change over time? `geom_line()`, groups, `geom_path()` | Gapminder life expectancy 1800 to 2023, Rosling | self-learning tutorial |
-| [`10_6_final_graph`](classes/10_6_final_graph) | From a default chart to a final chart: themes, viridis, axes and labels, grey plus one colour, `bbplot` | Rosling | self-learning tutorial |
+| [`10_5_trends`](classes/10_5_trends) | How do things change over time? `geom_line()`, groups, `geom_path()`, animation with `gganimate`, interactive graphs with `plotly` | Gapminder life expectancy 1800 to 2023 (includes Latvia), Rosling | three self-learning tutorials: trends, animation, interactive |
+| [`10_6_final_graph`](classes/10_6_final_graph) | From a default chart to a final chart: themes, viridis, axes and labels, grey plus one colour, `bbplot` | Rosling (Europe in focus) | self-learning tutorial |
 
 The self-learning tutorials have a predict line, an empty chunk and a closed solution box for each step.
 
@@ -74,7 +74,7 @@ The self-learning tutorials have a predict line, an empty chunk and a closed sol
 | Thu 19 Nov, 13:45 to 15:15 and 15:30 to 17:00 | Work on the final project |
 | Fri 20 Nov, 18:00 to 19:30 and 19:45 to 21:15 | Presentations |
 
-Self-study homework replaces the classes on focus and design: colour with viridis, axes, labels and the `scales` package. These tutorials are planned. Their sources are the drafts in [`classes/old_classes`](classes/old_classes) (`11_cut_focus_themes`, `12_tell`, `14_animation_and_questions`). The other drafts in that folder follow the earlier 20-class plan and are not part of the current schedule.
+Self-study homework replaces the classes on focus and design. The tutorial [`10_6_final_graph`](classes/10_6_final_graph) covers themes, colour with viridis, axes, labels, the `scales` package and the `bbplot` style. The interactive tutorial in `10_5_trends` is a second self-study option. The sources of the design content are the drafts in [`classes/old_classes`](classes/old_classes) (`11_cut_focus_themes`, `12_tell`, `14_animation_and_questions`). The other drafts in that folder follow the earlier 20-class plan and are not part of the current schedule.
 
 ### Final project
 
@@ -115,7 +115,7 @@ Class numbers in this table and in the readings table follow the earlier 20-clas
 2. Open the `.qmd` file of the class.
 3. Run each chunk with Ctrl+Shift+Enter (Cmd+Shift+Enter on Mac).
 
-Packages load with `pacman::p_load()`. Core set: `tidyverse`, `here`, `janitor`, `gtsummary`. Class packages: `palmerpenguins`, `mosaicData`, `NHANES`, `nycflights13`, `treemapify`, `ggrepel`, `gganimate`, `gifski`.
+Packages load with `pacman::p_load()`. Core set: `tidyverse`, `here`, `janitor`, `gtsummary`. Class packages: `palmerpenguins`, `mosaicData`, `NHANES`, `nycflights13`, `treemapify`, `ggrepel`, `scales`, `gganimate`, `gifski`, `plotly`, and `bbplot` (GitHub only: `pacman::p_load_gh("bbc/bbplot")`).
 
 ## Data
 
@@ -129,7 +129,7 @@ Packages load with `pacman::p_load()`. Core set: `tidyverse`, `here`, `janitor`,
 - `data/companies_lv_smaller_2020_2025.csv`: Latvian companies with a `type` (legal form) and a `place` column. Used in class 10_2.
 - `data/world_exports_1998_2000.csv`: export value by country and product. Used in the treemap of class 10_2.
 
-`rosling_tidy.csv` covers 142 countries from 1952 to 2007 in steps of 5 years. It does not include Latvia, Estonia or Lithuania. The long life expectancy file includes all three, from 1800.
+`rosling_tidy.csv` covers 142 countries from 1952 to 2007 in steps of 5 years. It does not include Latvia, Estonia or Lithuania. The long life expectancy file includes all three, from 1800. `population.csv` has Latvia, Estonia and Lithuania from 1950 to 2023. Examples in the course focus on European countries. Reference countries from other continents are Chile, the USA, Nigeria (Africa) and China (Asia).
 
 ## Readings
 
