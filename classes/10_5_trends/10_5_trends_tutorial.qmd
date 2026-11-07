@@ -39,7 +39,7 @@ Each dataset loads once into a named object.
 
 ### 2.1 life_wide (file in the course repository)
 
-Life expectancy at birth, in years, for 194 countries. Each year from 1800 to 2100 is one column. Years after 2023 are projections.
+Life expectancy at birth, in years, for 194 countries. Each year from 1800 to 2100 is one column. Years after 2023 are projections. In the chunk, `select(1:6)` shows the first 6 columns and `head()` shows the first 6 rows.
 
 ```{r}
 #| label: data-life
@@ -83,6 +83,15 @@ rosling |> head()
 ## 3. Prepare the table
 
 A line graph needs one row per country and year. `life_wide` has one column per year, so we reshape it. Run this chunk once. It builds the table `life_long`, and every later step starts from it. This is the only extra table in the tutorial.
+
+Each function in the chunk has one job:
+
+-   `pivot_longer()` turns the year columns into rows (class 7). `-c(geo, name)` keeps the columns `geo` and `name` as they are.
+-   `as.integer()` turns text into whole numbers. After pivoting, the year is text, and a graph needs a number on the `x` axis.
+-   `left_join()` adds the columns of a second table to the first, matching rows with the same `geo` (class 8).
+-   `transmute()` works like `mutate()` and keeps only the columns you create. Here it builds a small table of `continents` with the columns `geo`, `continent` and `subregion`.
+-   `str_to_lower()` writes text in lower case, so "LVA" becomes "lva". The codes in `life_wide` are in lower case, and the codes in `continents` are in upper case. They must match for the join.
+-   `head()` prints the first 6 rows, so you can check the result.
 
 ```{r}
 #| label: prepare
@@ -455,7 +464,7 @@ China falls to 26.4 years in 1960 and Cambodia to 26.4 years in 1977. Both also 
 
 **Question.** What is the mean life expectancy of the countries in each continent, year by year?
 
-Use `group_by(continent, year)` to make one group for each continent and year, then `summarize(life_exp = mean(life_exp, na.rm = TRUE), .groups = "drop")`. The function `mean()` calculates the average, `na.rm = TRUE` ignores missing values, and `.groups = "drop"` removes the grouping afterwards so R prints no message. Show the table for 1938 and 1944 with `filter(year %in% c(1938, 1944))`.
+Use `group_by(continent, year)` to make one group for each continent and year, then `summarize(life_exp = mean(life_exp, na.rm = TRUE), .groups = "drop")`. The function `mean()` calculates the average, `na.rm = TRUE` ignores missing values, and `.groups = "drop"` removes the grouping afterwards so R prints no message. Show the table for 1938 and 1944 with `filter(year %in% c(1938, 1944))`. Then use `pivot_wider(names_from = year, values_from = life_exp)`, the opposite of `pivot_longer()`: each year gets its own column, so you read 1938 and 1944 side by side.
 
 **Predict.** Which continent changes most between 1938 and 1944?
 
@@ -559,7 +568,7 @@ Each path is the trail of one country across the years. Rwanda moves down to 23.
 
 **Question.** Can we show the size of each country and the first and last year, as in the animation?
 
-Add `size = population` inside `aes()` of `geom_point()`. Then label only the years 1952 and 2007. Create the label column with `mutate()` and `case_when()`: the year when `year %in% c(1952, 2007)` and `TRUE ~ ""` in all other cases. Draw the labels with `geom_text_repel(aes(label = label))`, which moves labels apart so they do not overlap.
+Add `size = population` inside `aes()` of `geom_point()`. Then label only the years 1952 and 2007. Create the label column with `mutate()` and `case_when()`: the year when `year %in% c(1952, 2007)` and `TRUE ~ ""` in all other cases. The function `as.character(year)` turns the year into text, because one column cannot hold numbers and the empty text `""` together. Draw the labels with `geom_text_repel(aes(label = label))`, which moves labels apart so they do not overlap.
 
 **Predict.** How far does China move between 1952 and 2007?
 

@@ -22,6 +22,11 @@ Work through the steps in order. Every step has the same parts:
 
 An animation takes a few seconds to render. Wait for it to finish.
 
+**Two ways to start.**
+
+-   You finished part 1 and your homework file (`10_5_trends_tutorial.qmd`) is still open. Keep it open. In the console or in a new chunk, run `pacman::p_load(gganimate, gifski, plotly)`. The objects `rosling` and `life_long` already exist, so skip sections 1 to 3 below and start at **Step 0**.
+-   You start in this file. Run sections 1 to 3 first. They load the packages and build the same tables as part 1.
+
 ## 1. Packages
 
 ```{r}
@@ -64,7 +69,14 @@ rosling <- read_csv(
 
 ## 3. Prepare the table
 
-Run this chunk once. It builds the table `life_long` with one row per country and year, as in part 1.
+Run this chunk once. It builds the table `life_long` with one row per country and year, as in part 1. Each function has one job:
+
+-   `pivot_longer()` turns the year columns into rows. `-c(geo, name)` keeps the columns `geo` and `name` as they are.
+-   `as.integer()` turns the year, which is text after pivoting, into a whole number.
+-   `left_join()` adds the columns of a second table, matching rows with the same `geo`.
+-   `transmute()` works like `mutate()` and keeps only the columns you create. Here it builds a small table with `geo` and `continent`.
+-   `str_to_lower()` writes text in lower case, so "LVA" becomes "lva" and the codes of both tables match.
+-   `head()` prints the first 6 rows.
 
 ```{r}
 #| label: prepare
@@ -85,13 +97,58 @@ life_long |>
   head()
 ```
 
+## 3b. Step 0: Continue from your homework
+
+### Step 0: From a static path to an animation
+
+**Question.** Your Step 11 drew the path of five countries in one picture. How do we see the same countries move, one year at a time?
+
+Copy your Step 11 chunk (the one with `geom_path()`) into the empty chunk below and change three things:
+
+1.  Delete `geom_path()`. The animation draws the path by itself, because the point moves from year to year.
+2.  Delete the `mutate()` with the `label` column and the `geom_text_repel()` line. The title shows the year, so the point labels are not needed.
+3.  Add `transition_time(year)` as the last layer. The function `transition_time()` makes one frame for each year: each frame shows the rows of one year. The package stores the year of the frame in `frame_time`. Add `labs(title = "Year: {round(frame_time)}")` to print it. The text in `{ }` is replaced in each frame, and `round()` rounds the year to a whole number.
+
+**Predict.** Which of the five countries moves left (a lower income) at some point?
+
+```{r}
+#| label: a0
+#| eval: false
+rosling |>
+```
+
+**Your finding:**
+
+::: {.callout-tip collapse="true" title="Solution"}
+```{r}
+#| label: a0-solution
+rosling |>
+  filter(country %in% c("China", "India", "United States", "Rwanda", "Botswana")) |>
+  ggplot(aes(x = income, 
+             y = life_exp, 
+             color = country)) +
+  geom_point(aes(size = population)) +
+  scale_x_log10() +
+  labs(title = "Year: {round(frame_time)}",             # the year of the frame
+       x = "Income per person (log scale)", 
+       y = "Life expectancy (years)", 
+       size = "Population", 
+       color = NULL) +
+  transition_time(year)                                  # one frame for each year
+```
+
+Each point walks along the path that `geom_path()` drew in your static graph. The static graph shows all years at once, and the animation shows one year at a time. Rwanda falls to 23.6 years in 1992 and returns to 46.2 years in 2007.
+:::
+
+The next steps use six countries that fit this course: Poland and Sweden from Europe, Chile and the USA, Nigeria and China. Step 1 starts with the Baltic states and Latvia.
+
 ## 4. Animate a line
 
 ### Step 1: A line that grows
 
 **Question.** Can the line of each Baltic country draw itself year by year?
 
-Start from the static graph of part 1: filter Estonia, Latvia and Lithuania from 1900 to 1960, put `year` on `x`, `life_exp` on `y` and `color = name`, and draw `geom_line()`. Then add `transition_reveal(year)`. The function `transition_reveal()` shows the line up to the current year and extends it frame by frame. Add `labs(title = "Year: {round(frame_along)}")` to print the year. The text in `{ }` is replaced in each frame, and `frame_along` is the year of the current frame.
+Start from the static graph of part 1: filter Estonia, Latvia and Lithuania from 1900 to 1960, put `year` on `x`, `life_exp` on `y` and `color = name`, and draw `geom_line()`. Then add `transition_reveal(year)`. The function `transition_reveal()` shows the line up to the current year and extends it frame by frame. Add `labs(title = "Year: {round(frame_along)}")` to print the year. The text in `{ }` is replaced in each frame, and `frame_along` is the year of the current frame. The function `round()` rounds it to a whole number, because many frames fall between two years.
 
 **Predict.** Which line will fall first?
 
@@ -174,7 +231,7 @@ What is the difference between `transition_reveal(year)` and `transition_time(ye
 
 **Question.** How do six countries move year by year? Poland and Sweden represent Europe, where this course takes place. Chile and the United States represent the Americas. Nigeria is the country with most people in Africa and China is the country with most people in Asia.
 
-Take the six countries (`rosling`, `income` on `x` on a log scale, `life_exp` on `y`, `color = country`) and draw `geom_point(size = 3)`. Add `transition_time(year)`: each frame shows the rows of one year, so the points move. The year is stored in `frame_time`, so write `labs(title = "Year: {round(frame_time)}")`. Then add `shadow_mark(past = TRUE, alpha = 0.4, size = 1.5)`. The function `shadow_mark()` keeps the positions of the earlier frames on the graph. `past = TRUE` keeps the past, `alpha = 0.4` makes the old points transparent and `size = 1.5` makes them small. The old points form the trail.
+Take the six countries (`rosling`, `income` on `x` on a log scale with `scale_x_log10()`, which spaces the axis by multiples of 10 so that poor and rich countries both fit on the graph, `life_exp` on `y`, `color = country`) and draw `geom_point(size = 3)`. Add `transition_time(year)`: each frame shows the rows of one year, so the points move. The year is stored in `frame_time`, so write `labs(title = "Year: {round(frame_time)}")`. Then add `shadow_mark(past = TRUE, alpha = 0.4, size = 1.5)`. The function `shadow_mark()` keeps the positions of the earlier frames on the graph. `past = TRUE` keeps the past, `alpha = 0.4` makes the old points transparent and `size = 1.5` makes them small. The old points form the trail.
 
 **Predict.** Which country moves backwards at some point?
 
@@ -211,7 +268,7 @@ China moves backwards in 1962: life expectancy falls from 50.5 to 44.5 years. Ni
 
 **Question.** What does the animation show when we draw every country?
 
-Use `transition_time(year)` as in Step 3: each frame shows the countries of one year. Use all 142 countries, `size = population`, `color = continent` and `geom_point(alpha = 0.7)`. Add `scale_size(range = c(1, 12), guide = "none")` to set the size of the points and hide the size legend, `scale_color_viridis_d()` for the colours, and `labs(title = "Year: {round(frame_time)}")`. With `transition_time()` the year is stored in `frame_time`.
+Use `transition_time(year)` as in Step 3: each frame shows the countries of one year. Use all 142 countries, `size = population`, `color = continent` and `geom_point(alpha = 0.7)`. Add `scale_size(range = c(1, 12), guide = "none")` to set the size of the points and hide the size legend, `scale_color_viridis_d()` for the colours (the viridis palette, readable with colour blindness), and `labs(title = "Year: {round(frame_time)}")`. With `transition_time()` the year is stored in `frame_time`.
 
 **Predict.** Which continent moves furthest to the right?
 
@@ -484,7 +541,7 @@ The static line. In an animation the reader must remember values from an earlier
 
 **Question.** Animate the life expectancy of Latvia compared with the other European countries from 1900 to 2023, and decide whether the animation adds information over the static line.
 
-Use `transition_reveal(year)`, a gray line for the other European countries and one colour for Latvia, as in the trends tutorial (Step 5c). Write one sentence about what the animation shows and one sentence about what you lose compared with a static graph.
+Use `transition_reveal(year)`, a gray line for the other European countries and one colour for Latvia, as in the trends tutorial (Step 5c). Two functions help: `fct_relevel(name, "Latvia", after = Inf)` moves Latvia to the end of the order, so ggplot draws its line last, on top; `scale_color_manual(values = ...)` sets each colour by hand. Write one sentence about what the animation shows and one sentence about what you lose compared with a static graph.
 
 ```{r}
 #| label: challenge

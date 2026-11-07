@@ -49,7 +49,7 @@ rosling |>
 
 `rosling` has life expectancy, income and population of 142 countries every 5 years from 1952 to 2007. It does not contain Latvia.
 
-The second dataset has life expectancy for 194 countries, including Latvia, for each year from 1800 to 2100. Each year is one column. The chunk below reads the file, turns the year columns into rows with `pivot_longer()` and keeps the years from 1952 to 2023 (the years after 2023 are projections).
+The second dataset has life expectancy for 194 countries, including Latvia, for each year from 1800 to 2100. Each year is one column. The chunk below reads the file, turns the year columns into rows with `pivot_longer()`, turns the year from text into a number with `as.integer()`, and keeps the years from 1952 to 2023 with `filter()` (the years after 2023 are projections). The function `head()` prints the first 6 rows.
 
 ```{r}
 #| label: data-life
@@ -253,7 +253,7 @@ The Latvian line falls in the 1990s: from 70.9 years in 1987 to 67.1 years in 19
 
 **Question.** Can the reader move through the years?
 
-Go back to the scatter of Step 2 and use all years, not only 2007. Add `frame = year` inside `aes()` and remove the `filter(year == 2007)`. The aesthetic `frame` builds one frame for each year, with a slider and a play button. Add `size = population` and `scale_size(range = c(1, 12), guide = "none")`.
+Go back to the scatter of Step 2 and use all years, not only 2007. Add `frame = year` inside `aes()` and remove the `filter(year == 2007)`. The aesthetic `frame` builds one frame for each year, with a slider and a play button. Add `size = population` and `scale_size(range = c(1, 12), guide = "none")`. Colour the continents with `scale_color_viridis_d()`, a palette that stays readable with colour blindness.
 
 **Predict.** Do the points glide between the years?
 
