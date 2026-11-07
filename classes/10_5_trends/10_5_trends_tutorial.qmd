@@ -89,7 +89,8 @@ Each function in the chunk has one job:
 -   `pivot_longer()` turns the year columns into rows (class 7). `-c(geo, name)` keeps the columns `geo` and `name` as they are.
 -   `as.integer()` turns text into whole numbers. After pivoting, the year is text, and a graph needs a number on the `x` axis.
 -   `left_join()` adds the columns of a second table to the first, matching rows with the same `geo` (class 8).
--   `transmute()` works like `mutate()` and keeps only the columns you create. Here it builds a small table of `continents` with the columns `geo`, `continent` and `subregion`.
+-   `mutate()` adds or changes columns (class 4). Here it adds `geo`, `continent` and `subregion` to the `continents` table.
+-   `select()` keeps the columns you name (class 4). Here it keeps `geo`, `continent` and `subregion`, so the join adds only these three.
 -   `str_to_lower()` writes text in lower case, so "LVA" becomes "lva". The codes in `life_wide` are in lower case, and the codes in `continents` are in upper case. They must match for the join.
 -   `head()` prints the first 6 rows, so you can check the result.
 
@@ -101,11 +102,10 @@ life_long <- life_wide |>
   filter(year <= 2023) |>                                                     # drop the projections after 2023
   left_join(
     continents |>
-      transmute(
-        geo = str_to_lower(`alpha-3`),       # the codes in life_wide are in lower case
-        continent = region,
-        subregion = `intermediate-region`    # has the value "South America" for 12 countries
-      ),
+      mutate(geo = str_to_lower(`alpha-3`),            # the codes in life_wide are in lower case
+             continent = region,
+             subregion = `intermediate-region`) |>     # has the value "South America" for 12 countries
+      select(geo, continent, subregion),
     by = "geo"
   )
 

@@ -74,7 +74,8 @@ Run this chunk once. It builds the table `life_long` with one row per country an
 -   `pivot_longer()` turns the year columns into rows. `-c(geo, name)` keeps the columns `geo` and `name` as they are.
 -   `as.integer()` turns the year, which is text after pivoting, into a whole number.
 -   `left_join()` adds the columns of a second table, matching rows with the same `geo`.
--   `transmute()` works like `mutate()` and keeps only the columns you create. Here it builds a small table with `geo` and `continent`.
+-   `mutate()` adds or changes columns (class 4). Here it adds `geo` and `continent` to the `continents` table.
+-   `select()` keeps the columns you name (class 4). Here it keeps `geo` and `continent`.
 -   `str_to_lower()` writes text in lower case, so "LVA" becomes "lva" and the codes of both tables match.
 -   `head()` prints the first 6 rows.
 
@@ -88,8 +89,9 @@ life_long <- life_wide |>
   filter(year <= 2023) |>                                 # drop the projections after 2023
   left_join(
     continents |>
-      transmute(geo = str_to_lower(`alpha-3`),            # the codes in life_wide are in lower case
-                continent = region),
+      mutate(geo = str_to_lower(`alpha-3`),               # the codes in life_wide are in lower case
+             continent = region) |>
+      select(geo, continent),
     by = "geo"
   )
 
