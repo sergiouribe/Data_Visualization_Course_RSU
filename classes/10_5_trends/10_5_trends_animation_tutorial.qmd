@@ -101,15 +101,16 @@ life_long |>
 
 ### Step 0: From a static path to an animation
 
-**Question.** Your Step 11 drew the path of five countries in one picture. How do we see the same countries move, one year at a time?
+**Question.** Your Step 11 drew a path for a group of countries in one picture. How do we see the same countries move, one year at a time? We use six countries that fit this course: Poland and Sweden from Europe, Chile, the United States, Nigeria and China.
 
-Copy your Step 11 chunk (the one with `geom_path()`) into the empty chunk below and change three things:
+Copy your Step 11 chunk into the empty chunk below and change four things:
 
-1.  Delete `geom_path()`. The animation draws the path by itself, because the point moves from year to year.
-2.  Delete the `mutate()` with the `label` column and the `geom_text_repel()` line. The title shows the year, so the point labels are not needed.
-3.  Add `transition_time(year)` as the last layer. The function `transition_time()` makes one frame for each year: each frame shows the rows of one year. The package stores the year of the frame in `frame_time`. Add `labs(title = "Year: {round(frame_time)}")` to print it. The text in `{ }` is replaced in each frame, and `round()` rounds the year to a whole number.
+1.  Replace the countries in `filter()` with `c("Poland", "Sweden", "Chile", "United States", "Nigeria", "China")`.
+2.  Delete `geom_path()`. The animation draws the path by itself, because the point moves from year to year.
+3.  Delete the `mutate()` with the `label` column and the `geom_text_repel()` line. The title shows the year, so the point labels are not needed.
+4.  Add `transition_time(year)` as the last layer. The function `transition_time()` makes one frame for each year: each frame shows the rows of one year. The package stores the year of the frame in `frame_time`. Add `labs(title = "Year: {round(frame_time)}")` to print it. The text in `{ }` is replaced in each frame, and `round()` rounds the year to a whole number.
 
-**Predict.** Which of the five countries moves left (a lower income) at some point?
+**Predict.** Poland is the only European country in the group with a fall in income. In which decades does the point of Poland move left?
 
 ```{r}
 #| label: a0
@@ -123,7 +124,7 @@ rosling |>
 ```{r}
 #| label: a0-solution
 rosling |>
-  filter(country %in% c("China", "India", "United States", "Rwanda", "Botswana")) |>
+  filter(country %in% c("Poland", "Sweden", "Chile", "United States", "Nigeria", "China")) |>
   ggplot(aes(x = income, 
              y = life_exp, 
              color = country)) +
@@ -137,10 +138,10 @@ rosling |>
   transition_time(year)                                  # one frame for each year
 ```
 
-Each point walks along the path that `geom_path()` drew in your static graph. The static graph shows all years at once, and the animation shows one year at a time. Rwanda falls to 23.6 years in 1992 and returns to 46.2 years in 2007.
+Each point walks along the path that `geom_path()` drew in your static graph. The static graph shows all years at once, and the animation shows one year at a time. Poland moves left in 1982 (income falls from 9,508 to 8,452 dollars) and in 1992 (from 9,082 to 7,739 dollars). Sweden moves right in every period.
 :::
 
-The next steps use six countries that fit this course: Poland and Sweden from Europe, Chile and the USA, Nigeria and China. Step 1 starts with the Baltic states and Latvia.
+Step 1 starts with the Baltic states and Latvia.
 
 ## 4. Animate a line
 
