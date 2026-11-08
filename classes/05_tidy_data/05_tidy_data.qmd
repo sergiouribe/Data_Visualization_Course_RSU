@@ -18,13 +18,23 @@ pacman::p_load(tidyverse, here)
 
 ## 1. Read the wide table
 
+
+```{r}
+df <- read_csv(here("data", "life_expectancy_wide.csv"))
+```
+
 ```{r}
 #| label: read-wide
 # Years are column names. This table is wide.
-here("data", "life_expectancy_wide.csv") |>
-  read_csv(show_col_types = FALSE) |>
+df |> 
   glimpse()
 ```
+
+```{r}
+df |> 
+  View()
+```
+
 
 ## 2. Try to plot it
 
@@ -34,13 +44,23 @@ We want `year` on the x axis, but `year` is not a column. ggplot cannot draw thi
 
 ```{r}
 #| label: pivot
-here("data", "life_expectancy_wide.csv") |>
-  read_csv(show_col_types = FALSE) |>
+#| 
+df|>
   pivot_longer(
     cols = `1952`:`2007`,       # the year columns
     names_to = "year",          # old column names go here
     values_to = "life_exp",     # old cell values go here
-    names_transform = as.integer
+    # names_transform = as.integer
+  ) |>
+  glimpse()
+```
+```{r}
+df_long <- df|>
+  pivot_longer(
+    cols = `1952`:`2007`,       # the year columns
+    names_to = "year",          # old column names go here
+    values_to = "life_exp",     # old cell values go here
+    # names_transform = as.integer
   ) |>
   glimpse()
 ```
@@ -49,36 +69,20 @@ here("data", "life_expectancy_wide.csv") |>
 
 ```{r}
 #| label: line
-here("data", "life_expectancy_wide.csv") |>
-  read_csv(show_col_types = FALSE) |>
-  pivot_longer(`1952`:`2007`, names_to = "year", values_to = "life_exp",
-               names_transform = as.integer) |>
+df_long |> 
   filter(country %in% c("Finland", "Sweden", "Poland", "Japan", "Brazil")) |>
   ggplot(aes(x = year, y = life_exp, color = country)) +
   geom_line()
 ```
 
-## 5. case_when(): make a category from a number
-
 ```{r}
-#| label: case-when
-# Group countries by life expectancy in 2007, then count them
-here("data", "life_expectancy_wide.csv") |>
-  read_csv(show_col_types = FALSE) |>
-  pivot_longer(`1952`:`2007`, names_to = "year", values_to = "life_exp",
-               names_transform = as.integer) |>
-  filter(year == 2007) |>
-  mutate(life_group = case_when(
-    life_exp < 60 ~ "Under 60",
-    life_exp < 75 ~ "60 to 74",
-    .default = "75 or more"
-  )) |>
-  ggplot(aes(x = life_group)) +
-  geom_bar()
+df_long |> 
+  mutate( year = as.integer(year))
 ```
 
-## 6. Your turn
+```{r}
+df_long <- df_long |> 
+  mutate( year = as.integer(year))
+```
 
-Pick five other countries. Describe the largest change in one sentence.
 
-> Deliverable: a reshaped table and a line plot of five countries.

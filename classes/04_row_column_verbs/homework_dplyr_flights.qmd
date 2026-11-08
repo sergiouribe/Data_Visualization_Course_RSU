@@ -48,16 +48,16 @@ Here we explore the main `dplyr` verbs using the `flights` dataset. It contains 
 
 ## About the data
 
-| Column | What it contains |
-|--------|-----------------|
-| `carrier` | Two-letter airline code |
-| `origin` | Departure airport: `JFK`, `LGA` or `EWR` |
-| `dest` | Destination airport code |
-| `dep_delay` | Departure delay in minutes (negative = left early) |
+| Column      | What it contains                                    |
+|-------------|-----------------------------------------------------|
+| `carrier`   | Two-letter airline code                             |
+| `origin`    | Departure airport: `JFK`, `LGA` or `EWR`            |
+| `dest`      | Destination airport code                            |
+| `dep_delay` | Departure delay in minutes (negative = left early)  |
 | `arr_delay` | Arrival delay in minutes (negative = arrived early) |
-| `air_time` | Time in the air, in minutes |
-| `distance` | Distance between airports, in miles |
-| `month` | Month number (1 = January ... 12 = December) |
+| `air_time`  | Time in the air, in minutes                         |
+| `distance`  | Distance between airports, in miles                 |
+| `month`     | Month number (1 = January ... 12 = December)        |
 
 Main carriers: AA = American Airlines, UA = United Airlines, DL = Delta, B6 = JetBlue, EV = ExpressJet.
 
@@ -108,7 +108,7 @@ flights |>
 #| eval: false
 # Use head() with a number
 flights |>
-  ___
+  head(10)
 ```
 
 Now show only the last row.
@@ -117,10 +117,10 @@ Now show only the last row.
 #| eval: false
 # Use tail() with a number
 flights |>
-  ___
+  tail(1)
 ```
 
-Answer: [YOUR ANSWER HERE]
+Answer: \[YOUR ANSWER HERE\]
 
 ------------------------------------------------------------------------
 
@@ -131,9 +131,17 @@ Answer: [YOUR ANSWER HERE]
 **Question:** Which columns show the carrier, origin, destination and departure delay?
 
 ```{r}
-flights |>
-  select(carrier, origin, dest, dep_delay) |>
-  head()
+filtered_data <- flights |>
+  select(carrier, origin, dest, dep_delay)
+
+```
+
+```{r}
+# select year, carrier, origin, destination
+
+flights |> 
+  select(year, carrier, origin, dest)
+
 ```
 
 **Question:** How do departure and arrival delays compare across the three largest carriers?
@@ -145,9 +153,7 @@ flights |>
   filter(carrier %in% c("AA", "UA", "DL")) |>
   select(carrier, dep_delay, arr_delay) |>
   tbl_summary(
-    by = carrier,
-    missing = "no",
-    digits = all_continuous() ~ 1
+    by = carrier
   )
 ```
 
@@ -160,7 +166,7 @@ flights |>
   ___
 ```
 
-Answer: [YOUR ANSWER HERE]
+Answer: \[YOUR ANSWER HERE\]
 
 ------------------------------------------------------------------------
 
@@ -178,9 +184,8 @@ flights |>
 **Question:** How many American Airlines flights are in the dataset?
 
 ```{r}
-flights |>
-  filter(carrier == "AA") |>
-  count()
+american_airlines <- flights |>
+  filter(carrier == "AA")
 ```
 
 **Your turn 1:** Filter for flights from LaGuardia airport (`LGA`).
@@ -188,7 +193,8 @@ flights |>
 ```{r}
 #| eval: false
 flights |>
-  ___
+  filter(origin == "LGA", carrier == "AA") |> 
+  count()
 ```
 
 **Your turn 2:** How many United Airlines (`UA`) flights are there?
@@ -196,10 +202,12 @@ flights |>
 ```{r}
 #| eval: false
 flights |>
-  ___
+  filter(carrier == "UA") |>
+  filter(month == "12") |> 
+  count()
 ```
 
-Answer: [YOUR ANSWER HERE]
+Answer: \[YOUR ANSWER HERE\]
 
 ------------------------------------------------------------------------
 
@@ -207,16 +215,16 @@ Answer: [YOUR ANSWER HERE]
 
 To filter, you need a condition. A condition compares values and returns `TRUE` or `FALSE`.
 
-| Symbol     | Meaning                   | Example                              |
-|------------|---------------------------|--------------------------------------|
-| `==`       | equal to                  | `carrier == "AA"`                    |
-| `!=`       | not equal to              | `origin != "JFK"`                    |
-| `>`        | greater than              | `dep_delay > 60`                     |
-| `>=`       | greater than or equal to  | `dep_delay >= 60`                    |
-| `<`        | less than                 | `dep_delay < 0`                      |
-| `<=`       | less than or equal to     | `arr_delay <= 0`                     |
-| `%in%`     | is one of a set           | `origin %in% c("JFK", "LGA")`        |
-| `!is.na()` | has a value (not missing) | `!is.na(dep_delay)`                  |
+| Symbol     | Meaning                   | Example                       |
+|------------|---------------------------|-------------------------------|
+| `==`       | equal to                  | `carrier == "AA"`             |
+| `!=`       | not equal to              | `origin != "JFK"`             |
+| `>`        | greater than              | `dep_delay > 60`              |
+| `>=`       | greater than or equal to  | `dep_delay >= 60`             |
+| `<`        | less than                 | `dep_delay < 0`               |
+| `<=`       | less than or equal to     | `arr_delay <= 0`              |
+| `%in%`     | is one of a set           | `origin %in% c("JFK", "LGA")` |
+| `!is.na()` | has a value (not missing) | `!is.na(dep_delay)`           |
 
 Use `==` to compare text or numbers. A single `=` gives an error inside `filter()`. Text goes inside quotes. Numbers do not.
 
@@ -224,7 +232,7 @@ Use `==` to compare text or numbers. A single `=` gives an error inside `filter(
 
 ```{r}
 flights |>
-  filter(dep_delay > 120)
+  filter(dep_delay > 120) 
 ```
 
 **Question:** Which flights left early (negative departure delay)?
@@ -239,7 +247,8 @@ flights |>
 ```{r}
 #| eval: false
 flights |>
-  ___
+  filter(dep_delay >= 60) |> 
+  count()
 ```
 
 **Your turn 2:** Filter flights that arrived more than 30 minutes early (`arr_delay < -30`).
@@ -247,10 +256,11 @@ flights |>
 ```{r}
 #| eval: false
 flights |>
-  ___
+  filter(arr_delay < -30) |> 
+  count()
 ```
 
-Answer: [YOUR ANSWER HERE]
+Answer: \[YOUR ANSWER HERE\]
 
 ------------------------------------------------------------------------
 
@@ -265,7 +275,9 @@ Think of any dataset with groups: airlines, airports, seasons. You often want to
 ```{r}
 # Three conditions: all three must be TRUE
 flights |>
-  filter(carrier == "UA", origin == "EWR", dep_delay > 60) |>
+  filter(carrier == "UA", 
+         origin == "EWR", 
+         dep_delay > 60) |>
   count()
 ```
 
@@ -273,7 +285,9 @@ flights |>
 
 ```{r}
 flights |>
-  filter(origin == "JFK", month == 12, dep_delay > 0) |>
+  filter(origin == "JFK", 
+         month == 12, 
+         dep_delay > 0) |>
   count()
 ```
 
@@ -282,7 +296,10 @@ flights |>
 ```{r}
 #| eval: false
 flights |>
-  ___
+  filter(carrier == "AA", 
+         origin == "JFK", 
+         arr_delay > 30) |> 
+  count()
 ```
 
 **Your turn 2:** How many summer flights (June, July, August) had no departure delay?
@@ -291,10 +308,12 @@ flights |>
 #| eval: false
 # Hint: use month %in% c(6, 7, 8) and dep_delay == 0
 flights |>
-  ___
+  filter(month %in%c(6, 7, 8), 
+         dep_delay == 0) |> 
+  count()
 ```
 
-Answer: [YOUR ANSWER HERE]
+Answer: \[YOUR ANSWER HERE\]
 
 ------------------------------------------------------------------------
 
@@ -308,9 +327,15 @@ Each verb does one job. The pipe `|>` connects them in order. The result of one 
 flights |>
   filter(carrier == "DL") |>            # keep only Delta
   filter(origin == "JFK") |>            # from JFK only
-  select(carrier, dest, dep_delay) |>   # keep three columns
-  arrange(desc(dep_delay)) |>           # sort most delayed first
+  select(carrier, dest, dep_delay, flight) |>   # keep three columns
+  arrange(desc(dep_delay)) |>           # sort least delayed first
   head(5)                               # show only the top 5
+```
+
+```{r}
+flights |> 
+  arrange(desc(dep_delay)) |> 
+  head(3)
 ```
 
 **Question:** Show carrier, origin and air time for American Airlines flights to Los Angeles (LAX), sorted by shortest flight first.
@@ -320,7 +345,7 @@ flights |>
   filter(carrier == "AA") |>
   filter(dest == "LAX") |>
   select(carrier, origin, air_time) |>
-  arrange(air_time)
+  arrange(desc(air_time))
 ```
 
 **Your turn:** Show the carrier, destination and arrival delay of the five flights with the worst arrival delays from Newark (EWR), sorted from worst to best.
@@ -328,10 +353,13 @@ flights |>
 ```{r}
 #| eval: false
 flights |>
-  ___
+  select(carrier, dest, arr_delay, origin, flight) |>
+  filter(origin == "EWR") |> 
+  arrange(desc(arr_delay)) |> 
+  head(5)
 ```
 
-Answer: [YOUR ANSWER HERE]
+Answer: \[YOUR ANSWER HERE\]
 
 ------------------------------------------------------------------------
 
@@ -345,6 +373,7 @@ Answer: [YOUR ANSWER HERE]
 flights |>
   mutate(dep_delay_hours = dep_delay / 60) |>
   select(carrier, dep_delay, dep_delay_hours) |>
+  arrange(desc(dep_delay)) |> 
   head()
 ```
 
@@ -353,10 +382,13 @@ flights |>
 ```{r}
 #| eval: false
 flights |>
-  ___
+  mutate( flight_speed_m = (distance / (air_time / 60))  ) |> 
+  select(carrier, dest, distance, air_time, flight_speed_m) |> 
+  arrange(desc(flight_speed_m)) |> 
+  head(3)
 ```
 
-Answer: [YOUR ANSWER HERE]
+Answer: \[YOUR ANSWER HERE\]
 
 ------------------------------------------------------------------------
 
@@ -371,7 +403,8 @@ Answer: [YOUR ANSWER HERE]
 ```{r}
 flights |>
   group_by(carrier) |>
-  summarize(mean_dep_delay = mean(dep_delay, na.rm = TRUE))
+  summarize(mean_dep_delay = mean(dep_delay, na.rm = TRUE)) |> 
+  arrange(mean_dep_delay)
 ```
 
 **Question:** How many flights departed from each airport?
@@ -390,7 +423,7 @@ flights |>
   ___
 ```
 
-Answer: [YOUR ANSWER HERE]
+Answer: \[YOUR ANSWER HERE\]
 
 ------------------------------------------------------------------------
 
@@ -406,8 +439,8 @@ flights |>
   group_by(carrier) |>
   summarize(
     n = n(),
-    mean_dep_delay = mean(dep_delay, na.rm = TRUE)
-  ) |>
+    mean_dep_delay = mean(dep_delay, na.rm = TRUE), 
+    sd_delay = sd(dep_delay, na.rm = TRUE)) |>
   arrange(desc(mean_dep_delay))
 ```
 
@@ -441,7 +474,7 @@ flights |>
   ___
 ```
 
-Answer: [YOUR ANSWER HERE]
+Answer: \[YOUR ANSWER HERE\]
 
 ------------------------------------------------------------------------
 
@@ -455,11 +488,8 @@ Answer: [YOUR ANSWER HERE]
 flights |>
   filter(carrier %in% c("AA", "UA", "DL")) |>
   select(carrier, dep_delay, arr_delay) |>
-  tbl_summary(
-    by = carrier,
-    missing = "no",
-    digits = all_continuous() ~ 1
-  )
+  gtsummary::tbl_summary(by = carrier, 
+                         missing = "no")
 ```
 
 **Question:** Same table, but only for JFK flights. Does the pattern change?
@@ -471,8 +501,7 @@ flights |>
   select(carrier, dep_delay, arr_delay) |>
   tbl_summary(
     by = carrier,
-    missing = "no",
-    digits = all_continuous() ~ 1
+    missing = "no"
   )
 ```
 
@@ -481,10 +510,15 @@ flights |>
 ```{r}
 #| eval: false
 flights |>
-  ___
+  
+  filter(carrier %in% c("AA", "UA", "DL")) |>
+  filter(month == 1) |> 
+  select(air_time, carrier, distance) |> 
+  gtsummary::tbl_summary(by = carrier, 
+                         missing = "no")
 ```
 
-Answer: [YOUR ANSWER HERE]
+Answer: \[YOUR ANSWER HERE\]
 
 ------------------------------------------------------------------------
 
