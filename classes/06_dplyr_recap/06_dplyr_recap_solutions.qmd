@@ -1,0 +1,100 @@
+---
+title: "dplyr recap: select() and filter() (solutions)"
+format: html
+---
+
+Teacher version. Chunks run, so `data/flights.csv` must exist.
+
+```{r}
+#| label: setup
+pacman::p_load(here, tidyverse)
+```
+
+```{r}
+#| label: load-data
+flights <- read_csv(here("data", "flights.csv"))
+```
+
+## Your turn 1: select a range
+
+```{r}
+#| label: turn-1a
+flights |>
+  select(dep_time:arr_delay)
+```
+
+Answer: 6 columns (`dep_time`, `sched_dep_time`, `dep_delay`, `arr_time`, `sched_arr_time`, `arr_delay`).
+
+```{r}
+#| label: turn-1b
+flights |>
+  select(!dep_time:arr_delay)
+```
+
+Answer: 13 columns, the 19 of `flights` minus 6.
+
+## Your turn 2: select by pattern
+
+```{r}
+#| label: turn-2a
+flights |>
+  select(ends_with("time"))
+```
+
+Answer: 5 columns (`dep_time`, `sched_dep_time`, `arr_time`, `sched_arr_time`, `air_time`). `time_hour` ends in `hour`, so it stays out.
+
+```{r}
+#| label: turn-2b
+flights |>
+  select(starts_with("sched"))
+```
+
+Answer: 2 columns (`sched_dep_time`, `sched_arr_time`).
+
+## Your turn 3: AND and OR
+
+```{r}
+#| label: turn-3a
+flights |>
+  filter(month == 12 & day == 25)
+```
+
+```{r}
+#| label: turn-3b
+flights |>
+  filter(month == 6 | month == 7)
+```
+
+```{r}
+#| label: turn-3c
+flights |>
+  filter(month %in% c(6, 7))
+```
+
+Answer: both versions return the same number of rows. Students check it by adding `count()` to each chunk.
+
+## Your turn 4: NOT
+
+```{r}
+#| label: turn-4a
+flights |>
+  filter(origin != "JFK") |>
+  count(origin)
+```
+
+Answer: 2 airports remain (EWR and LGA).
+
+```{r}
+#| label: turn-4b
+flights |>
+  filter(!(origin %in% c("JFK", "LGA"))) |>
+  count(origin)
+```
+
+Answer: EWR is the only airport left.
+
+## Notes for the teacher
+
+- Slide checks: `month == 1 & month == 2` returns 0 rows. `month == 1 | month == 2` and `month %in% c(1, 2)` return the same rows. `month == 1 | 2` returns all 12 months. `month != 1 & month != 2` and `!(month %in% c(1, 2))` return the same rows.
+- `filter(dep_delay == NA)` returns 0 rows. `filter(is.na(dep_delay))` returns the flights with a missing departure delay. This needs the full `flights` table, which has missing values.
+- Spare slide if a student asks: `filter(month != 1 | month != 2)` returns every row, because every month differs from 1 or from 2. The fix is `&`.

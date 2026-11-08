@@ -1,0 +1,91 @@
+---
+title: "Joining tables: left, inner, full and anti (solutions)"
+format: html
+---
+
+Teacher version. Chunks run. The tables come with the dplyr package, so no data file is needed.
+
+```{r}
+#| label: setup
+pacman::p_load(tidyverse)
+```
+
+## Look at the tables
+
+```{r}
+#| label: look-members
+band_members
+```
+
+```{r}
+#| label: look-instruments
+band_instruments
+```
+
+Answer: both tables share `name`. John and Paul appear in both tables.
+
+## Your turn 1: left_join()
+
+```{r}
+#| label: turn-1
+band_members |>
+  left_join(band_instruments, join_by(name))
+```
+
+Answer: 3 rows. Mick has `NA` in `plays` because `band_instruments` has no row for him.
+
+## Your turn 2: swap the tables
+
+```{r}
+#| label: turn-2
+band_instruments |>
+  left_join(band_members, join_by(name))
+```
+
+Answer: 3 rows. Keith has `NA` in `band`. `left_join()` keeps all rows of the left table, so the table order changes the result.
+
+## Your turn 3: inner_join()
+
+```{r}
+#| label: turn-3
+band_members |>
+  inner_join(band_instruments, join_by(name))
+```
+
+Answer: 2 rows, John and Paul. Mick and Keith are missing because each appears in only one table.
+
+## Your turn 4: full_join()
+
+```{r}
+#| label: turn-4
+band_members |>
+  full_join(band_instruments, join_by(name))
+```
+
+Answer: 4 rows. Mick has no `plays` and Keith has no `band`.
+
+## Your turn 5: anti_join()
+
+```{r}
+#| label: turn-5
+band_members |>
+  anti_join(band_instruments, join_by(name))
+```
+
+Answer: Mick, 1 row. The result has only the columns of `band_members`.
+
+## Your turn 6: choose the join
+
+| Question | Join |
+|----------|------|
+| All members of the band, with or without an instrument | `left_join()` |
+| Only people with a band and an instrument | `inner_join()` |
+| All four people, whatever is missing | `full_join()` |
+| Members with no instrument | `anti_join()` |
+
+## Notes for the teacher
+
+- The slide "Name the key" runs `left_join()` without `join_by()`. dplyr prints `Joining with by = join_by(name)`. The result is the same, and the key stays implicit.
+- The slides show `anti_join(band_instruments, band_members)` as the example (Keith). Your turn 5 reverses the tables (Mick).
+- `anti_join()` returns later in the course to find countries that do not match between two tables.
+- If time runs short, Your turn 6 becomes homework.

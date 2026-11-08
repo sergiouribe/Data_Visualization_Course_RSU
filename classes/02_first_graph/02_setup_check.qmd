@@ -1,0 +1,80 @@
+---
+title: "Class 2. Setup check"
+format: html
+---
+
+Run each chunk with Ctrl+Shift+Enter (Cmd+Shift+Enter on Mac). Work in order.
+
+## 0. Is the project open?
+
+Look at the top right corner of RStudio. It must show `data_visualization_course`. If it shows `Project: (None)`, close RStudio and double-click `data_visualization_course.Rproj`.
+
+## 1. The console
+
+```{r}
+#| label: console
+# R is a calculator
+1 + 1
+```
+
+## 2. Install pacman (run once)
+
+```{r}
+#| label: install-pacman
+#| eval: false
+install.packages("pacman")
+```
+
+## 3. Install and load the packages (run once; it takes several minutes)
+
+`p_load()` installs a package if it is missing, then loads it.
+
+```{r}
+#| label: install-packages
+#| eval: false
+pacman::p_load(tidyverse, here, janitor, gtsummary, palmerpenguins,
+               gapminder, NHANES, ggrepel, knitr, rmarkdown)
+```
+
+## 4. Load the packages for today
+
+```{r}
+#| label: packages
+pacman::p_load(tidyverse, here, palmerpenguins)
+```
+
+## 5. Find your project folder
+
+```{r}
+#| label: here
+# This path must end with the name of the course folder
+here()
+```
+
+## 6. Read a file with a relative path
+
+```{r}
+#| label: read
+here("data", "life_expectancy_wide.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  glimpse()
+```
+
+## 7. Draw one graph
+
+```{r}
+#| label: graph
+penguins |>
+  ggplot(aes(x = flipper_length_mm, y = body_mass_g)) +
+  geom_point()
+```
+
+## Check
+
+- [ ] The project name shows at the top right of RStudio.
+- [ ] Chunk 1 printed `[1] 2`.
+- [ ] Chunk 5 printed the project folder.
+- [ ] Chunk 6 printed a table with `country` and year columns.
+- [ ] Chunk 7 drew a scatter plot.
+
+Fix any red text with the teacher before you leave.

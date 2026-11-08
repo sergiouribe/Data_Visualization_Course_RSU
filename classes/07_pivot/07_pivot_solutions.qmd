@@ -1,0 +1,119 @@
+---
+title: "Reshaping data: pivot_longer() and pivot_wider() (solutions)"
+format: html
+---
+
+Teacher version. Chunks run, so `data/gapminder_life_expectancy_wide.csv` must exist.
+
+```{r}
+#| label: setup
+pacman::p_load(here, tidyverse)
+```
+
+```{r}
+#| label: load-data
+gapminder_wide <- read_csv(here("data", "gapminder_life_expectancy_wide.csv"))
+```
+
+## One row per country, one column per year
+
+```{r}
+#| label: look-wide
+gapminder_wide |>
+  filter(name %in% c("Estonia", "Latvia", "Lithuania")) |>
+  select(name, `1990`, `2000`, `2010`, `2023`)
+```
+
+## Your turn 1: plot the wide table
+
+Answer: no column holds the years. They are the names of 301 columns, so `x` has nothing to map to.
+
+## Wide to long: pivot_longer()
+
+```{r}
+#| label: make-long
+gapminder_long <- gapminder_wide |>
+  filter(name %in% c("Estonia", "Latvia", "Lithuania")) |>
+  select(name, `1950`:`2023`) |>
+  pivot_longer(
+    cols = `1950`:`2023`,
+    names_to = "year",
+    values_to = "life_exp"
+  )
+
+gapminder_long
+```
+
+Answer: 222 rows (3 countries, 74 years) and 3 columns. Without `select()`, `pivot_longer()` keeps `geo` and the other 227 year columns as identifiers. `names_to = "year"` avoids the default `name`, which clashes with the existing `name` column.
+
+## Your turn 2: plot the long table
+
+```{r}
+#| label: turn-2
+gapminder_long |>
+  ggplot(aes(x = year, y = life_exp, color = name)) +
+  geom_line()
+```
+
+Answer: the plot is empty and ggplot2 prints `Each group consists of only one observation`. `year` is text, so every point is its own group.
+
+```{r}
+#| label: look-long
+gapminder_long |>
+  glimpse()
+```
+
+Answer: `year` is `<chr>`.
+
+## Your turn 3: change the type of year
+
+```{r}
+#| label: turn-3
+gapminder_long |>
+  mutate(year = as.integer(year)) |>
+  ggplot(aes(x = year, y = life_exp, color = name)) +
+  geom_line()
+```
+
+Answer: `as.integer()`. It is a base R function. `as_integer()` does not exist in the tidyverse and returns `could not find function`.
+
+```{r}
+#| label: make-long-fixed
+gapminder_long <- gapminder_wide |>
+  filter(name %in% c("Estonia", "Latvia", "Lithuania")) |>
+  select(name, `1950`:`2023`) |>
+  pivot_longer(
+    cols = `1950`:`2023`,
+    names_to = "year",
+    values_to = "life_exp"
+  ) |>
+  mutate(year = as.integer(year))
+```
+
+## Long to wide: pivot_wider()
+
+```{r}
+#| label: table2-example
+table2 |>
+  pivot_wider(names_from = type, values_from = count)
+```
+
+Answer: 12 rows become 6 rows, with the columns `country`, `year`, `cases` and `population`.
+
+## Your turn 4: back to wide
+
+```{r}
+#| label: turn-4
+gapminder_long |>
+  filter(year %in% c(1990, 2023)) |>
+  pivot_wider(names_from = year, values_from = life_exp) |>
+  mutate(change = `2023` - `1990`)
+```
+
+Answer: Estonia gained the most, 8.7 years (70.0 in 1990 and 78.7 in 2023). Latvia gained 5.9 years and Lithuania 5.7 years.
+
+## Notes for the teacher
+
+- Column names that start with a digit need backticks, in `select()`, `cols` and `mutate()`.
+- `names_transform = as.integer` inside `pivot_longer()` does the type change in one step. This class uses `mutate()` first so that students see the problem.
+- If time runs short, Your turn 4 becomes homework.

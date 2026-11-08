@@ -1,0 +1,341 @@
+---
+title: "Homework. Explore data with dplyr verbs (penguins), solutions"
+format: html
+---
+
+## Before we start
+
+The `tidyverse` is a collection of R packages for data science. Each package does one job. You already know `ggplot2`, the package for graphics.
+
+For data wrangling, the tidyverse has a package called `dplyr`. Wrangling means preparing a table for analysis: choosing columns, choosing rows, sorting, making new columns and summarizing groups.
+
+In this homework you explore the main `dplyr` verbs. Each verb is a function that does one usual data task.
+
+Each section has four parts: a short explanation of one verb, a question, the question solved with the verb, and **your turn**.
+
+Replace each `___` with code, remove the line `#| eval: false`, and run the chunk. Write the answer under the chunk.
+
+## How to submit
+
+1. Fill in every `___`, remove `#| eval: false` from the chunk and run it.
+2. Write your answer under each chunk.
+3. Click **Render** to make the HTML file.
+4. Upload the HTML file to Moodle before **Fri 23 Oct 2026, 18:00** (start of class 7). Class 7 opens with a 10-minute review of this homework.
+
+The homework takes about 45 to 60 minutes.
+
+```{r}
+#| label: setup
+pacman::p_load(tidyverse, palmerpenguins, gtsummary)
+```
+
+# 1. Look at the first and last rows
+
+`head()` shows the first rows of a table. `tail()` shows the last rows. Add a number to choose how many rows.
+
+**Question:** What do the first rows of `penguins` look like? And the last rows?
+
+```{r}
+#| label: head-tail
+# First 6 rows
+penguins |>
+  head()
+
+# Last 3 rows
+penguins |>
+  tail(3)
+```
+
+**Your turn:** Show the first 10 rows. Then show the last row. Which species and year does it show?
+
+```{r}
+#| label: turn-head
+penguins |>
+  head(10)
+```
+
+```{r}
+#| label: turn-tail
+penguins |>
+  tail(1)
+```
+
+Answer: Chinstrap, 2009.
+
+# 2. select(): choose columns
+
+`select()` keeps the columns you name and drops the others.
+
+**Question:** Which columns give the species, the island and the body mass?
+
+```{r}
+#| label: select
+penguins |>
+  select(species, island, body_mass_g) |>
+  head()
+```
+
+**Question:** How do bill length and body mass differ between species? Select the columns, then make a table with `tbl_summary()`.
+
+```{r}
+#| label: select-table
+# by = species gives one column per species
+penguins |>
+  select(species, bill_length_mm, body_mass_g) |>
+  tbl_summary(by = species)
+```
+
+**Your turn:** Make the same table with two other numeric columns: `flipper_length_mm` and `bill_depth_mm`.
+
+```{r}
+#| label: turn-select-table
+#| eval: false
+penguins |>
+  select(species, flipper_length_mm, bill_depth_mm) |>
+  tbl_summary(by = species)
+```
+
+Answer: Gentoo has the longest flippers (median 216 mm, against 190 mm for Adelie and 196 mm for Chinstrap) and the shallowest bills (median depth 15.0 mm, against 18.4 mm for the other two).
+
+# 3. Comparison symbols
+
+`filter()` needs a condition. A condition compares values and returns `TRUE` or `FALSE`.
+
+| Symbol | Meaning | Example |
+|---|---|---|
+| `==` | equal to | `species == "Gentoo"` |
+| `!=` | not equal to | `island != "Dream"` |
+| `>` | greater than | `body_mass_g > 4000` |
+| `>=` | greater than or equal to | `body_mass_g >= 4000` |
+| `<` | less than | `flipper_length_mm < 190` |
+| `<=` | less than or equal to | `flipper_length_mm <= 190` |
+| `%in%` | is one of a set | `island %in% c("Dream", "Biscoe")` |
+| `!is.na()` | has a value (not missing) | `!is.na(sex)` |
+
+Use `==` to compare. A single `=` assigns a value and gives an error inside `filter()`. Put text inside quotes. Numbers have no quotes.
+
+**Question:** What does each line return?
+
+```{r}
+#| label: comparisons
+5 > 3
+5 == 3
+"Adelie" == "Gentoo"
+c(2700, 3500, 6000) > 4000
+```
+
+**Your turn:** Write a comparison that returns `TRUE` for the number 4000, and one that returns `FALSE`.
+
+```{r}
+#| label: turn-comparisons
+#| eval: false
+4000 >= 4000
+4000 < 4000
+```
+
+Answer: `4000 >= 4000` returns `TRUE`. `4000 < 4000` returns `FALSE`.
+
+# 4. filter(): choose rows
+
+`filter()` keeps the rows where the condition is `TRUE`. A comma between two conditions means "and".
+
+**Question:** How many Gentoo penguins are in the table?
+
+```{r}
+#| label: filter-1
+penguins |>
+  filter(species == "Gentoo") |>
+  count()
+```
+
+**Question:** Which penguins weigh more than 6,000 g?
+
+```{r}
+#| label: filter-2
+penguins |>
+  filter(body_mass_g > 6000)
+```
+
+**Question:** How many female Gentoo penguins weigh more than 5,000 g?
+
+```{r}
+#| label: filter-3
+# Three conditions, separated by commas
+penguins |>
+  filter(species == "Gentoo", sex == "female", body_mass_g > 5000) |>
+  count()
+```
+
+**Question:** How many penguins have a known sex?
+
+```{r}
+#| label: filter-4
+# !is.na() keeps rows with a value
+penguins |>
+  filter(!is.na(sex)) |>
+  count()
+```
+
+**Your turn 1:** How many penguins live on Dream island?
+
+```{r}
+#| label: turn-filter-1
+#| eval: false
+penguins |>
+  filter(island == "Dream") |>
+  count()
+```
+
+Answer: 124 penguins.
+
+**Your turn 2:** How many Adelie penguins have a bill longer than 45 mm?
+
+```{r}
+#| label: turn-filter-2
+#| eval: false
+penguins |>
+  filter(species == "Adelie", bill_length_mm > 45) |>
+  count()
+```
+
+Answer: 3 penguins.
+
+**Your turn 3:** Make a table of body mass and flipper length per species, only for penguins on Biscoe island.
+
+```{r}
+#| label: turn-filter-3
+#| eval: false
+penguins |>
+  filter(island == "Biscoe") |>
+  select(species, body_mass_g, flipper_length_mm) |>
+  tbl_summary(by = species)
+```
+
+Answer: Biscoe has 44 Adelie and 124 Gentoo penguins. Gentoo is heavier (median 5,000 g against 3,750 g) and has longer flippers (median 216 mm against 190 mm).
+
+# 5. arrange(): sort rows
+
+`arrange()` sorts the rows from the smallest to the largest value. `desc()` reverses the order. Missing values go last.
+
+**Question:** Which penguin weighs the least?
+
+```{r}
+#| label: arrange
+penguins |>
+  arrange(body_mass_g) |>
+  head(3)
+```
+
+**Your turn:** Which penguin weighs the most? Which species and sex is it?
+
+```{r}
+#| label: turn-arrange
+#| eval: false
+penguins |>
+  arrange(desc(body_mass_g)) |>
+  head(3)
+```
+
+Answer: A male Gentoo, 6,300 g.
+
+# 6. select() again
+
+We used `select()` in section 2 and in class. It also helps you look at a few columns of a large table.
+
+**Question:** Which columns tell where and when each penguin was measured?
+
+```{r}
+#| label: select-again
+penguins |>
+  select(island, year) |>
+  head()
+```
+
+**Your turn:** Show the first 5 rows of `species`, `sex` and `body_mass_g`.
+
+```{r}
+#| label: turn-select-again
+#| eval: false
+penguins |>
+  select(species, sex, body_mass_g) |>
+  head(5)
+```
+
+Answer: The first row is an Adelie male of 3,750 g. The fourth row has no sex and no body mass (`NA`).
+
+# 7. mutate(): make a new column
+
+`mutate()` adds a column calculated from other columns. The name goes on the left of `=`.
+
+**Question:** What is the body mass in kilograms?
+
+```{r}
+#| label: mutate
+penguins |>
+  mutate(body_mass_kg = body_mass_g / 1000) |>
+  select(species, body_mass_g, body_mass_kg) |>
+  head()
+```
+
+**Your turn:** Make a column with the bill length in centimeters (1 cm = 10 mm). Show `species`, `bill_length_mm` and your new column.
+
+```{r}
+#| label: turn-mutate
+#| eval: false
+penguins |>
+  mutate(bill_length_cm = bill_length_mm / 10) |>
+  select(species, bill_length_mm, bill_length_cm) |>
+  head()
+```
+
+Answer: The first penguin has a bill of 3.91 cm (39.1 mm).
+
+# 8. group_by() and summarize(): groups
+
+`group_by()` splits the rows into groups. `summarize()` turns each group into one row with a summary number. `mean()` gives the mean. `n()` counts rows. `na.rm = TRUE` ignores missing values.
+
+**Question:** What is the mean body mass of each species?
+
+```{r}
+#| label: group-summarize
+penguins |>
+  group_by(species) |>
+  summarize(mean_mass = mean(body_mass_g, na.rm = TRUE))
+```
+
+**Question:** How many penguins are in each species?
+
+```{r}
+#| label: group-count
+penguins |>
+  group_by(species) |>
+  summarize(n = n())
+```
+
+`tbl_summary(by = species)` gives the same kind of answer for many columns in one table, as in section 2.
+
+**Your turn:** What is the mean flipper length on each island?
+
+```{r}
+#| label: turn-group
+#| eval: false
+penguins |>
+  group_by(island) |>
+  summarize(mean_flipper = mean(flipper_length_mm, na.rm = TRUE))
+```
+
+Answer: Biscoe 209.7 mm, Dream 193.1 mm, Torgersen 191.2 mm.
+
+# 9. Final question
+
+**What is the mean body mass of female Gentoo penguins?** Use `filter()` and `summarize()`.
+
+```{r}
+#| label: turn-final
+#| eval: false
+penguins |>
+  filter(species == "Gentoo", sex == "female") |>
+  summarize(mean_mass = mean(body_mass_g, na.rm = TRUE))
+```
+
+Answer: 4,680 g.

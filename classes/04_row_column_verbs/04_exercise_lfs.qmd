@@ -1,0 +1,247 @@
+---
+title: "Exercise. The four dplyr verbs with the Latvian Labour Force Survey"
+format: html
+---
+
+Each part answers one question about work in Latvia in 2025. Codes are in `data/lfs_codebook.md`. Replace each `___` with code, remove `#| eval: false`, and write the answer under the chunk.
+
+**Class 4:** parts A and B. **Class 5:** part C. **Class 6:** part D.
+
+| Verb | What it does | Part |
+|---|---|---|
+| `filter()` | Extract specific observations (rows) | A |
+| `select()` | Remove distracting columns | B |
+| `mutate()` | Compute new variables | C |
+| `summarise()` | Summarize cases | D |
+
+```{r}
+#| label: setup
+pacman::p_load(tidyverse, here, janitor)
+```
+
+## Look first
+
+```{r}
+#| label: look
+# One row per person. Blank cells mean "not applicable", "." is also read as missing
+here("data", "lfs_2025_example.csv") |>
+  read_csv(na = c("", ".", "NA"), show_col_types = FALSE) |>
+  glimpse()
+```
+
+# Part A. filter(): extract rows
+
+## A1. How many people are employed?
+
+```{r}
+#| label: a1
+#| eval: false
+# EKA == 1 means employed. count() with no column counts rows.
+here("data", "lfs_2025_example.csv") |>
+  read_csv(na = c("", ".", "NA"), show_col_types = FALSE) |>
+  ___
+```
+
+## A2. How many employed women aged 25 to 54 live in the Riga region?
+
+```{r}
+#| label: a2
+#| eval: false
+# Vecums 3, 4, 5 = ages 25 to 54. B11 == 2 = women. Jreg5 == 1 = Riga.
+here("data", "lfs_2025_example.csv") |>
+  read_csv(na = c("", ".", "NA"), show_col_types = FALSE) |>
+  ___
+```
+
+## A3. Who works part time because no full-time job was available?
+
+```{r}
+#| label: a3
+#| eval: false
+# D55 == 2 part time. D56 == 3 could not find full-time work.
+here("data", "lfs_2025_example.csv") |>
+  read_csv(na = c("", ".", "NA"), show_col_types = FALSE) |>
+  ___
+```
+
+## A4. How many unemployed people have higher education?
+
+```{r}
+#| label: a4
+#| eval: false
+# EKA == 2 unemployed. L124 == 1 higher education.
+here("data", "lfs_2025_example.csv") |>
+  read_csv(na = c("", ".", "NA"), show_col_types = FALSE) |>
+  ___
+```
+
+## A5. Quality check: how many employed people have no answer on hours?
+
+```{r}
+#| label: a5
+#| eval: false
+# Stundas == 9 is "no answer". is.na() catches blank cells.
+here("data", "lfs_2025_example.csv") |>
+  read_csv(na = c("", ".", "NA"), show_col_types = FALSE) |>
+  ___
+```
+
+# Part B. select(): remove distracting columns
+
+## B1. Keep who the person is
+
+```{r}
+#| label: b1
+#| eval: false
+# Four columns: ID, age group, sex, region
+here("data", "lfs_2025_example.csv") |>
+  read_csv(na = c("", ".", "NA"), show_col_types = FALSE) |>
+  ___
+```
+
+## B2. Which columns describe the household?
+
+```{r}
+#| label: b2
+#| eval: false
+# starts_with() picks every column whose name begins with MS_
+here("data", "lfs_2025_example.csv") |>
+  read_csv(na = c("", ".", "NA"), show_col_types = FALSE) |>
+  ___
+```
+
+## B3. Drop the weights and give columns readable names
+
+```{r}
+#| label: b3
+#| eval: false
+# -starts_with() removes columns. rename(new = old) changes names.
+here("data", "lfs_2025_example.csv") |>
+  read_csv(na = c("", ".", "NA"), show_col_types = FALSE) |>
+  ___
+```
+
+## B4. Which columns have no values at all?
+
+```{r}
+#| label: b4
+#| eval: false
+# where() selects columns by a test. Here: every value is missing.
+here("data", "lfs_2025_example.csv") |>
+  read_csv(na = c("", ".", "NA"), show_col_types = FALSE) |>
+  ___
+```
+
+# Part C. mutate(): compute new variables
+
+## C1. Is the annual weight one quarter of the quarterly weight?
+
+```{r}
+#| label: c1
+#| eval: false
+# Arithmetic: divide one column by another
+here("data", "lfs_2025_example.csv") |>
+  read_csv(na = c("", ".", "NA"), show_col_types = FALSE) |>
+  ___
+```
+
+## C2. Turn codes into labels
+
+```{r}
+#| label: c2
+#| eval: false
+# case_when(): condition ~ value, one line per code
+here("data", "lfs_2025_example.csv") |>
+  read_csv(na = c("", ".", "NA"), show_col_types = FALSE) |>
+  ___
+```
+
+## C3. Group ages into three bands
+
+```{r}
+#| label: c3
+#| eval: false
+# Vecums codes: 2 = 15-24, 3 to 5 = 25-54, 6 and 7 = 55-74
+here("data", "lfs_2025_example.csv") |>
+  read_csv(na = c("", ".", "NA"), show_col_types = FALSE) |>
+  ___
+```
+
+## C4. Flag part-time work
+
+```{r}
+#| label: c4
+#| eval: false
+# A comparison returns TRUE or FALSE. Use it as a new column.
+here("data", "lfs_2025_example.csv") |>
+  read_csv(na = c("", ".", "NA"), show_col_types = FALSE) |>
+  ___
+```
+
+# Part D. summarise(): summarize cases
+
+The survey covers a sample. Each person has a weight (`Svars_G`), the number of people in Latvia that person stands for. Sum the weights to estimate people in Latvia. Use `Svars_G` for one year of data.
+
+## D1. How many people aged 15 to 74 are employed, unemployed or inactive?
+
+```{r}
+#| label: d1
+#| eval: false
+# count(wt = ...) adds up the weights instead of counting rows
+here("data", "lfs_2025_example.csv") |>
+  read_csv(na = c("", ".", "NA"), show_col_types = FALSE) |>
+  ___
+```
+
+## D2. Which region has the highest share of employed people?
+
+```{r}
+#| label: d2
+#| eval: false
+# Share = weighted employed / weighted total, by region
+here("data", "lfs_2025_example.csv") |>
+  read_csv(na = c("", ".", "NA"), show_col_types = FALSE) |>
+  ___
+```
+
+## D3. Do men or women work part time more often?
+
+```{r}
+#| label: d3
+#| eval: false
+# Among employed people only
+here("data", "lfs_2025_example.csv") |>
+  read_csv(na = c("", ".", "NA"), show_col_types = FALSE) |>
+  ___
+```
+
+## D4. In which sectors do women hold most jobs?
+
+```{r}
+#| label: d4
+#| eval: false
+# Women's share of employed people, by sector of the main job
+here("data", "lfs_2025_example.csv") |>
+  read_csv(na = c("", ".", "NA"), show_col_types = FALSE) |>
+  ___
+```
+
+## D5. Draw the answer to D4
+
+```{r}
+#| label: d5
+#| fig-height: 4
+#| eval: false
+# Show: sorted bars. Focus: one color. Tell: the title states the finding.
+here("data", "lfs_2025_example.csv") |>
+  read_csv(na = c("", ".", "NA"), show_col_types = FALSE) |>
+  ___
+```
+
+# Your own question
+
+Write one question about the survey. Name the verbs you need. Answer it in a chunk.
+
+Question: [YOUR QUESTION HERE]
+
+Answer: [YOUR ANSWER HERE]

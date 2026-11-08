@@ -1,0 +1,82 @@
+---
+title: "Testing"
+author: "Sergio Uribe"
+format: html
+editor: visual
+---
+
+```{r}
+pacman::p_load(tidyverse, gapminder, here, gtsummary, penguins)
+```
+
+# Shorcuts
+
+CTRL + Alt + I = chunk
+
+```{r}
+# comment, not executable
+1 + 1
+```
+
+Alt + - = \<-
+
+```{r}
+x  <- 2
+y <- 5
+x + y
+```
+
+CTRL + Shift + M = pipe
+
+```{r}
+penguins
+```
+
+# Commands
+
+see the dataset
+
+```{r}
+penguins
+```
+
+## Load a dataset
+
+```{r}
+df <- penguins
+```
+
+# EDA
+
+## Summary of the dataset
+
+```{r}
+summary(penguins)
+```
+
+```{r}
+summary(penguins$species)
+```
+
+```{r}
+table(penguins$species, penguins$island)
+```
+
+```{r}
+mean(penguins$body_mass)
+```
+
+```{r}
+mean(penguins$body_mass, na.rm = TRUE)
+```
+
+## gtsummary
+
+```{r}
+penguins |> 
+  gtsummary::tbl_summary(by = species, missing = "no")
+```
+
+```{r}
+View(penguins)
+```

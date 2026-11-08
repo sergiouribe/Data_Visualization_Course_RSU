@@ -1,0 +1,206 @@
+---
+title: "How is the data distributed?"
+subtitle: "[SZF_184 Data Visualisation and Storytelling](https://estudijas.rsu.lv/course/view.php?id=83740)"
+author: "Sergio Uribe"
+institute: "Rīga Stradiņš University"
+format:
+  revealjs:
+    theme: simple
+    slide-number: true
+    code-block-bg: true
+    highlight-style: github
+    footer: '<a href="https://estudijas.rsu.lv/course/view.php?id=83740">SZF_184</a> RSU · Uribe'
+    transition: fade
+execute:
+  echo: true
+  warning: false
+  message: false
+  fig-width: 8
+  fig-height: 4.2
+---
+
+```{r}
+#| label: setup
+#| include: false
+pacman::p_load(here, tidyverse, palmerpenguins)
+```
+
+## The question
+
+**How is the data distributed?**
+
+One continuous variable. Where are most of the values? How wide is the spread?
+
+A **histogram** answers this. It cuts the variable into intervals and counts the rows in each interval.
+
+---
+
+## Our data
+
+```{r}
+# penguins comes with the palmerpenguins package
+penguins |>
+  glimpse()
+```
+
+`body_mass_g` is a continuous variable: the weight of each penguin in grams.
+
+---
+
+# 1. The first histogram {background-color="#1a5276" style="color: white;"}
+
+**geom_histogram()**
+
+---
+
+## A first histogram
+
+```{r}
+#| message: true
+#| warning: true
+penguins |>
+  ggplot(aes(x = body_mass_g)) +
+  geom_histogram()
+```
+
+---
+
+## Two messages from R
+
+| Message | Meaning | Fix |
+|---------|---------|-----|
+| `using bins = 30` | R cut the weights into 30 bars. It chose this number for us. | `binwidth = 200` sets the width of each bar |
+| `Removed 2 rows` | 2 penguins have no body mass. ggplot cannot draw them. | `filter(!is.na(body_mass_g))` keeps the penguins with a weight |
+
+---
+
+## Fix both
+
+```{r}
+# !is.na() keeps penguins with a weight. binwidth = 200 gives bars of 200 g
+penguins |>
+  filter(!is.na(body_mass_g)) |>
+  ggplot(aes(x = body_mass_g)) +
+  geom_histogram(binwidth = 200)
+```
+
+---
+
+## Your turn 1 {background-color="#d5e8d4"}
+
+**Draw the histogram of one species. Choose Adelie, Chinstrap or Gentoo.**
+
+```{r}
+#| eval: false
+penguins |>
+  filter(species == "___", !is.na(body_mass_g)) |>
+  ggplot(aes(x = body_mass_g)) +
+  geom_histogram(binwidth = 200)
+```
+
+Answer: the species is [YOUR ANSWER HERE]. The tallest bar is near [YOUR ANSWER HERE] g.
+
+---
+
+# 2. One histogram for all species {background-color="#1a5276" style="color: white;"}
+
+**fill, position and alpha**
+
+---
+
+## Fill by species
+
+```{r}
+penguins |>
+  filter(!is.na(body_mass_g)) |>
+  ggplot(aes(x = body_mass_g, fill = species)) +
+  geom_histogram(binwidth = 200)
+```
+
+Each species has a color, and the bars stack on top of each other. Chinstrap floats on top of Adelie, so we cannot compare their shapes.
+
+---
+
+## position = "identity"
+
+```{r}
+# "identity" draws each species from zero, one in front of the other
+penguins |>
+  filter(!is.na(body_mass_g)) |>
+  ggplot(aes(x = body_mass_g, fill = species)) +
+  geom_histogram(binwidth = 200, position = "identity")
+```
+
+Now every species starts at zero. Adelie sits behind Chinstrap, and the overlap is hidden.
+
+---
+
+## alpha = 0.5
+
+```{r}
+# alpha = 0.5 makes the bars half transparent
+penguins |>
+  filter(!is.na(body_mass_g)) |>
+  ggplot(aes(x = body_mass_g, fill = species)) +
+  geom_histogram(binwidth = 200, position = "identity", alpha = 0.5)
+```
+
+Adelie and Chinstrap overlap across most of their range. Gentoo is shifted to the right, with its tallest bar near 4,800 g.
+
+---
+
+## Your turn 2 {background-color="#d5e8d4"}
+
+**Draw the histogram of the flipper length of all penguins, with one color for each species.**
+
+```{r}
+#| eval: false
+penguins |>
+  filter(!is.na(flipper_length_mm)) |>
+  ggplot(aes(x = ___, fill = ___)) +
+  geom_histogram(binwidth = 3, position = "identity", alpha = 0.5)
+```
+
+Answer: [YOUR ANSWER HERE] has the longest flippers. [YOUR ANSWER HERE] and [YOUR ANSWER HERE] overlap the most.
+
+---
+
+# 3. A smooth curve {background-color="#1a5276" style="color: white;"}
+
+**geom_density()**
+
+---
+
+## geom_density()
+
+```{r}
+# A smooth curve instead of bars
+penguins |>
+  filter(!is.na(body_mass_g)) |>
+  ggplot(aes(x = body_mass_g, fill = species)) +
+  geom_density(alpha = 0.5)
+```
+
+Each curve has the same area. A species with few penguins, like Chinstrap (68), looks as large as Adelie (152). The curves compare shapes, and the histogram compares counts.
+
+---
+
+## Recap {.smaller}
+
+| Task | Code |
+|------|------|
+| Distribution of one continuous variable | `geom_histogram()` |
+| Width of each bar | `binwidth = 200` |
+| Remove rows with a missing value | `filter(!is.na(x))` |
+| One color for each group | `aes(fill = species)` |
+| Draw groups in front of each other | `position = "identity"` |
+| See through the bars | `alpha = 0.5` |
+| Smooth curve | `geom_density()` |
+
+---
+
+## {background-color="#1a5276" style="color: white; text-align: center;"}
+
+<br><br>
+
+### See you in the next class!

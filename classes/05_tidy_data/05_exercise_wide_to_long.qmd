@@ -1,0 +1,76 @@
+---
+title: "Exercise. From wide to long with Gapminder"
+format: html
+---
+
+Replace each `___` with code, then remove `#| eval: false`.
+
+**Question:** How did life expectancy change in Estonia, Latvia and Lithuania since 1950?
+
+```{r}
+#| label: setup
+pacman::p_load(tidyverse)
+```
+
+## 1. Look at the wide table
+
+```{r}
+#| label: look
+# One row per country, one column per year
+"https://bit.ly/wide_to_long" |>
+  read_csv(show_col_types = FALSE) |>
+  filter(name %in% c("Estonia", "Latvia", "Lithuania")) |>
+  select(name, `1950`, `1990`, `2023`)
+```
+
+**Ask:** How many variables does this table have? Where is the year?
+
+## 2. Make it long
+
+```{r}
+#| label: pivot
+#| eval: false
+# select() keeps the country and the years 1950 to 2023. cols = the year columns, names_to = new column for the year, values_to = new column for the value
+"https://bit.ly/wide_to_long" |>
+  read_csv(show_col_types = FALSE) |>
+  ___
+```
+
+**Ask:** How many rows now? Which three columns matter?
+
+## 3. Plot it
+
+```{r}
+#| label: plot
+#| eval: false
+# Years after 2023 are projections, so the table stops at 2023
+"https://bit.ly/wide_to_long" |>
+  read_csv(show_col_types = FALSE) |>
+  ___
+```
+
+## 4. Your turn
+
+Pick three other countries. Change the names in `filter()`. Write one sentence about what you see.
+
+```{r}
+#| label: your-turn
+#| eval: false
+"https://bit.ly/wide_to_long" |>
+  read_csv(show_col_types = FALSE) |>
+  ___
+```
+
+Sentence: [YOUR SENTENCE HERE]
+
+## 5. One more question
+
+In which year was Latvia's life expectancy lowest since 1950?
+
+```{r}
+#| label: lowest
+#| eval: false
+"https://bit.ly/wide_to_long" |>
+  read_csv(show_col_types = FALSE) |>
+  ___
+```

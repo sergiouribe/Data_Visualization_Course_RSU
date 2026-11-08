@@ -1,0 +1,179 @@
+---
+title: "Class 3. Recap, and the type of variable decides the chart"
+format: html
+---
+
+**Question for today:** What does each variable type allow us to draw?
+
+```{r}
+#| label: setup
+pacman::p_load(tidyverse, palmerpenguins, here)
+```
+
+## 0. Recap: bad graphs and the five principles
+
+**Ask. Show. Cut. Focus. Tell.** Today we practice **Show**: honest data, the right chart for the data type, and honest scales.
+
+Three mistakes from class 1, rebuilt with penguins.
+
+```{r}
+#| label: recap-baseline
+# Mistake 1: omitting the baseline. The axis starts at 60.
+# Adelie looks 11 times taller than Chinstrap. The real ratio is 2.2 (152 and 68 penguins).
+penguins |>
+  count(species) |>
+  ggplot(aes(x = species, y = n)) +
+  geom_col() +
+  coord_cartesian(ylim = c(60, 160))
+```
+
+```{r}
+#| label: recap-baseline-fix
+# Fix: bars start at zero
+penguins |>
+  count(species) |>
+  ggplot(aes(x = species, y = n)) +
+  geom_col()
+```
+
+```{r}
+#| label: recap-wrong-graph
+# Mistake 2: using the wrong graph. A line joins categories that have no order.
+penguins |>
+  count(species) |>
+  ggplot(aes(x = species, y = n, group = 1)) +
+  geom_line() +
+  geom_point()
+```
+
+```{r}
+#| label: recap-axis
+# Mistake 3: manipulating the y axis. Same data, a range of 0 to 20,000 g.
+penguins |>
+  ggplot(aes(x = flipper_length_mm, y = body_mass_g)) +
+  geom_point() +
+  coord_cartesian(ylim = c(0, 20000))
+```
+
+Which principle failed in each graph? Write it down. The rest of today answers: **which chart fits which type of data?**
+
+## 1. Know the data before you plot
+
+```{r}
+#| label: glimpse
+penguins |>
+  glimpse()
+```
+
+```{r}
+#| label: missing
+# NA's = missing values in each column. Min and Max show the range.
+penguins |>
+  summary()
+```
+
+## 2. One number: histogram
+
+```{r}
+#| label: histogram
+penguins |>
+  ggplot(aes(x = body_mass_g)) +
+  geom_histogram(binwidth = 250)
+```
+
+## 3. Two numbers: scatter plot
+
+```{r}
+#| label: scatter
+penguins |>
+  ggplot(aes(x = flipper_length_mm, y = body_mass_g)) +
+  geom_point()
+```
+
+## 3b. Check for outliers
+
+A histogram and a scatter plot show values that sit far from the rest. An outlier needs a check before you remove it.
+
+```{r}
+#| label: outliers-histogram
+# The heaviest penguins come first
+penguins |>
+  arrange(desc(body_mass_g))
+```
+
+```{r}
+#| label: outliers-scatter
+# Color by species. A point that looks extreme overall may be typical for its group.
+penguins |>
+  ggplot(aes(x = flipper_length_mm, y = body_mass_g, color = species)) +
+  geom_point()
+```
+
+For each extreme value, write one sentence: **data error** (impossible value, wrong unit, typo) or **real value** (rare but possible, typical for its group)?
+
+## 4. One category: bar of counts
+
+`geom_bar()` counts the rows for you. Use `geom_col()` when the table already holds the values.
+
+```{r}
+#| label: bar
+penguins |>
+  ggplot(aes(x = species)) +
+  geom_bar()
+```
+
+## 5. A number by a category: box plot
+
+```{r}
+#| label: boxplot
+penguins |>
+  ggplot(aes(x = species, y = body_mass_g)) +
+  geom_boxplot()
+```
+
+## 6. More variables without 3D
+
+Each new variable goes into one more channel: color, shape, size, or a facet panel.
+
+```{r}
+#| label: more-variables
+penguins |>
+  ggplot(aes(x = flipper_length_mm, y = body_mass_g, color = species, shape = sex)) +
+  geom_point() +
+  facet_wrap(~ island)
+```
+
+## 7. Data quality checklist
+
+Run the five checks of the [data quality checklist](../../capstone/data_quality_checklist.md) on `penguins`: types, missing values, units and ranges, duplicates, row counts.
+
+Types, missing values and ranges: use `glimpse()` and `summary()` from section 1.
+
+```{r}
+#| label: rows
+# Row count
+penguins |>
+  count()
+```
+
+```{r}
+#| label: duplicates
+# Duplicates: the count of different rows. If it equals the row count, no row repeats.
+penguins |>
+  distinct() |>
+  count()
+```
+
+## 8. Your turn
+
+Draw five graphs, one per row of the chart-by-type map, and fill in the map.
+
+| Variables | Chart | Your example |
+|---|---|---|
+| 1 number | histogram | |
+| 2 numbers | scatter | |
+| 1 category | bar of counts | |
+| number by category | box plot | |
+| time | line (next classes) | |
+
+> Deliverable: the chart-by-type map filled with five graphs.

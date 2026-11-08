@@ -1,0 +1,179 @@
+---
+title: "Class 7. Joins, pivots and the Rosling chart"
+format: html
+---
+
+Replace each `___` with code, remove `#| eval: false` and run the chunk. Write answers under the chunks.
+
+**Question for today:** Can we build the Rosling chart and make it move?
+
+You need `data/gapminder_regions.csv` from class 6.
+
+```{r}
+#| label: setup
+pacman::p_load(here, tidyverse, nycflights13, gganimate, gifski)
+```
+
+## 1. Joins: the key has the same name
+
+Add the airline name to each flight, count the flights per airline and sort.
+
+```{r}
+#| label: join-airlines
+#| eval: false
+flights |>
+  left_join(___, by = "carrier") |>
+  count(___) |>
+  arrange(___)
+```
+
+Answer: [YOUR ANSWER HERE] flew the most flights.
+
+## 2. Joins: rows without a match
+
+Which carriers have flights with no row in `planes`? Count them by carrier.
+
+```{r}
+#| label: anti-planes
+#| eval: false
+flights |>
+  ___(planes, by = "tailnum") |>
+  count(carrier)
+```
+
+Answer: [YOUR ANSWER HERE]
+
+## 3. Joins: the key has two names
+
+Add the airport name of the origin. In `flights` the key is `origin`, in `airports` it is `faa`. Count flights per airport name.
+
+```{r}
+#| label: join-airports
+#| eval: false
+flights |>
+  left_join(airports, by = join_by(___ == ___)) |>
+  count(name)
+```
+
+## 4. Join a summary back to the table
+
+Which 5 countries are furthest above their continent mean in 2007?
+
+```{r}
+#| label: gap
+#| eval: false
+here("data", "gapminder_regions.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(year == 2007) |>
+  left_join(
+    here("data", "gapminder_regions.csv") |>
+      read_csv(show_col_types = FALSE) |>
+      filter(year == 2007) |>
+      group_by(continent) |>
+      summarize(continent_life = mean(life_exp)),
+    by = "___"
+  ) |>
+  mutate(gap = life_exp - continent_life) |>
+  select(country, continent, life_exp, continent_life, gap) |>
+  arrange(___) |>
+  head(5)
+```
+
+Answer: [YOUR ANSWER HERE]
+
+## 5. Pivot wider
+
+Median income by continent for 1952, 1982 and 2007 in wide format. Add a column `ratio`: 2007 divided by 1952.
+
+```{r}
+#| label: wider
+#| eval: false
+here("data", "gapminder_regions.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(year %in% c(1952, 1982, 2007)) |>
+  group_by(continent, year) |>
+  summarize(median_income = median(income), .groups = "drop") |>
+  pivot_wider(names_from = ___, values_from = ___) |>
+  mutate(ratio = ___ / ___)
+```
+
+Answer: Income grew [YOUR ANSWER HERE] times in [YOUR ANSWER HERE], the most of all continents.
+
+## 6. Pivot longer and plot
+
+Take the wide table back to long. Draw one line per continent.
+
+```{r}
+#| label: longer
+#| eval: false
+here("data", "gapminder_regions.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(year %in% c(1952, 1982, 2007)) |>
+  group_by(continent, year) |>
+  summarize(median_income = median(income), .groups = "drop") |>
+  pivot_wider(names_from = year, values_from = median_income) |>
+  pivot_longer(
+    cols = -___,
+    names_to = "year",
+    values_to = "median_income",
+    names_transform = as.integer
+  ) |>
+  ggplot(aes(x = year, y = median_income, color = continent)) +
+  geom_line(linewidth = 1)
+```
+
+## 7. The Rosling chart for 1982
+
+Color the circles by subregion.
+
+```{r}
+#| label: rosling-1982
+#| eval: false
+here("data", "gapminder_regions.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(year == ___) |>
+  ggplot(aes(x = income, y = life_exp, size = population, color = ___)) +
+  geom_point(alpha = 0.7) +
+  scale_x_log10() +
+  scale_size_area(max_size = 15) +
+  theme_minimal()
+```
+
+## 8. Panels for two years
+
+Show 1952 and 2007 side by side.
+
+```{r}
+#| label: facets
+#| eval: false
+here("data", "gapminder_regions.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(year %in% c(___, ___)) |>
+  ggplot(aes(x = income, y = life_exp, size = population, color = continent)) +
+  geom_point(alpha = 0.7) +
+  scale_x_log10() +
+  scale_size_area(max_size = 12) +
+  facet_wrap(~ ___) +
+  theme_minimal()
+```
+
+## 9. Animate Europe
+
+Color the circles by subregion.
+
+```{r}
+#| label: animate-europe
+#| eval: false
+here("data", "gapminder_regions.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(continent == "___") |>
+  ggplot(aes(x = income, y = life_exp, size = population, color = ___)) +
+  geom_point(alpha = 0.7) +
+  scale_x_log10() +
+  scale_size_area(max_size = 15) +
+  labs(title = "Year: {round(frame_time)}") +
+  theme_minimal() +
+  transition_time(___)
+```
+
+> Deliverable: the animated chart from section 9 and one sentence about what you see.

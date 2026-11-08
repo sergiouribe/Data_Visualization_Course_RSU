@@ -1,0 +1,57 @@
+---
+title: "Class 14. Render a report"
+author: "[your name]"
+date: today
+format:
+  html:
+    embed-resources: true   # one self-contained file to share
+    toc: true
+---
+
+## How this file works
+
+1. The block between the `---` lines is the **header** (YAML). It sets title, author, and output format.
+2. Text is written in Markdown.
+3. Code lives in **chunks**. Quarto runs each chunk and puts the output in the report.
+
+Click **Render** in RStudio. The report opens as an HTML file.
+
+## A chunk with a graph
+
+```{r}
+#| label: graph
+#| echo: false
+#| fig-cap: "Flipper length and body mass of 344 penguins."
+pacman::p_load(tidyverse, palmerpenguins)
+
+penguins |>
+  ggplot(aes(x = flipper_length_mm, y = body_mass_g, color = species)) +
+  geom_point() +
+  labs(title = "Penguins with longer flippers weigh more",
+       x = "Flipper length (mm)", y = "Body mass (g)", color = NULL) +
+  theme_minimal()
+```
+
+## Chunk options
+
+| Option | Effect |
+|---|---|
+| `#| echo: false` | Show the graph, hide the code |
+| `#| eval: false` | Show the code, do not run it |
+| `#| warning: false` | Hide warnings |
+| `#| fig-cap: "..."` | Add a figure caption |
+
+## Other formats
+
+Change `format:` in the header and render again:
+
+- `html`: web page
+- `pdf`: PDF (needs a LaTeX installation: run `quarto install tinytex`)
+- `docx`: Word file
+- `gfm`: Markdown for GitHub
+
+## Your turn
+
+1. Change the title and author.
+2. Render to HTML.
+3. Change `echo: false` to `echo: true` and render again. What changed?

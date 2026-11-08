@@ -1,0 +1,351 @@
+---
+title: "Split, apply, combine"
+subtitle: "[SZF_184 Data Visualisation and Storytelling](https://estudijas.rsu.lv/course/view.php?id=83740)"
+author: "Sergio Uribe"
+institute: "Rīga Stradiņš University"
+format:
+  revealjs:
+    theme: simple
+    slide-number: true
+    code-block-bg: true
+    highlight-style: github
+    footer: '<a href="https://estudijas.rsu.lv/course/view.php?id=83740">SZF_184</a> RSU · Uribe'
+    transition: fade
+execute:
+  echo: true
+  warning: false
+  message: false
+---
+
+```{r}
+#| label: setup
+#| include: false
+pacman::p_load(here, tidyverse, palmerpenguins)
+```
+
+## Our data
+
+```{r}
+# penguins comes with the palmerpenguins package
+penguins |>
+  glimpse()
+```
+
+---
+
+## Load the Gapminder table once
+
+```{r}
+# Used in topic 4. Every chunk after this one starts from rosling_tidy
+rosling_tidy <- read_csv(here("data", "rosling_tidy.csv"))
+```
+
+---
+
+# 0. One number for the whole table {background-color="#1a5276" style="color: white;"}
+
+**Missing values**
+
+---
+
+## The mean of a column
+
+```{r}
+penguins |>
+  summarize(mean_mass = mean(body_mass_g))
+```
+
+The result is `NA`. Some penguins have no body mass. R cannot compute a mean with unknown values, so it returns `NA`.
+
+---
+
+## na.rm = TRUE
+
+```{r}
+# na.rm = TRUE removes the missing values before the mean
+penguins |>
+  summarize(mean_mass = mean(body_mass_g, na.rm = TRUE))
+```
+
+One number describes all penguins: 4,202 g. We want one number for each species.
+
+---
+
+## Your turn 0 {background-color="#d5e8d4"}
+
+**Compute the mean flipper length of all penguins.**
+
+```{r}
+#| eval: false
+penguins |>
+  summarize(mean_flipper = mean(flipper_length_mm, ___ = TRUE))
+```
+
+Answer: [YOUR ANSWER HERE] mm.
+
+---
+
+# 1. Split, apply, combine {background-color="#1a5276" style="color: white;"}
+
+**One number for each group**
+
+---
+
+## Three steps
+
+| Step | Job | Code |
+|------|-----|------|
+| Split | Separate the rows into groups | `group_by(species)` |
+| Apply | Run a function on each group | `mean(body_mass_g)` |
+| Combine | Join the results in one table | `summarize()` |
+
+---
+
+## One mean per species
+
+```{r}
+# group_by() splits by species, mean() applies, summarize() combines
+penguins |>
+  group_by(species) |>
+  summarize(mean_mass = mean(body_mass_g, na.rm = TRUE))
+```
+
+The result has one row per species. Gentoo penguins weigh over 1,300 g more than the other two species.
+
+---
+
+## Your turn 1 {background-color="#d5e8d4"}
+
+**Compute the mean flipper length of each species.**
+
+```{r}
+#| eval: false
+penguins |>
+  group_by(___) |>
+  summarize(mean_flipper = mean(flipper_length_mm, na.rm = TRUE))
+```
+
+Answer: [YOUR ANSWER HERE] has the longest flippers.
+
+---
+
+# 2. Rows behind each mean {background-color="#1a5276" style="color: white;"}
+
+**n() and count()**
+
+---
+
+## How many penguins are behind each mean?
+
+```{r}
+# n() counts the rows of each group
+penguins |>
+  group_by(species) |>
+  summarize(n = n(), mean_mass = mean(body_mass_g, na.rm = TRUE))
+```
+
+---
+
+## count() gives the same n
+
+```{r}
+# count() splits and counts in one step
+penguins |>
+  count(species)
+```
+
+---
+
+## count() with two variables
+
+```{r}
+# One row for each combination of species and island
+penguins |>
+  count(species, island)
+```
+
+Adelie lives on three islands. Chinstrap lives only on Dream. Gentoo lives only on Biscoe.
+
+---
+
+## Your turn 2 {background-color="#d5e8d4"}
+
+**For each island, count the penguins and compute the mean bill length.**
+
+```{r}
+#| eval: false
+penguins |>
+  group_by(island) |>
+  summarize(n = ___, mean_bill = mean(bill_length_mm, na.rm = TRUE))
+```
+
+Answer: [YOUR ANSWER HERE] has the shortest bills.
+
+---
+
+# 3. Combine the verbs {background-color="#1a5276" style="color: white;"}
+
+**filter, group_by, summarize, arrange**
+
+---
+
+## Females only
+
+```{r}
+# filter() keeps the rows, group_by() splits, summarize() combines,
+# arrange() sorts the summary
+penguins |>
+  filter(sex == "female") |>
+  group_by(species) |>
+  summarize(n = n(), mean_mass = mean(body_mass_g, na.rm = TRUE)) |>
+  arrange(desc(mean_mass))
+```
+
+---
+
+## Your turn 3 {background-color="#d5e8d4"}
+
+**Males only: the mean flipper length of each species, from the longest to the shortest.**
+
+```{r}
+#| eval: false
+penguins |>
+  filter(sex == "___") |>
+  group_by(species) |>
+  summarize(n = n(), mean_flipper = mean(flipper_length_mm, na.rm = TRUE)) |>
+  arrange(___(mean_flipper))
+```
+
+Answer: [YOUR ANSWER HERE] is first, with [YOUR ANSWER HERE] mm.
+
+---
+
+# 4. Gapminder {background-color="#1a5276" style="color: white;"}
+
+**A mean of countries or of people?**
+
+---
+
+## Look at the data first
+
+```{r}
+rosling_tidy |>
+  glimpse()
+```
+
+One row for each country and year. `life_exp` is life expectancy in years. `population` is the number of people.
+
+---
+
+## One mean for Asia in 2007
+
+```{r}
+rosling_tidy |>
+  filter(year == 2007, continent == "Asia") |>
+  summarize(mean_life = mean(life_exp))
+```
+
+Is 70.7 years the life expectancy of a typical person in Asia?
+
+---
+
+## The countries behind the mean
+
+```{r}
+# The three largest countries of Asia
+rosling_tidy |>
+  filter(year == 2007, continent == "Asia") |>
+  arrange(desc(population)) |>
+  head(3)
+```
+
+```{r}
+# The three smallest countries of Asia
+rosling_tidy |>
+  filter(year == 2007, continent == "Asia") |>
+  arrange(population) |>
+  head(3)
+```
+
+`mean()` gives each country one vote. Bahrain (708,573 people) counts as much as China (1,318,683,096 people). The mean describes countries and misses most of the people.
+
+---
+
+## Fix it by hand: count each person once
+
+```{r}
+# Multiply each life expectancy by the population, add them up,
+# then divide by the total population
+rosling_tidy |>
+  filter(year == 2007, continent == "Asia") |>
+  summarize(mean_life_people = sum(life_exp * population) / sum(population))
+```
+
+A large country adds more to the sum, so it counts in proportion to its people. The result is 69.4 years.
+
+---
+
+## The shortcut: weighted.mean()
+
+```{r}
+# The values first, then the weights
+rosling_tidy |>
+  filter(year == 2007, continent == "Asia") |>
+  summarize(mean_life_people = weighted.mean(life_exp, population))
+```
+
+The result equals the previous slide: 69.4 years.
+
+---
+
+## All continents, both means
+
+```{r}
+rosling_tidy |>
+  filter(year == 2007) |>
+  group_by(continent) |>
+  summarize(
+    mean_countries = mean(life_exp),
+    mean_people = weighted.mean(life_exp, population)
+  )
+```
+
+Asia drops from 70.7 to 69.4 years. The Americas rise from 73.6 to 75.4 years.
+
+---
+
+## Your turn 4 {background-color="#d5e8d4"}
+
+**Which continent has the highest life expectancy for a typical person in 2007?**
+
+```{r}
+#| eval: false
+rosling_tidy |>
+  filter(year == 2007) |>
+  group_by(continent) |>
+  summarize(mean_people = weighted.mean(life_exp, ___)) |>
+  arrange(___(mean_people))
+```
+
+Answer: [YOUR ANSWER HERE] is first, with [YOUR ANSWER HERE] years.
+
+---
+
+## Recap {.smaller}
+
+| Task | Code |
+|------|------|
+| Ignore missing values | `mean(x, na.rm = TRUE)` |
+| One summary per group | `group_by(g) \|> summarize(...)` |
+| Rows in each group | `n()` or `count(g)` |
+| Count by two variables | `count(g1, g2)` |
+| Filter, group, summarize, sort | `filter() \|> group_by() \|> summarize() \|> arrange()` |
+| Mean that counts each person once | `weighted.mean(x, weights)` |
+
+---
+
+## {background-color="#1a5276" style="color: white; text-align: center;"}
+
+<br><br>
+
+### See you in the next class!

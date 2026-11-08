@@ -1,0 +1,35 @@
+# R-specific
+.Rhistory
+.Rdata
+.RData
+.Ruserdata
+.Rproj.user/
+
+# RStudio project files (keep, but ignore user-specific)
+*.Rproj.user
+
+# Rendered outputs (these should be regenerated)
+*.html
+*.pdf
+*.docx
+
+# Temporary files
+*~
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Data files (if too large)
+# data/*.csv
+# data/*.xlsx
+
+# Output files (regenerate as needed)
+output/
+
+# Credentials and secrets
+.Renviron
+.env
+credentials.json

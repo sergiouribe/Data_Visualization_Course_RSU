@@ -1,0 +1,140 @@
+---
+title: "Class 7. Joins, pivots and the Rosling chart (solutions)"
+format: html
+---
+
+Teacher version. It needs `data/gapminder_regions.csv` from class 6.
+
+```{r}
+#| label: setup
+pacman::p_load(here, tidyverse, nycflights13, gganimate, gifski)
+```
+
+## 1. Joins: the key has the same name
+
+```{r}
+#| label: join-airlines
+flights |>
+  left_join(airlines, by = "carrier") |>
+  count(name) |>
+  arrange(desc(n))
+```
+
+## 2. Joins: rows without a match
+
+```{r}
+#| label: anti-planes
+flights |>
+  anti_join(planes, by = "tailnum") |>
+  count(carrier)
+```
+
+## 3. Joins: the key has two names
+
+```{r}
+#| label: join-airports
+flights |>
+  left_join(airports, by = join_by(origin == faa)) |>
+  count(name)
+```
+
+## 4. Join a summary back to the table
+
+```{r}
+#| label: gap
+here("data", "gapminder_regions.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(year == 2007) |>
+  left_join(
+    here("data", "gapminder_regions.csv") |>
+      read_csv(show_col_types = FALSE) |>
+      filter(year == 2007) |>
+      group_by(continent) |>
+      summarize(continent_life = mean(life_exp)),
+    by = "continent"
+  ) |>
+  mutate(gap = life_exp - continent_life) |>
+  select(country, continent, life_exp, continent_life, gap) |>
+  arrange(desc(gap)) |>
+  head(5)
+```
+
+## 5. Pivot wider
+
+```{r}
+#| label: wider
+here("data", "gapminder_regions.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(year %in% c(1952, 1982, 2007)) |>
+  group_by(continent, year) |>
+  summarize(median_income = median(income), .groups = "drop") |>
+  pivot_wider(names_from = year, values_from = median_income) |>
+  mutate(ratio = `2007` / `1952`)
+```
+
+## 6. Pivot longer and plot
+
+```{r}
+#| label: longer
+here("data", "gapminder_regions.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(year %in% c(1952, 1982, 2007)) |>
+  group_by(continent, year) |>
+  summarize(median_income = median(income), .groups = "drop") |>
+  pivot_wider(names_from = year, values_from = median_income) |>
+  pivot_longer(
+    cols = -continent,
+    names_to = "year",
+    values_to = "median_income",
+    names_transform = as.integer
+  ) |>
+  ggplot(aes(x = year, y = median_income, color = continent)) +
+  geom_line(linewidth = 1)
+```
+
+## 7. The Rosling chart for 1982
+
+```{r}
+#| label: rosling-1982
+here("data", "gapminder_regions.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(year == 1982) |>
+  ggplot(aes(x = income, y = life_exp, size = population, color = subregion)) +
+  geom_point(alpha = 0.7) +
+  scale_x_log10() +
+  scale_size_area(max_size = 15) +
+  theme_minimal()
+```
+
+## 8. Panels for two years
+
+```{r}
+#| label: facets
+here("data", "gapminder_regions.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(year %in% c(1952, 2007)) |>
+  ggplot(aes(x = income, y = life_exp, size = population, color = continent)) +
+  geom_point(alpha = 0.7) +
+  scale_x_log10() +
+  scale_size_area(max_size = 12) +
+  facet_wrap(~ year) +
+  theme_minimal()
+```
+
+## 9. Animate Europe
+
+```{r}
+#| label: animate-europe
+#| fig-width: 8
+#| fig-height: 5
+here("data", "gapminder_regions.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(continent == "Europe") |>
+  ggplot(aes(x = income, y = life_exp, size = population, color = subregion)) +
+  geom_point(alpha = 0.7) +
+  scale_x_log10() +
+  scale_size_area(max_size = 15) +
+  labs(title = "Year: {round(frame_time)}") +
+  theme_minimal() +
+  transition_time(year)
+```

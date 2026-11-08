@@ -1,0 +1,84 @@
+---
+title: "Class 5. Tidy data: from wide to long"
+format: html
+---
+
+**Question for today:** How did life expectancy change in five countries since 1952?
+
+```{r}
+#| label: setup
+pacman::p_load(tidyverse, here)
+```
+
+## Tidy data rules
+
+1. Each variable is a column.
+2. Each observation is a row.
+3. Each value is a cell.
+
+## 1. Read the wide table
+
+```{r}
+#| label: read-wide
+# Years are column names. This table is wide.
+here("data", "life_expectancy_wide.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  glimpse()
+```
+
+## 2. Try to plot it
+
+We want `year` on the x axis, but `year` is not a column. ggplot cannot draw this table as it is.
+
+## 3. pivot_longer(): wide to long
+
+```{r}
+#| label: pivot
+here("data", "life_expectancy_wide.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  pivot_longer(
+    cols = `1952`:`2007`,       # the year columns
+    names_to = "year",          # old column names go here
+    values_to = "life_exp",     # old cell values go here
+    names_transform = as.integer
+  ) |>
+  glimpse()
+```
+
+## 4. Time variable: line plot
+
+```{r}
+#| label: line
+here("data", "life_expectancy_wide.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  pivot_longer(`1952`:`2007`, names_to = "year", values_to = "life_exp",
+               names_transform = as.integer) |>
+  filter(country %in% c("Finland", "Sweden", "Poland", "Japan", "Brazil")) |>
+  ggplot(aes(x = year, y = life_exp, color = country)) +
+  geom_line()
+```
+
+## 5. case_when(): make a category from a number
+
+```{r}
+#| label: case-when
+# Group countries by life expectancy in 2007, then count them
+here("data", "life_expectancy_wide.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  pivot_longer(`1952`:`2007`, names_to = "year", values_to = "life_exp",
+               names_transform = as.integer) |>
+  filter(year == 2007) |>
+  mutate(life_group = case_when(
+    life_exp < 60 ~ "Under 60",
+    life_exp < 75 ~ "60 to 74",
+    .default = "75 or more"
+  )) |>
+  ggplot(aes(x = life_group)) +
+  geom_bar()
+```
+
+## 6. Your turn
+
+Pick five other countries. Describe the largest change in one sentence.
+
+> Deliverable: a reshaped table and a line plot of five countries.

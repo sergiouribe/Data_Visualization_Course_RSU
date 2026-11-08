@@ -1,0 +1,699 @@
+---
+title: "Class 7. Joins, pivots and the Rosling chart"
+subtitle: "[SZF_184 Data Visualisation and Storytelling](https://estudijas.rsu.lv/course/view.php?id=83740)"
+author: "Sergio Uribe"
+institute: "Rīga Stradiņš University"
+format:
+  revealjs:
+    theme: simple
+    slide-number: true
+    code-block-bg: true
+    highlight-style: github
+    footer: '<a href="https://estudijas.rsu.lv/course/view.php?id=83740">SZF_184</a> RSU · Uribe'
+    transition: fade
+execute:
+  echo: true
+  warning: false
+  message: false
+---
+
+```{r}
+#| label: setup
+#| include: false
+pacman::p_load(here, tidyverse, nycflights13, gganimate, gifski)
+```
+
+## Today
+
+**Question:** Can we build the Rosling chart and make it move?
+
+| Step | What we do |
+|------|-----------|
+| 1 | Join two tables with a key |
+| 2 | Pivot a summary table: long to wide and back |
+| 3 | Draw the Gapminder graphs |
+| 4 | Animate the Rosling chart |
+
+Data: `band_members` and `nycflights13` for joins, the Gapminder table from class 6 for the rest.
+
+---
+
+# 1. Joins {background-color="#1a5276" style="color: white;"}
+
+**Put two tables together**
+
+---
+
+## Two tables and one key
+
+```{r}
+# Who is in which band
+band_members
+```
+
+```{r}
+# Who plays which instrument
+band_instruments
+```
+
+The key is `name`. Mick has no instrument. Keith has no band.
+
+---
+
+## left_join(): keep every row of the left table
+
+```{r}
+band_members |>
+  left_join(band_instruments, by = "name")
+```
+
+Mick stays, with `NA` for the instrument. Keith disappears.
+
+---
+
+## inner_join(): keep only the matches
+
+```{r}
+band_members |>
+  inner_join(band_instruments, by = "name")
+```
+
+Mick and Keith both disappear.
+
+---
+
+## full_join(): keep every row of both tables
+
+```{r}
+band_members |>
+  full_join(band_instruments, by = "name")
+```
+
+---
+
+## Two joins that only filter
+
+```{r}
+# semi_join: rows of the left table that have a match
+band_members |>
+  semi_join(band_instruments, by = "name")
+```
+
+```{r}
+# anti_join: rows of the left table that have no match
+band_members |>
+  anti_join(band_instruments, by = "name")
+```
+
+---
+
+## Which join? {.smaller}
+
+| Join | Keeps | New columns |
+|------|-------|-------------|
+| `left_join()` | all rows of the left table | yes |
+| `inner_join()` | rows with a match in both | yes |
+| `full_join()` | all rows of both tables | yes |
+| `semi_join()` | rows of the left table with a match | no |
+| `anti_join()` | rows of the left table without a match | no |
+
+Start with `left_join()`. It never drops rows of the table you care about.
+
+---
+
+## The key has a different name in each table
+
+```{r}
+band_instruments2
+```
+
+```{r}
+#| error: true
+# The column is called artist here, not name
+band_members |>
+  left_join(band_instruments2, by = "name")
+```
+
+---
+
+## join_by() matches two different names
+
+```{r}
+band_members |>
+  left_join(band_instruments2, by = join_by(name == artist))
+```
+
+---
+
+## A real case: flights and airlines
+
+```{r}
+# flights has the carrier code only
+flights |>
+  select(carrier, flight, dep_delay) |>
+  head(3)
+```
+
+```{r}
+# airlines holds the name of each code
+airlines |>
+  head(3)
+```
+
+---
+
+## Add the airline name
+
+```{r}
+flights |>
+  select(carrier, flight, dep_delay) |>
+  left_join(airlines, by = "carrier") |>
+  head(4)
+```
+
+---
+
+## Check the row count after a join
+
+```{r}
+# A left_join must keep the 336,776 rows of flights
+flights |>
+  left_join(airlines, by = "carrier") |>
+  count()
+```
+
+More rows mean the key repeats in the right table. Fewer rows mean the join dropped rows.
+
+---
+
+## Join, then split, apply, combine
+
+```{r}
+# Mean departure delay by airline name
+flights |>
+  left_join(airlines, by = "carrier") |>
+  group_by(name) |>
+  summarize(mean_dep_delay = mean(dep_delay, na.rm = TRUE)) |>
+  arrange(desc(mean_dep_delay)) |>
+  head(5)
+```
+
+---
+
+## Airports: the key has two names again
+
+```{r}
+# dest in flights, faa in airports
+flights |>
+  select(dest, dep_delay) |>
+  left_join(airports, by = join_by(dest == faa)) |>
+  select(dest, name, dep_delay) |>
+  head(4)
+```
+
+---
+
+## Which destinations have no row in airports?
+
+```{r}
+flights |>
+  anti_join(airports, by = join_by(dest == faa)) |>
+  distinct(dest)
+```
+
+---
+
+## Your turn 1 {background-color="#d5e8d4"}
+
+**Which airline flew the most flights from New York in 2013?**
+
+Add the airline name, count flights per name and sort.
+
+```{r}
+#| eval: false
+flights |>
+  left_join(___, by = "carrier") |>
+  count(___) |>
+  arrange(___)
+```
+
+---
+
+## Your turn 2 {background-color="#d5e8d4"}
+
+**Which carriers have flights with no row in `planes`?** Count them by carrier.
+
+```{r}
+#| eval: false
+flights |>
+  ___(planes, by = "tailnum") |>
+  count(carrier)
+```
+
+---
+
+## Gapminder: a summary table to join back
+
+```{r}
+# Mean life expectancy of each continent in 2007
+here("data", "gapminder_regions.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(year == 2007) |>
+  group_by(continent) |>
+  summarize(continent_life = mean(life_exp))
+```
+
+---
+
+## Join the summary to every country
+
+```{r}
+# Which countries are far below their continent mean?
+here("data", "gapminder_regions.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(year == 2007) |>
+  left_join(
+    here("data", "gapminder_regions.csv") |>
+      read_csv(show_col_types = FALSE) |>
+      filter(year == 2007) |>
+      group_by(continent) |>
+      summarize(continent_life = mean(life_exp)),
+    by = "continent"
+  ) |>
+  mutate(gap = life_exp - continent_life) |>
+  select(country, continent, life_exp, continent_life, gap) |>
+  arrange(gap) |>
+  head(5)
+```
+
+---
+
+## Your turn 3 {background-color="#d5e8d4"}
+
+**Which 5 countries are furthest above their continent mean in 2007?**
+
+Change one line of the previous chunk.
+
+```{r}
+#| eval: false
+here("data", "gapminder_regions.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(year == 2007) |>
+  left_join(
+    here("data", "gapminder_regions.csv") |>
+      read_csv(show_col_types = FALSE) |>
+      filter(year == 2007) |>
+      group_by(continent) |>
+      summarize(continent_life = mean(life_exp)),
+    by = "continent"
+  ) |>
+  mutate(gap = life_exp - continent_life) |>
+  select(country, continent, life_exp, continent_life, gap) |>
+  arrange(___) |>
+  head(5)
+```
+
+---
+
+# 2. Pivots {background-color="#1a5276" style="color: white;"}
+
+**Long and wide tables**
+
+---
+
+## Long: one row per continent and year
+
+```{r}
+here("data", "gapminder_regions.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(year %in% c(1952, 1982, 2007)) |>
+  group_by(continent, year) |>
+  summarize(life_exp = weighted.mean(life_exp, population), .groups = "drop")
+```
+
+A reader cannot compare the years at a glance.
+
+---
+
+## pivot_wider(): one column per year
+
+```{r}
+# names_from: the column whose values become column names
+# values_from: the column that fills the cells
+here("data", "gapminder_regions.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(year %in% c(1952, 1982, 2007)) |>
+  group_by(continent, year) |>
+  summarize(life_exp = weighted.mean(life_exp, population), .groups = "drop") |>
+  pivot_wider(names_from = year, values_from = life_exp)
+```
+
+---
+
+## The wide table lets us calculate across columns
+
+```{r}
+# Backticks: the column names are numbers
+here("data", "gapminder_regions.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(year %in% c(1952, 1982, 2007)) |>
+  group_by(continent, year) |>
+  summarize(life_exp = weighted.mean(life_exp, population), .groups = "drop") |>
+  pivot_wider(names_from = year, values_from = life_exp) |>
+  mutate(change = `2007` - `1952`) |>
+  arrange(desc(change))
+```
+
+---
+
+## pivot_longer(): back to long
+
+ggplot needs the long shape.
+
+```{r}
+# cols: the columns to stack. -continent means all columns except continent
+here("data", "gapminder_regions.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(year %in% c(1952, 1982, 2007)) |>
+  group_by(continent, year) |>
+  summarize(life_exp = weighted.mean(life_exp, population), .groups = "drop") |>
+  pivot_wider(names_from = year, values_from = life_exp) |>
+  pivot_longer(
+    cols = -continent,
+    names_to = "year",
+    values_to = "life_exp"
+  )
+```
+
+---
+
+## The year is now text. How to get a number?
+
+```{r}
+# names_transform = as.integer turns the text into a number
+here("data", "gapminder_regions.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(year %in% c(1952, 1982, 2007)) |>
+  group_by(continent, year) |>
+  summarize(life_exp = weighted.mean(life_exp, population), .groups = "drop") |>
+  pivot_wider(names_from = year, values_from = life_exp) |>
+  pivot_longer(
+    cols = -continent,
+    names_to = "year",
+    values_to = "life_exp",
+    names_transform = as.integer
+  ) |>
+  head(4)
+```
+
+---
+
+## Which shape? {.smaller}
+
+| Task | Shape |
+|------|-------|
+| Plot with ggplot2, group, filter, join | long |
+| Show a table to a reader who compares columns | wide |
+| Calculate a difference or a ratio between two years | wide |
+
+---
+
+## Your turn 4 {background-color="#d5e8d4"}
+
+**Median income by continent for 1952, 1982 and 2007, in wide format. Add a column `ratio`: 2007 divided by 1952.**
+
+```{r}
+#| eval: false
+here("data", "gapminder_regions.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(year %in% c(1952, 1982, 2007)) |>
+  group_by(continent, year) |>
+  summarize(median_income = median(income), .groups = "drop") |>
+  pivot_wider(names_from = ___, values_from = ___) |>
+  mutate(ratio = ___ / ___)
+```
+
+---
+
+## Your turn 5 {background-color="#d5e8d4"}
+
+**Take the wide table back to long and draw one line per continent.**
+
+```{r}
+#| eval: false
+here("data", "gapminder_regions.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(year %in% c(1952, 1982, 2007)) |>
+  group_by(continent, year) |>
+  summarize(median_income = median(income), .groups = "drop") |>
+  pivot_wider(names_from = year, values_from = median_income) |>
+  pivot_longer(
+    cols = -___,
+    names_to = "year",
+    values_to = "median_income",
+    names_transform = as.integer
+  ) |>
+  ggplot(aes(x = year, y = median_income, color = continent)) +
+  geom_line(linewidth = 1)
+```
+
+---
+
+# 3. Gapminder graphs {background-color="#1a5276" style="color: white;"}
+
+**From many lines to the Rosling chart**
+
+---
+
+## One line per country
+
+```{r}
+here("data", "gapminder_regions.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  ggplot(aes(x = year, y = life_exp, group = country)) +
+  geom_line(alpha = 0.3)
+```
+
+`group = country` draws one line per country.
+
+---
+
+## Which lines belong to which continent?
+
+```{r}
+here("data", "gapminder_regions.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  ggplot(aes(x = year, y = life_exp, group = country, color = continent)) +
+  geom_line(alpha = 0.4)
+```
+
+---
+
+## One panel per continent
+
+```{r}
+# facet_wrap() splits the plot in panels
+here("data", "gapminder_regions.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  ggplot(aes(x = year, y = life_exp, group = country)) +
+  geom_line(alpha = 0.4) +
+  facet_wrap(~ continent)
+```
+
+---
+
+## Rosling, step 1: two numbers
+
+```{r}
+here("data", "gapminder_regions.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(year == 2007) |>
+  ggplot(aes(x = income, y = life_exp)) +
+  geom_point()
+```
+
+Most countries sit on the left. The rich countries stretch the axis.
+
+---
+
+## Rosling, step 2: a log axis
+
+```{r}
+# A log axis gives each doubling of income the same width
+here("data", "gapminder_regions.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(year == 2007) |>
+  ggplot(aes(x = income, y = life_exp)) +
+  geom_point() +
+  scale_x_log10()
+```
+
+---
+
+## Rosling, step 3: size and color
+
+```{r}
+# size = people, color = continent
+# scale_size_area() makes the circle area proportional to population
+here("data", "gapminder_regions.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(year == 2007) |>
+  ggplot(aes(x = income, y = life_exp, size = population, color = continent)) +
+  geom_point(alpha = 0.7) +
+  scale_x_log10() +
+  scale_size_area(max_size = 15)
+```
+
+---
+
+## Rosling, step 4: labels, theme and readable colors
+
+```{r}
+here("data", "gapminder_regions.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(year == 2007) |>
+  ggplot(aes(x = income, y = life_exp, size = population, color = continent)) +
+  geom_point(alpha = 0.7) +
+  scale_x_log10() +
+  scale_size_area(max_size = 15) +
+  scale_color_viridis_d() +
+  labs(x = "Income per person", y = "Life expectancy", title = "2007") +
+  theme_minimal()
+```
+
+---
+
+## Two years, two panels
+
+```{r}
+here("data", "gapminder_regions.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(year %in% c(1952, 2007)) |>
+  ggplot(aes(x = income, y = life_exp, size = population, color = continent)) +
+  geom_point(alpha = 0.7) +
+  scale_x_log10() +
+  scale_size_area(max_size = 12) +
+  scale_color_viridis_d() +
+  facet_wrap(~ year) +
+  theme_minimal()
+```
+
+Panels show two years. Twelve years need another idea.
+
+---
+
+## Your turn 6 {background-color="#d5e8d4"}
+
+**Draw the Rosling chart for 1982. Color the circles by subregion.**
+
+```{r}
+#| eval: false
+here("data", "gapminder_regions.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(year == ___) |>
+  ggplot(aes(x = income, y = life_exp, size = population, color = ___)) +
+  geom_point(alpha = 0.7) +
+  scale_x_log10() +
+  scale_size_area(max_size = 15) +
+  theme_minimal()
+```
+
+---
+
+# 4. Animation {background-color="#1a5276" style="color: white;"}
+
+**Time on the screen instead of in panels**
+
+---
+
+## gganimate: one new line
+
+`transition_time(year)` draws one frame per year and moves the circles between frames. The text `{round(frame_time)}` in the title shows the current year.
+
+```{r}
+#| fig-width: 8
+#| fig-height: 5
+here("data", "gapminder_regions.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  ggplot(aes(x = income, y = life_exp, size = population, color = continent)) +
+  geom_point(alpha = 0.7) +
+  scale_x_log10() +
+  scale_size_area(max_size = 15) +
+  scale_color_viridis_d() +
+  labs(title = "Year: {round(frame_time)}", x = "Income per person", y = "Life expectancy") +
+  theme_minimal() +
+  transition_time(year)
+```
+
+---
+
+## Lines that grow: transition_reveal()
+
+```{r}
+#| fig-width: 8
+#| fig-height: 5
+here("data", "gapminder_regions.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  group_by(continent, year) |>
+  summarize(life_exp = weighted.mean(life_exp, population), .groups = "drop") |>
+  ggplot(aes(x = year, y = life_exp, color = continent)) +
+  geom_line(linewidth = 1) +
+  geom_point(size = 3) +
+  scale_color_viridis_d() +
+  theme_minimal() +
+  transition_reveal(year)
+```
+
+---
+
+## Save the animation
+
+```r
+# Saves the last animation as a GIF in the output folder
+anim_save(here("output", "rosling.gif"))
+```
+
+Put the GIF in a slide, a web page or an email.
+
+---
+
+## Your turn 7 {background-color="#d5e8d4"}
+
+**Animate Europe only. Color the circles by subregion.**
+
+```{r}
+#| eval: false
+here("data", "gapminder_regions.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(continent == "___") |>
+  ggplot(aes(x = income, y = life_exp, size = population, color = ___)) +
+  geom_point(alpha = 0.7) +
+  scale_x_log10() +
+  scale_size_area(max_size = 15) +
+  labs(title = "Year: {round(frame_time)}") +
+  theme_minimal() +
+  transition_time(___)
+```
+
+---
+
+## Recap {.smaller}
+
+| Task | Code |
+|------|------|
+| Keep all rows of the left table | `left_join(x, by = "key")` |
+| Keys with different names | `join_by(a == b)` |
+| Find rows without a match | `anti_join()` |
+| Long to wide | `pivot_wider(names_from, values_from)` |
+| Wide to long | `pivot_longer(cols, names_to, values_to)` |
+| One line per group | `group = country` |
+| Panels | `facet_wrap(~ continent)` |
+| Animation | `transition_time(year)` |
+
+---
+
+## {background-color="#1a5276" style="color: white; text-align: center;"}
+
+<br><br>
+
+### See you next class!

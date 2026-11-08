@@ -1,0 +1,114 @@
+---
+title: "Class 12. Tell: message, title, annotation, export (solutions)"
+format: html
+---
+
+**Rule 5, Tell:** the title states the finding. An annotation points to the evidence.
+
+```{r}
+#| label: setup
+pacman::p_load(tidyverse, ggrepel, here)
+```
+
+## 1. The one-sentence message (10 minutes, in pairs)
+
+Write one sentence that states what the chart shows. Use numbers. Your partner reads the chart and says the message in their words. Compare the two sentences.
+
+| Topic title | Active title |
+|---|---|
+| Life expectancy and income in 2007 | In 2007, countries above $10,000 per person lived 15 years longer, on average, than the others |
+
+A title that is too long runs off the plot. Break it with `\n`.
+
+Check the numbers before you write them:
+
+```{r}
+#| label: check-message
+here("data", "rosling_tidy.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(year == 2007) |>
+  mutate(group = case_when(income > 10000 ~ "Above $10,000", .default = "Below $10,000")) |>
+  group_by(group) |>
+  summarize(countries = n(), mean_life_exp = mean(life_exp))
+```
+
+Answer: 54 countries above $10,000 have a mean of 76 years. 88 countries below have a mean of 61 years. The difference is 15 years.
+
+## 2. Title, subtitle, source and annotation
+
+`labs()` sets the text. `\n` starts a new line. `annotate()` adds a note at x and y positions of the data.
+
+```{r}
+#| label: tell
+here("data", "rosling_tidy.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(year == 2007) |>
+  ggplot(aes(x = income, y = life_exp, size = population, color = continent)) +
+  geom_point(alpha = 0.7) +
+  geom_vline(xintercept = 10000, linetype = "dashed", color = "gray40") +
+  annotate("text", x = 10500, y = 45, label = "$10,000 per person",
+           hjust = 0, color = "gray30") +
+  scale_x_log10(labels = scales::label_dollar(accuracy = 1)) +
+  scale_size_area(max_size = 12, guide = "none") +
+  scale_color_viridis_d() +
+  labs(
+    title = "In 2007, countries above $10,000 per person\nlived 15 years longer, on average",
+    subtitle = "Life expectancy at birth by income per person (log scale).\nCircle area shows population.",
+    x = "Income per person (international dollars)",
+    y = "Life expectancy (years)",
+    color = NULL,
+    caption = "Source: Gapminder"
+  ) +
+  theme_minimal(base_size = 14) +
+  theme(plot.title = element_text(face = "bold"), legend.position = "bottom",
+        plot.title.position = "plot")
+```
+
+## 3. Your theme in 3 lines
+
+Copy these three lines to the end of every chart in your capstone. All your graphs then share one look.
+
+```r
+theme_minimal(base_size = 14) +
+  theme(plot.title = element_text(face = "bold"),
+        plot.title.position = "plot",
+        legend.position = "bottom")
+```
+
+## 4. Export with ggsave()
+
+`ggsave()` saves the last plot you drew. Set the size and the resolution.
+
+```{r}
+#| label: export
+#| eval: false
+ggsave(here("rosling_2007.png"), width = 8, height = 5.5, dpi = 300)
+```
+
+Open the PNG. Check that the title fits and that no text overlaps.
+
+## 5. Optional: animate the years
+
+`transition_time(year)` adds one frame per year. Printing the plot renders the animation. This step needs `gganimate` and `gifski`; if the install fails, skip it.
+
+```{r}
+#| label: animate
+#| eval: false
+pacman::p_load(gganimate, gifski)
+
+here("data", "rosling_tidy.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  ggplot(aes(x = income, y = life_exp, size = population, color = continent)) +
+  geom_point(alpha = 0.7) +
+  scale_x_log10(labels = scales::label_dollar(accuracy = 1)) +
+  scale_size_area(max_size = 12, guide = "none") +
+  scale_color_viridis_d() +
+  labs(title = "Year: {round(frame_time)}",
+       x = "Income per person (international dollars)",
+       y = "Life expectancy (years)", color = NULL) +
+  theme_minimal(base_size = 14) +
+  theme(plot.title = element_text(face = "bold"), legend.position = "bottom") +
+  transition_time(year)
+```
+
+> Deliverable: the exported PNG with an active title, an annotation and your three-line theme.

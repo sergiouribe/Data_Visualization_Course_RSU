@@ -1,0 +1,126 @@
+---
+title: "Class 6. Split, apply, combine (solutions)"
+format: html
+---
+
+Teacher version. Chunks run, so the data must exist: run sections 1 and 2 first.
+
+```{r}
+#| label: setup
+pacman::p_load(here, tidyverse, janitor, countrycode)
+```
+
+## 1. Download the CSV once
+
+```{r}
+#| label: download
+#| eval: false
+read_csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vQMKvrshkL1R55vcnXnXQ14VfJM6HB62bed8U6ukVc-9ncRg79co2GoaS84eb1o4aEg1bqLFiWNJAS3/pub?gid=554197504&single=true&output=csv") |>
+  write_csv(here("data", "gapminder.csv"))
+```
+
+## 2. Add continent and subregion
+
+```{r}
+#| label: prepare
+here("data", "gapminder.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  clean_names() |>
+  rename(population = pop, income = gdp_percap) |>
+  mutate(
+    continent = countrycode(country, origin = "country.name", destination = "continent"),
+    subregion = countrycode(country, origin = "country.name", destination = "un.regionsub.name"),
+    .after = country
+  ) |>
+  write_csv(here("data", "gapminder_regions.csv"))
+```
+
+## 3. Check
+
+```{r}
+#| label: check
+here("data", "gapminder_regions.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(is.na(continent)) |>
+  distinct(country)
+```
+
+If a name appears, `countrycode` did not recognise it. Fix it with `custom_match = c("Name in the file" = "Europe")` inside `countrycode()`.
+
+## 4. A third column
+
+```{r}
+#| label: wb-region
+here("data", "gapminder.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  clean_names() |>
+  mutate(
+    wb_region = countrycode(country, origin = "country.name", destination = "region")
+  ) |>
+  distinct(wb_region)
+```
+
+## 5. Count
+
+```{r}
+#| label: count-subregion
+here("data", "gapminder_regions.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(year == 2007) |>
+  count(subregion) |>
+  arrange(desc(n))
+```
+
+## 6. Mean of countries and mean of people
+
+```{r}
+#| label: weighted
+here("data", "gapminder_regions.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(year == 2007) |>
+  group_by(continent) |>
+  summarize(
+    mean_life = mean(life_exp),
+    weighted_life = weighted.mean(life_exp, population)
+  )
+```
+
+Large countries (China, India) pull the weighted mean of Asia away from the mean of countries. Ask which number answers "how long does a person in Asia live?".
+
+## 7. Life expectancy by continent over time
+
+```{r}
+#| label: line
+here("data", "gapminder_regions.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  group_by(continent, year) |>
+  summarize(life_exp = weighted.mean(life_exp, population), .groups = "drop") |>
+  ggplot(aes(x = year, y = life_exp, color = continent)) +
+  geom_line(linewidth = 1)
+```
+
+## 8. Median income, 1952 and 2007
+
+```{r}
+#| label: income
+here("data", "gapminder_regions.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(year %in% c(1952, 2007)) |>
+  group_by(continent, year) |>
+  summarize(median_income = median(income), .groups = "drop") |>
+  ggplot(aes(x = continent, y = median_income, fill = factor(year))) +
+  geom_col(position = "dodge")
+```
+
+## 9. The subregions of Europe
+
+```{r}
+#| label: europe
+here("data", "gapminder_regions.csv") |>
+  read_csv(show_col_types = FALSE) |>
+  filter(continent == "Europe") |>
+  group_by(subregion, year) |>
+  summarize(life_exp = weighted.mean(life_exp, population), .groups = "drop") |>
+  ggplot(aes(x = year, y = life_exp, color = subregion)) +
+  geom_line(linewidth = 1)
+```

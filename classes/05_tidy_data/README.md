@@ -1,0 +1,39 @@
+# Class 05. Tidy data
+
+**When:** Sat 17 Oct 2026, 12:30-14:00 (in person, 90 min)  
+**Data:** Gapminder wide (life expectancy)
+
+**Goal:** Students reshape a wide table and draw a line plot.
+
+## Plan
+
+| Minutes | Activity |
+|---|---|
+| 0-15 | Three rules of tidy data. Show why the wide table cannot be plotted. |
+| 15-45 | `pivot_longer()` step by step: `cols`, `names_to`, `values_to`. |
+| 45-65 | Line plot of five countries. Time variable on the x axis. |
+| 65-80 | `case_when()`: turn life expectancy into three groups and count them with `geom_bar()`. |
+| 80-90 | Students pick five other countries and describe the largest change. |
+
+## Reading
+
+Individual work (about 30 minutes). Read it before the class if possible:
+
+- Broman and Woo, [Data organization in spreadsheets](https://peerj.com/preprints/3183v1/).
+- [R4DS 2e](https://r4ds.hadley.nz/), chapter 5, Data tidying.
+
+## Deliverable
+
+Reshaped table, a line plot of five countries, and a bar chart of life-expectancy groups.
+
+## Files
+
+- [05_tidy_data.qmd](05_tidy_data.qmd)
+- [05_exercise_wide_to_long.qmd](05_exercise_wide_to_long.qmd): short exercise. Reshape life expectancy of Estonia, Latvia and Lithuania from wide to long and plot it. Data from `https://bit.ly/wide_to_long`. Teacher version: [05_exercise_wide_to_long_solutions.qmd](05_exercise_wide_to_long_solutions.qmd).
+- [Add the continent to each country](../08_pivoting/08_homework_add_continent.qmd): moved to the homework of class 8.
+
+## Notes
+
+`data/life_expectancy_wide.csv` comes from `data-raw/make_wide.R`.
+
+The link `https://bit.ly/wide_to_long` points to `https://raw.githubusercontent.com/sergiouribe/Data_Visualization_Course_RSU/main/data/gapminder_life_expectancy_wide.csv` (the `main` branch).
