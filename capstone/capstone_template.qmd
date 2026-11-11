@@ -7,75 +7,86 @@ format:
     toc: true
 ---
 
+## Packages
+
+```{r}
+# install pacman if it is not installed
+if (!requireNamespace("pacman", quietly = TRUE)) install.packages("pacman")
+```
+
 ```{r}
 #| label: setup
+# Load the packages
 pacman::p_load(tidyverse, here, janitor)
 ```
 
-## M1. Ask (class 15)
+## 1. Question
 
-**Question:** [one question that names a number, a group, and a period]
+**Aim:** ask one question that the data can answer. It names a group, a measure and a period.
 
-**Expected message:** [one sentence]
+**Question:** \[write here\]
 
-**Source:** [dataset name and link]
+## 2. Dataset
 
-```{r}
-#| label: import
-#| eval: false
-# Replace the path with your file in the data/ folder
-here("data", "my_data.csv") |>
-  read_csv(show_col_types = FALSE) |>
-  clean_names() |>
-  glimpse()
-```
+**Aim:** find a dataset that can answer the question. Keep the original file in `data/raw/` and fill in `SOURCE.md`.
 
-Data quality: run the five checks of the [data quality checklist](data_quality_checklist.md) and write one line per check.
+**Dataset name and link:** \[write here\]
+
+**Why this dataset can answer the question:** \[one sentence\]
+
+## 3. Basic data exploration
+
+**Aim:** know your data before you plot it. Write the code yourself, and write one line under each check that says what you found.
+
+Data quality checks:
+
+1.  **Types.** Numbers are numbers, categories are text or factors, dates are dates.
+
+    Finding: \[one line\]
+
+2.  **Missing values.** Count how many, in which columns, and why. Do not replace `NA` with 0.
+
+    Finding: \[one line\]
+
+3.  **Units and ranges.** The minimum and maximum make sense, and all rows use the same unit.
+
+    Finding: \[one line\]
+
+4.  **Duplicates.** No row appears twice by mistake.
+
+    Finding: \[one line\]
+
+5.  **Row counts.** The number of rows before and after each filter or join matches what you expect.
+
+    Finding: \[one line\]
 
 Tidy check (answer yes or no):
 
-- Each variable is a column.
-- Each observation is a row.
-- Each value is a cell.
+- Each variable is a column: \[yes or no\]
+- Each observation is a row: \[yes or no\]
+- Each value is a cell: \[yes or no\]
 
-## M2. Wrangle (class 16)
+## 4. Prepare the dataset for the graph
 
-```{r}
-#| label: wrangle
-#| eval: false
-# One pipeline: filter, mutate, pivot, join, group_by + summarize
-here("data", "my_data.csv") |>
-  read_csv(show_col_types = FALSE) |>
-  clean_names() |>
-  filter() |>
-  mutate() |>
-  group_by() |>
-  summarize()
-```
+**Aim:** shape the data so the graph answers the question. Use at least 2 tidyverse steps, such as `select()`, `filter()` and `mutate()`. Add a comment above each step that says why you use it.
 
-## M3. Draft (class 17)
+## 5. Graph
 
-Chart type, chosen from the data types (see class 3):
+**Aim:** build the graph and show how you built it. Mistakes are allowed. Save each version as an image in `figures/` and add one line to the log: what changed and why. Keep at least 2 versions, and keep the one with a problem.
 
-| Variables | Chart |
-|---|---|
-| 1 number | histogram |
-| 2 numbers | scatter |
-| 1 category | bar of counts |
-| number by category | box plot |
-| time | line |
+Chart type, chosen from the data types:
 
-```{r}
-#| label: draft
-#| eval: false
-# Continue the wrangle pipeline and pipe it into ggplot
-here("data", "my_data.csv") |>
-  read_csv(show_col_types = FALSE) |>
-  ggplot(aes()) +
-  geom_point()
-```
+| Variables          | Chart         |
+|--------------------|---------------|
+| 1 number           | histogram     |
+| 2 numbers          | scatter       |
+| 1 category         | bar of counts |
+| number by category | box plot      |
+| time               | line          |
 
-## M4. Refine (class 18)
+## 6. Refine the graph
+
+**Aim:** refine the graph until it carries the message. Save the final graph as `figures/final_graph.png`.
 
 Checklist:
 
@@ -83,13 +94,12 @@ Checklist:
 - [ ] Show: right chart, bars start at zero, scales are honest.
 - [ ] Cut: no border, no redundant legend, no extra grid lines.
 - [ ] Focus: gray plus one color.
-- [ ] Tell: active title, source, one annotation.
+- [ ] Tell: the title states the finding, the axes have labels and units, one annotation points to the evidence, and the source is on the graph.
+- [ ] Design: a theme and a palette chosen on purpose, and the text is readable on a screen.
+- [ ] Colour blind safe: the palette passes a colour blindness simulator, and the message does not rely on colour alone.
 
-```{r}
-#| label: final
-#| eval: false
-# Paste the final plot code here, then save the last plot
-ggsave(here("capstone_final.png"), width = 8, height = 5.5, dpi = 300)
-```
+## 7. Answer the question with the graph
 
-**60-second script:** [beginning, middle, end]
+**Aim:** answer the question in two sentences. The first gives the finding with a number. The second gives one limit of the data.
+
+**Answer:** [write here]
