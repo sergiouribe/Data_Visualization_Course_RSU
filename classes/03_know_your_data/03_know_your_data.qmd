@@ -145,7 +145,7 @@ penguins |>
 
 ## 7. Data quality checklist
 
-Run the five checks of the [data quality checklist](../../capstone/data_quality_checklist.md) on `penguins`: types, missing values, units and ranges, duplicates, row counts.
+Run the five data quality checks on `penguins`: types, missing values, units and ranges, duplicates, row counts.
 
 Types, missing values and ranges: use `glimpse()` and `summary()` from section 1.
 

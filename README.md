@@ -17,7 +17,7 @@ Students learn to turn a question into a clear graph in R. The course ends with 
 
 ## Data quality
 
-Every table passes the [five-check data quality checklist](capstone/data_quality_checklist.md) before it is plotted: types, missing values, units and ranges, duplicates, row counts.
+Every table passes five data quality checks before it is plotted: types, missing values, units and ranges, duplicates, row counts.
 
 ## Palettes
 
@@ -78,8 +78,7 @@ Self-study homework replaces the classes on focus and design. The tutorial [`10_
 
 ### Final project
 
-- [`capstone/project_template`](capstone/project_template): one RStudio project with the original data, a prompt log, the Quarto file and a one-page story.
-- [Rubric](capstone/rubric.md), [data quality checklist](capstone/data_quality_checklist.md), [peer scoring sheet](capstone/peer_scoring_sheet.md) and the older [template](capstone/capstone_template.qmd).
+- The instructions, the template and the rubric of the final project are given to the students in the course platform.
 - **Due date:** the zipped project is due on Fri 20 Nov 2026, 23:59.
 - **Moodle checkpoint:** Fri 13 Nov 2026, 23:59. Students submit a short script that loads the clean data and runs `glimpse()` and `nrow()`.
 
@@ -87,7 +86,7 @@ Self-study homework replaces the classes on focus and design. The tutorial [`10_
 
 | Part | Share of grade | What counts |
 |---|---|---|
-| Final project (the exam) | 60% | One visualization project that joins analysis, visualization and storytelling, presented in the last sessions. Scored with the [rubric](capstone/rubric.md). |
+| Final project (the exam) | 60% | One visualization project that joins analysis, visualization and storytelling, presented in the last sessions. Scored with the rubric given in the final project instructions. |
 | Participation | 40% | The deliverable of each class (see the Deliverable section of each class), the individual readings, and the Moodle checkpoint on 13 Nov. |
 
 Projects are individual. Each student works alone. Students may use any dataset and any large language model for the final project. They include the full prompts in the prompt log.
